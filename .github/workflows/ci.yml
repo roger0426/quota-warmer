@@ -7,6 +7,8 @@ on:
   push:
     branches:
       - main
+      - "harden/**"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -42,6 +44,11 @@ jobs:
         # Every String Catalog key needs a finished Turkish translation with the
         # same format placeholders as the English key.
         run: python3 scripts/check-localizations.py
+
+      - name: Check outbound hosts
+        # Fails when the sources name a host that is not on the allow-list, or
+        # when the remote catalog / update check has been switched back on.
+        run: python3 scripts/check-egress-hosts.py
 
       - name: Run regression suites
         # Package.swift compiles the app's Models/Services in place; the three
