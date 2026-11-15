@@ -56,8 +56,8 @@ enum ToolID: String, CaseIterable, Identifiable, Codable {
     /// (`ModelCatalogStore.warmupModels`); these are the built-in defaults.
     var warmupCommand: String { warmupCommand(model: defaultWarmupModel) }
 
-    /// Run only when the primary command is rejected for an unknown option
-    /// (an older CLI without the isolation flags). Still pinned to a cheap
+    /// Run only when the primary command is rejected for an unknown option or
+    /// feature flag (a CLI without the isolation flags). Still pinned to a cheap
     /// model, so the fallback can never land on the user's default (e.g. Opus).
     var fallbackWarmupCommand: String? { legacyWarmupCommand(model: defaultWarmupModel) }
 
@@ -71,14 +71,38 @@ enum ToolID: String, CaseIterable, Identifiable, Codable {
         }
     }
 
+    /// Codex features switched off for a warm-up. `hooks` matters most:
+    /// `--ignore-user-config` skips `config.toml` but not `~/.codex/hooks.json`,
+    /// so without it the user's global hooks run on every warm-up. The rest only
+    /// add tool descriptions a one-word reply never uses. Measured 2026-11-14 on
+    /// codex-cli 0.166.0 (gpt-5.6-luna, one `hi`): 15,202 input tokens with the
+    /// plain command, 12,657 with these off, 9,110 with a one-line
+    /// `model_instructions_file` as well. An unknown name makes the CLI exit
+    /// before any request ("Unknown feature flag"), which
+    /// `legacyWarmupCommand` covers.
+    static let codexWarmupDisabledFeatures = [
+        "hooks", "apps", "browser_use", "browser_use_external", "browser_use_full_cdp_access",
+        "computer_use", "image_generation", "plugins", "remote_plugin", "plugin_discovery_prefetch",
+        "multi_agent", "goals", "sleep_tool", "view_image", "skill_search", "tool_suggest",
+        "in_app_browser", "worktrees", "skill_mcp_dependency_install", "shell_tool", "unified_exec"
+    ]
+
     /// `model` must pass `ModelCatalog.isSafeWarmupModel`: it is interpolated
-    /// into a `zsh -lc` command line.
-    func warmupCommand(model: String) -> String {
+    /// into a `zsh -lc` command line. `instructionsFile` (Codex only) is an
+    /// absolute path to a short file that replaces Codex's built-in system
+    /// prompt; a path with a quote or backslash is ignored.
+    func warmupCommand(model: String, instructionsFile: String? = nil) -> String {
         switch self {
         case .claude:
             return "claude --model \(model) --effort low --settings '{\"alwaysThinkingEnabled\":false}' --safe-mode --strict-mcp-config --system-prompt 'Reply with one word.' --no-session-persistence --max-turns 1 --tools '' -p 'hi'"
         case .codex:
-            return "codex exec --model \(model) -c model_reasoning_effort=\"low\" --skip-git-repo-check --ephemeral --ignore-user-config --ignore-rules 'hi'"
+            var instructions = ""
+            if let path = instructionsFile, path.hasPrefix("/"),
+               !path.contains("'"), !path.contains("\""), !path.contains("\\") {
+                instructions = " -c 'model_instructions_file=\"\(path)\"'"
+            }
+            let disabled = Self.codexWarmupDisabledFeatures.map { " --disable \($0)" }.joined()
+            return "codex exec --model \(model) -c model_reasoning_effort=\"low\"\(instructions) --skip-git-repo-check --ephemeral --ignore-user-config --ignore-rules\(disabled) 'hi'"
         }
     }
 
@@ -93,7 +117,9 @@ enum ToolID: String, CaseIterable, Identifiable, Codable {
     func legacyWarmupCommand(model: String) -> String? {
         switch self {
         case .claude: return "claude --model \(model) --no-session-persistence --max-turns 1 --tools '' -p 'hi'"
-        case .codex:  return nil
+        // Same pinned model, without the feature switches: for a Codex CLI
+        // that no longer knows one of `codexWarmupDisabledFeatures`.
+        case .codex:  return "codex exec --model \(model) -c model_reasoning_effort=\"low\" --skip-git-repo-check --ephemeral --ignore-user-config --ignore-rules 'hi'"
         }
     }
 

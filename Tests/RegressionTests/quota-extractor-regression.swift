@@ -58,10 +58,27 @@ struct QuotaExtractorRegression {
         require(
             ToolID.codex.warmupCommand.contains("--model gpt-5.6-luna")
                 && ToolID.codex.warmupCommand.contains(#"model_reasoning_effort="low""#)
-                && ToolID.codex.warmupCommand.contains("--ignore-user-config"),
-            "Codex warmup should pin Luna with low reasoning and isolate user config"
+                && ToolID.codex.warmupCommand.contains("--ignore-user-config")
+                && ToolID.codex.warmupCommand.contains("--disable hooks "),
+            "Codex warmup should pin Luna with low reasoning, isolate user config and keep global hooks off"
         )
-        require(ToolID.codex.fallbackWarmupCommand == nil, "Codex warmup must not fall back to a retired or expensive default model")
+        require(
+            ToolID.codex.fallbackWarmupCommand?.contains("--model gpt-5.6-luna") == true
+                && ToolID.codex.fallbackWarmupCommand?.contains("--disable") == false,
+            "Codex warmup fallback must stay pinned to Luna and drop only the feature switches"
+        )
+        require(
+            WarmupRunner.isUnsupportedOptionFailure("Error: Unknown feature flag: sleep_tool"),
+            "A Codex CLI that no longer knows a disabled feature should get the fallback command"
+        )
+        let codexInstructions = ToolID.codex.warmupCommand(model: "gpt-5.6-luna", instructionsFile: "/tmp/w/warmup-instructions.md")
+        require(
+            codexInstructions.contains(#" -c 'model_instructions_file="/tmp/w/warmup-instructions.md"' "#)
+                && !ToolID.codex.warmupCommand(model: "gpt-5.6-luna", instructionsFile: "/tmp/it's/x.md").contains("model_instructions_file")
+                && !ToolID.codex.warmupCommand(model: "gpt-5.6-luna", instructionsFile: "relative.md").contains("model_instructions_file")
+                && WarmupRunner.modelArgument(in: codexInstructions) == "gpt-5.6-luna",
+            "Codex warmup should take an absolute instructions file and ignore a path it cannot quote safely"
+        )
 
         let sanitizedFailure = WarmupRunner.sanitizedFailureDetail(
             #"""
@@ -1603,8 +1620,8 @@ access_token=private-value
         require(catalog.longContext?.inputTokensAbove == 272_000, "Codex catalog should carry the 272K long-context threshold")
         require(
             ToolID.codex.warmupCommand(model: "gpt-6-luna").contains("--model gpt-6-luna")
-                && ToolID.codex.legacyWarmupCommand(model: "gpt-6-luna") == nil,
-            "Codex warm-up command should take the catalog model and has no legacy fallback"
+                && ToolID.codex.legacyWarmupCommand(model: "gpt-6-luna")?.contains("--model gpt-6-luna") == true,
+            "Codex warm-up command and its fallback should both take the catalog model"
         )
     }
 

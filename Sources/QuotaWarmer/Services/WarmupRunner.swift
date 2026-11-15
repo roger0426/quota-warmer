@@ -78,9 +78,19 @@ class WarmupRunner {
         let pathPrefix = cliURL.deletingLastPathComponent().path
 
         let workspaceURL = try warmupWorkspaceURL()
+        // Codex's built-in system prompt is ~4K tokens of coding guidance; a
+        // one-line file replaces it for the warm-up. Best effort: without the
+        // file the command simply keeps the built-in prompt.
+        var instructionsFile: String?
+        if tool == .codex {
+            let url = workspaceURL.appendingPathComponent("warmup-instructions.md")
+            if (try? "Reply with one word.\n".write(to: url, atomically: true, encoding: .utf8)) != nil {
+                instructionsFile = url.path
+            }
+        }
         return try await Self.runCatalogWarmup(store: .shared(for: tool)) { model in
             try await self.runWithOptionFallback(
-                primary: envPrefix + tool.warmupCommand(model: model),
+                primary: envPrefix + tool.warmupCommand(model: model, instructionsFile: instructionsFile),
                 fallback: tool.legacyWarmupCommand(model: model).map { envPrefix + $0 },
                 tool: tool,
                 cliName: cliName,
@@ -153,6 +163,7 @@ class WarmupRunner {
     static func isUnsupportedOptionFailure(_ output: String) -> Bool {
         let text = output.lowercased()
         return text.contains("unknown option") || text.contains("unknown argument")
+            || text.contains("unknown feature flag")
     }
 
     /// A retired, misspelled, or inaccessible `--model`, as each CLI reports it
