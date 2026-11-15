@@ -4,7 +4,7 @@ import Foundation
 /// Diagnostics…" and the "Report an Issue" URL. Contains no tokens, auth
 /// headers or raw warm-up output; text is run through the logger's redaction.
 enum DiagnosticsExport {
-    static let issuesURL = "https://github.com/bcanozgur/quota-warmer/issues/new"
+    static let issuesURL = "https://github.com/roger0426/quota-warmer/issues/new"
 
     /// Global, non-secret settings that are safe to include in a bug report.
     static let settingKeys = [

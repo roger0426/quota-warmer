@@ -305,7 +305,7 @@ struct SettingsTabView: View {
                         }
                         .buttonStyle(.plain)
                         Divider().background(DS.C.border).padding(.leading, DS.Space.md)
-                    } else {
+                    } else if UpdateChecker.isEnabled {
                         row(icon: "arrow.clockwise.circle", title: "Check for Updates",
                             subtitle: "Check GitHub for the latest release") {
                             Button(action: { Task { await appState.checkForAppUpdate() } }) {

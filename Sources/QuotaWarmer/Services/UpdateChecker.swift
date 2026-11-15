@@ -6,9 +6,14 @@ struct ReleaseInfo {
 }
 
 actor UpdateChecker {
+    /// Off in this fork: it is built from source, so upstream's release feed is
+    /// not a source of updates and the app makes no request to GitHub.
+    static let isEnabled = false
+
     private let apiURL = URL(string: "https://api.github.com/repos/bcanozgur/quota-warmer/releases/latest")!
 
     func checkForUpdate() async -> ReleaseInfo? {
+        guard Self.isEnabled else { return nil }
         guard let current = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else { return nil }
 
         var req = URLRequest(url: apiURL)

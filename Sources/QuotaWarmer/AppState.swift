@@ -230,6 +230,7 @@ final class AppState: ObservableObject, CoordinatorHost {
     func morningTimeChanged() { morning.morningTimeChanged() }
 
     func checkForAppUpdate() async {
+        guard UpdateChecker.isEnabled else { return }
         updateInfo = await updateChecker.checkForUpdate()
         events.addHistory(tool: nil, kind: .updateCheck, title: "Update checked", detail: updateInfo == nil ? "No update found" : "Update available")
     }

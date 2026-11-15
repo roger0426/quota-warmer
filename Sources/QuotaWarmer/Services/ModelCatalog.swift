@@ -249,8 +249,12 @@ final class ModelCatalogStore: @unchecked Sendable {
     private var isRefreshing = false
     private var reportedUnpricedModels = Set<String>()
 
-    /// Regression tests turn this off so nothing reaches the network.
-    var remoteRefreshEnabled = true
+    /// Off in this fork: the catalog is only the copy built into the app (plus
+    /// any cache already on disk), so a file on someone else's repository can
+    /// never change which model a warm-up uses. Claude's `haiku` alias follows
+    /// new releases without a catalog. Turn on only after pointing
+    /// `defaultRemoteURL` at a repository you control.
+    var remoteRefreshEnabled = false
     let refreshInterval: TimeInterval = 24 * 3600
     let earlyRefreshInterval: TimeInterval = 3600
     private let maxDownloadBytes = 256 * 1024
