@@ -142,6 +142,24 @@ private let weeklyDuration: TimeInterval = 7 * 86400
 
 // MARK: - Views
 
+/// Ring sizes for a gauge drawn in a `size` × `size` square. The rings are
+/// kept thin, close to the Batteries widget's proportions.
+struct GaugeMetrics {
+    let line: CGFloat
+    let outer: CGFloat
+    let inner: CGFloat
+    let glyph: CGFloat
+
+    init(size: CGFloat) {
+        line = max(2.5, size * 0.075)
+        let gap = line * 0.55
+        // Leave room for the time knob, which is slightly wider than the ring.
+        outer = size - line * 1.2
+        inner = outer - 2 * (line + gap)
+        glyph = max(8, inner - line * 3.2)
+    }
+}
+
 /// Battery-style gauge for one account: the outer ring is the session (5h)
 /// window, the inner ring the weekly window, both as quota used. A white dot
 /// on each ring marks how far through the window the clock is, so a fill that
@@ -155,16 +173,12 @@ struct QuotaGauge: View {
 
     var body: some View {
         GeometryReader { geo in
-            let size = min(geo.size.width, geo.size.height)
-            let line = max(3, size * 0.095)
-            let gap = line * 0.45
-            let outer = size - line
-            let inner = outer - 2 * (line + gap)
+            let metrics = GaugeMetrics(size: min(geo.size.width, geo.size.height))
             ZStack {
-                ring(session, diameter: outer, line: line)
-                ring(weekly, diameter: inner, line: line)
+                ring(session, diameter: metrics.outer, line: metrics.line)
+                ring(weekly, diameter: metrics.inner, line: metrics.line)
                 glyph
-                    .frame(width: max(8, inner - line * 2.6), height: max(8, inner - line * 2.6))
+                    .frame(width: metrics.glyph, height: metrics.glyph)
             }
             .frame(width: geo.size.width, height: geo.size.height)
         }
@@ -181,10 +195,12 @@ struct QuotaGauge: View {
                     .rotationEffect(.degrees(-90))
             }
             if let elapsed = value.elapsed {
+                // A knob a little wider than the ring, with a dark rim so it
+                // reads on the track and on a green or red fill alike.
                 Circle()
                     .fill(Color.white)
-                    .frame(width: line * 0.62, height: line * 0.62)
-                    .shadow(color: .black.opacity(0.35), radius: 0.6)
+                    .overlay(Circle().stroke(Color.black.opacity(0.55), lineWidth: max(0.75, line * 0.14)))
+                    .frame(width: line * 1.05, height: line * 1.05)
                     .offset(y: -diameter / 2)
                     .rotationEffect(.degrees(360 * elapsed))
             }
@@ -226,31 +242,39 @@ extension WidgetProvider {
     }
 }
 
-/// A gauge with the session's used percent under it, as the Batteries widget
-/// puts the charge under each ring.
+/// One account's gauge. No text: like the Batteries widget's rings, the fill,
+/// its colour and the glyph carry everything; VoiceOver gets the numbers.
 struct QuotaCell: View {
     let provider: WidgetProvider
     let now: Date
-    var percentSize: CGFloat = 13
 
     var body: some View {
         let session = RingValue(window: provider.session, duration: sessionDuration, now: now)
         let weekly = RingValue(window: provider.weekly, duration: weeklyDuration, now: now)
-        let stale = provider.isStale(at: now)
         let sessionText = session.used.map { "\($0)%" } ?? "–"
         let weeklyText = weekly.used.map { "\($0)%" } ?? "–"
-        let critical = (session.used ?? 0) >= RingValue.criticalUsedPercent
-        VStack(spacing: 3) {
-            QuotaGauge(provider: provider, now: now)
-            Text(sessionText)
-                .font(.system(size: percentSize, weight: .semibold, design: .rounded))
-                .monospacedDigit()
-                .foregroundStyle(critical ? Color.red : Color.primary)
-                .lineLimit(1)
+        QuotaGauge(provider: provider, now: now)
+            .opacity(provider.isStale(at: now) ? 0.45 : 1)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text("\(provider.name): session \(sessionText) used, week \(weeklyText) used"))
+    }
+}
+
+/// Empty slot: the two tracks only, as the Batteries widget draws an unused ring.
+struct EmptyGauge: View {
+    var body: some View {
+        GeometryReader { geo in
+            let metrics = GaugeMetrics(size: min(geo.size.width, geo.size.height))
+            ZStack {
+                Circle().stroke(Color.primary.opacity(0.08), lineWidth: metrics.line)
+                    .frame(width: metrics.outer, height: metrics.outer)
+                Circle().stroke(Color.primary.opacity(0.08), lineWidth: metrics.line)
+                    .frame(width: metrics.inner, height: metrics.inner)
+            }
+            .frame(width: geo.size.width, height: geo.size.height)
         }
-        .opacity(stale ? 0.45 : 1)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text("\(provider.name): session \(sessionText) used, week \(weeklyText) used"))
+        .aspectRatio(1, contentMode: .fit)
+        .accessibilityHidden(true)
     }
 }
 
@@ -270,25 +294,28 @@ struct QuotaWidgetView: View {
                 }
                 .foregroundStyle(.secondary)
             } else if family == .systemMedium {
-                // One row, up to four accounts.
+                // One row of four slots.
                 HStack(spacing: 12) {
-                    ForEach(Array(entry.providers.prefix(4))) { provider in
-                        QuotaCell(provider: provider, now: entry.date, percentSize: 14)
-                            .frame(maxWidth: .infinity)
-                    }
+                    ForEach(0..<4, id: \.self) { index in slot(index) }
                 }
             } else {
-                // 2 × 2 grid, up to four accounts.
-                let shown = Array(entry.providers.prefix(4))
-                let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 2)
-                LazyVGrid(columns: columns, spacing: 4) {
-                    ForEach(shown) { provider in
-                        QuotaCell(provider: provider, now: entry.date, percentSize: shown.count > 2 ? 11 : 13)
-                    }
+                // 2 × 2 slots.
+                VStack(spacing: 10) {
+                    HStack(spacing: 10) { slot(0); slot(1) }
+                    HStack(spacing: 10) { slot(2); slot(3) }
                 }
             }
         }
         .containerBackground(.fill.tertiary, for: .widget)
+    }
+
+    @ViewBuilder
+    private func slot(_ index: Int) -> some View {
+        if index < entry.providers.count {
+            QuotaCell(provider: entry.providers[index], now: entry.date)
+        } else {
+            EmptyGauge()
+        }
     }
 }
 
@@ -303,7 +330,7 @@ struct QuotaWarmerWidget: Widget {
             QuotaWidgetView(entry: entry)
         }
         .configurationDisplayName("Quota")
-        .description("Session (outer ring) and weekly (inner ring) quota used for each account.")
+        .description("Quota used per account: session on the outer ring, week on the inner ring. The white dot is the time elapsed.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
