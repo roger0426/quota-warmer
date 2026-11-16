@@ -241,6 +241,7 @@ struct QuotaRing: View {
     let outer: RingValue
     let inner: RingValue
     let showsMarker: Bool
+    let now: Date
 
     @Environment(\.colorScheme) private var colorScheme
 
@@ -263,7 +264,7 @@ struct QuotaRing: View {
                         .offset(x: m.diameter / 2 * cos(angle), y: m.diameter / 2 * sin(angle))
                 }
                 ring(inner, line: m.innerLine, diameter: m.innerDiameter)
-                glyph.frame(width: m.glyph, height: m.glyph)
+                glyph(size: m.glyph)
             }
             .frame(width: geo.size.width, height: geo.size.height)
         }
@@ -286,24 +287,46 @@ struct QuotaRing: View {
         .frame(width: diameter, height: diameter)
     }
 
-    /// The provider glyph, with the account's initial as a corner badge.
-    private var glyph: some View {
-        Image(provider.tool == "claude" ? "ClaudeCode" : "Codex")
-            .resizable()
-            .renderingMode(.template)
-            .scaledToFit()
-            .foregroundStyle(.primary)
-            .overlay(alignment: .bottomTrailing) {
-                if let badge = provider.badge {
-                    Text(badge)
-                        .font(.system(size: 8, weight: .heavy, design: .rounded))
-                        .foregroundStyle(.background)
-                        .frame(minWidth: 11, minHeight: 11)
-                        .background(Color.primary, in: Circle())
-                        .overlay(Circle().stroke(.background, lineWidth: 1.2))
-                        .offset(x: 4, y: 4)
+    /// The provider glyph with a status badge in its corner: the status
+    /// colour, with an added account's initial in it (a smaller plain dot for
+    /// the default account). Same proportions as the menu bar: the badge
+    /// shares one centre either way, and a transparent gap is cut into the
+    /// logo around it instead of an outline.
+    private func glyph(size: CGFloat) -> some View {
+        let status = provider.statusColor(at: now)
+        let badge = provider.badge
+        let diameter = size * (badge == nil ? 0.37 : 0.53)
+        let gap = max(1, size * 0.067)
+        let center = CGPoint(x: size * 0.87, y: size * 0.83)
+        return ZStack(alignment: .topLeading) {
+            Image(provider.tool == "claude" ? "ClaudeCode" : "Codex")
+                .resizable()
+                .renderingMode(.template)
+                .scaledToFit()
+                .foregroundStyle(.primary)
+                .frame(width: size, height: size)
+                .mask {
+                    Rectangle()
+                        .overlay {
+                            Circle()
+                                .frame(width: diameter + 2 * gap, height: diameter + 2 * gap)
+                                .position(center)
+                                .blendMode(.destinationOut)
+                        }
+                        .compositingGroup()
                 }
+            Circle()
+                .fill(status)
+                .frame(width: diameter, height: diameter)
+                .position(center)
+            if let badge {
+                Text(verbatim: badge)
+                    .font(.system(size: diameter * 0.75, weight: .bold, design: .rounded))
+                    .foregroundStyle(status == .yellow ? Color.black : Color.white)
+                    .position(center)
             }
+        }
+        .frame(width: size, height: size)
     }
 }
 
@@ -313,6 +336,14 @@ extension WidgetProvider {
         guard account != "default" else { return nil }
         let label = name.components(separatedBy: " · ").last ?? name
         return label.first.map { String($0).uppercased() }
+    }
+
+    /// Badge colour: blue monitoring, green auto-warm while the reading is
+    /// fresh; yellow once it is stale. (The status file carries no sign-in
+    /// health, so the widget has no red.)
+    func statusColor(at now: Date) -> Color {
+        if isStale(at: now) { return .yellow }
+        return mode == "autoWarm" ? .green : .blue
     }
 
     /// Reading older than 30 minutes (the app's "expired" threshold).
@@ -353,7 +384,7 @@ struct QuotaCell: View {
         let weeklyText = weekly.shown.map { "\($0)%" } ?? "–"
         VStack(spacing: 4) {
             QuotaRing(provider: provider, outer: outer, inner: weeklyOuter ? session : weekly,
-                      showsMarker: configuration.timeMarker)
+                      showsMarker: configuration.timeMarker, now: now)
             if showsNumber {
                 percentLabel(outer.shown.map(String.init) ?? "–", unit: outer.shown != nil)
             }

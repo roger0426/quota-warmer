@@ -20,7 +20,7 @@ enum MenuBarStatus {
         let items = composeItems(appState)
         guard !items.isEmpty else { return "fallback|\(isHealthy(appState))" }
         return items.map { item in
-            "\(item.assetName)|\(item.text)|\(item.badge ?? "-")|\(item.dimmed)|\(item.gauge.map(\.key) ?? "-")"
+            "\(item.assetName)|\(item.text)|\(item.badge ?? "-")|\(item.statusColor)|\(item.dimmed)|\(item.gauge.map(\.key) ?? "-")"
         }.joined(separator: "||")
     }
 
@@ -90,9 +90,10 @@ enum MenuBarStatus {
 
             return MenuBarComposer.Item(
                 assetName: tool.kind.glyphAssetName,
-                // An added account is told apart from the default by its
-                // initial, in the logo's corner.
+                // Corner badge: the status colour, with an added account's
+                // initial in it (the default account gets a plain dot).
                 badge: tool.badge,
+                statusColor: statusColor(for: st, appState: appState),
                 text: gauge == nil ? text : "",
                 gauge: gauge,
                 spoken: "\(tool.shortName) \(text), \(spokenStatus(st, appState: appState))",
@@ -104,8 +105,7 @@ enum MenuBarStatus {
         }
     }
 
-    /// Words for the account's state (the menu bar draws no status dot;
-    /// dimming shows stale or failing data).
+    /// Words for the state the badge colour shows (same branches as `statusColor`).
     private static func spokenStatus(_ state: ToolState, appState: AppState) -> String {
         if appState.globalPassive { return String(localized: "paused") }
         if !state.isMonitored { return String(localized: "off") }
@@ -116,6 +116,17 @@ enum MenuBarStatus {
             return String(localized: "needs attention")
         }
         return String(localized: "stale")
+    }
+
+    /// Badge colour: blue monitoring, green auto-warm (both healthy), yellow
+    /// stale, red sign-in or source problem, grey off or paused.
+    private static func statusColor(for state: ToolState, appState: AppState) -> NSColor {
+        if appState.globalPassive || !state.isMonitored { return .systemGray }
+        if state.sourceHealth == .healthy && state.freshness == .fresh {
+            return state.mode == .monitor ? .systemBlue : .systemGreen
+        }
+        if state.sourceHealth == .authFailure || state.sourceHealth == .unavailable { return .systemRed }
+        return .systemYellow
     }
 
     /// Shown when no tool is pinned to the menu bar: a flame glyph plus an
@@ -142,13 +153,15 @@ enum MenuBarStatus {
     }
 }
 
-/// Draws one or more provider glyphs (white, with the account initial) plus
+/// Draws one or more provider glyphs (white, with a status badge) plus
 /// their quota text into a single NSImage for use as the menu-bar label.
 private enum MenuBarComposer {
     struct Item {
         let assetName: String
         /// Account initial at the logo's bottom-right; nil for the default account.
         let badge: String?
+        /// Fill of the corner badge (the account's status).
+        let statusColor: NSColor
         let text: String
         /// Bars style; nil draws the text style.
         let gauge: Gauge?
@@ -175,14 +188,27 @@ private enum MenuBarComposer {
     private static let barHeight: CGFloat = 14
     private static let barGap: CGFloat = 2
     /// Logo + both bars.
-    private static let gaugeWidth: CGFloat = 3 + barWidth + barGap + barWidth
+    private static let gaugeWidth: CGFloat = glyphGap + barWidth + barGap + barWidth
 
     private static let font = NSFont.monospacedDigitSystemFont(ofSize: 11, weight: .semibold)
     private static let height: CGFloat = 18
     private static let glyph: CGFloat = 15
-    private static let glyphGap: CGFloat = 3
+    private static let glyphGap: CGFloat = 4
     /// Space between accounts; the bars already end each one, so no divider.
     private static let itemGap: CGFloat = 8
+
+    // Corner status badge (see `draw`).
+    private static let badgeDiameter: CGFloat = 8
+    private static let dotDiameter: CGFloat = 5.5
+    /// Transparent ring cut into the logo around the badge.
+    private static let badgeGap: CGFloat = 1
+    /// Badge centre, measured in from the logo's bottom-right corner; keeps
+    /// the badge inside the 18 pt image.
+    private static let badgeInset = NSPoint(x: 2, y: 2.5)
+    private static let badgeFont: NSFont = {
+        let base = NSFont.systemFont(ofSize: 6, weight: .bold)
+        return base.fontDescriptor.withDesign(.rounded).flatMap { NSFont(descriptor: $0, size: 6) } ?? base
+    }()
 
     static func image(for items: [Item]) -> NSImage {
         var widths: [CGFloat] = []
@@ -234,25 +260,38 @@ private enum MenuBarComposer {
             logoRect.fill(using: .sourceAtop)
         }
 
-        // Account initial at the glyph's bottom-right corner: a white disc
-        // with the letter cut out in black.
+        // Status badge at the glyph's bottom-right corner: a disc in the
+        // status colour, with the account initial in it when there is one
+        // (a smaller plain dot otherwise). Both share one centre, and a
+        // transparent gap is cut into the logo around them, so the badge
+        // reads on any menu-bar colour without an outline.
+        let diameter = item.badge == nil ? Self.dotDiameter : Self.badgeDiameter
+        let center = NSPoint(x: logoRect.maxX - Self.badgeInset.x, y: logoRect.minY + Self.badgeInset.y)
+        let rect = NSRect(x: center.x - diameter / 2, y: center.y - diameter / 2, width: diameter, height: diameter)
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current?.compositingOperation = .destinationOut
+        NSColor.black.setFill()
+        NSBezierPath(ovalIn: rect.insetBy(dx: -Self.badgeGap, dy: -Self.badgeGap)).fill()
+        NSGraphicsContext.restoreGraphicsState()
+        item.statusColor.withAlphaComponent(alpha).setFill()
+        NSBezierPath(ovalIn: rect).fill()
         if let badge = item.badge {
-            let size: CGFloat = 8.5
-            let rect = NSRect(x: logoRect.maxX - size + 1.5, y: logoRect.minY - 1, width: size, height: size)
-            NSColor.white.withAlphaComponent(alpha).setFill()
-            NSBezierPath(ovalIn: rect).fill()
+            // Black reads better than white on yellow.
+            let ink: NSColor = item.statusColor == .systemYellow ? .black : .white
             let attrs: [NSAttributedString.Key: Any] = [
-                .font: NSFont.systemFont(ofSize: 6.5, weight: .heavy),
-                .foregroundColor: NSColor.black.withAlphaComponent(alpha)
+                .font: Self.badgeFont,
+                .foregroundColor: ink.withAlphaComponent(alpha)
             ]
             let letter = badge as NSString
-            let letterSize = letter.size(withAttributes: attrs)
-            letter.draw(at: NSPoint(x: rect.midX - letterSize.width / 2, y: rect.midY - letterSize.height / 2), withAttributes: attrs)
+            let width = letter.size(withAttributes: attrs).width
+            // Optical centre: the middle of the cap height on the disc's centre.
+            let originY = center.y - Self.badgeFont.capHeight / 2 + Self.badgeFont.descender
+            letter.draw(at: NSPoint(x: center.x - width / 2, y: originY), withAttributes: attrs)
         }
 
         var textX = logoRect.maxX + glyphGap
         if let gauge = item.gauge {
-            var x = logoRect.maxX + 3
+            var x = logoRect.maxX + Self.glyphGap
             for used in [gauge.session, gauge.weekly] {
                 drawBar(used: used, gauge: gauge, x: x, alpha: alpha)
                 x += barWidth + barGap
