@@ -96,6 +96,9 @@ enum DS {
         // Each fill keeps >= 3:1 against its own track (WCAG 1.4.11).
         static let usageBlue   = Color(light: 0x2F7DEB, dark: 0x4A8CF0)   // iStat Menus–style blue
         static let usageRed    = Color(light: 0xD8365A, dark: 0xF0506E)   // iStat Menus–style pink-red
+        /// "Use it or lose it": the unused part of a weekly bar that resets
+        /// soon with much still left (see `UnusedQuotaRule`).
+        static let unusedYellow = Color(light: 0xE0A100, dark: 0xF5C542)
         /// Colored track tint behind a usage bar (a touch lighter in dark).
         static let usageTrackOpacity: Double = 0.16
         /// Single-color bar used when Colorful Quota Bars is off: the original

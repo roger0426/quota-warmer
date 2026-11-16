@@ -53,6 +53,10 @@ enum MenuBarStatus {
     private static func composeItems(_ appState: AppState) -> [MenuBarComposer.Item] {
         let style = QuotaDisplay.MenuBarStyle.stored()
         let warningPercent = QuotaUsageLevel.storedWarningPercent()
+        let unusedRule = UnusedQuotaRule.load()
+        // Slow blink for the unused-quota highlight: on one second, off the
+        // next (the image is re-checked every second anyway).
+        let blinkOn = Int(Date().timeIntervalSince1970) % 2 == 0
         let colorful = UserDefaults.standard.object(forKey: QuotaDisplay.colorfulBarsKey) as? Bool ?? true
         return visibleTools(appState).map { tool in
             let st = appState.state(for: tool)
@@ -85,7 +89,10 @@ enum MenuBarStatus {
                 weekly: QuotaDisplay.gaugeUsedFraction(remainingFraction: st.weeklyMetric?.remainingFraction,
                                                        settling: false),
                 warningPercent: warningPercent,
-                colorful: colorful
+                colorful: colorful,
+                weeklyUnusedLit: unusedRule.applies(remainingFraction: st.weeklyMetric?.remainingFraction,
+                                                    resetAt: st.weeklyMetric?.resetAt)
+                    ? blinkOn : nil
             ) : nil
 
             return MenuBarComposer.Item(
@@ -178,9 +185,12 @@ private enum MenuBarComposer {
         let weekly: Double?
         let warningPercent: Int
         let colorful: Bool
+        /// Weekly window resetting soon with much left: nil when not, else
+        /// whether the blinking yellow on its unused part is lit right now.
+        let weeklyUnusedLit: Bool?
 
         var key: String {
-            "\(session.map { "\(Int(($0 * 100).rounded()))" } ?? "-")/\(weekly.map { "\(Int(($0 * 100).rounded()))" } ?? "-")/\(warningPercent)/\(colorful)"
+            "\(session.map { "\(Int(($0 * 100).rounded()))" } ?? "-")/\(weekly.map { "\(Int(($0 * 100).rounded()))" } ?? "-")/\(warningPercent)/\(colorful)/\(weeklyUnusedLit.map { "\($0)" } ?? "-")"
         }
     }
 
@@ -292,10 +302,9 @@ private enum MenuBarComposer {
         var textX = logoRect.maxX + glyphGap
         if let gauge = item.gauge {
             var x = logoRect.maxX + Self.glyphGap
-            for used in [gauge.session, gauge.weekly] {
-                drawBar(used: used, gauge: gauge, x: x, alpha: alpha)
-                x += barWidth + barGap
-            }
+            drawBar(used: gauge.session, gauge: gauge, x: x, alpha: alpha, unusedLit: false)
+            x += barWidth + barGap
+            drawBar(used: gauge.weekly, gauge: gauge, x: x, alpha: alpha, unusedLit: gauge.weeklyUnusedLit == true)
             textX = logoRect.maxX + gaugeWidth + glyphGap
         }
 
@@ -312,11 +321,20 @@ private enum MenuBarComposer {
         )
     }
 
-    private static func drawBar(used: Double?, gauge: Gauge, x: CGFloat, alpha: CGFloat) {
+    private static func drawBar(used: Double?, gauge: Gauge, x: CGFloat, alpha: CGFloat, unusedLit: Bool) {
         let track = NSRect(x: x, y: (height - barHeight) / 2, width: barWidth, height: barHeight)
         let radius: CGFloat = 1.5
         NSColor.white.withAlphaComponent(0.28 * alpha).setFill()
         NSBezierPath(roundedRect: track, xRadius: radius, yRadius: radius).fill()
+        if unusedLit {
+            // The unused part (above the fill) in yellow, lit every other second.
+            let usedHeight = barHeight * min(max(used ?? 0, 0), 1)
+            NSGraphicsContext.saveGraphicsState()
+            NSBezierPath(roundedRect: track, xRadius: radius, yRadius: radius).addClip()
+            NSColor(calibratedRed: 0.96, green: 0.77, blue: 0.26, alpha: alpha).setFill()   // DS unusedYellow (dark)
+            NSRect(x: x, y: track.minY + usedHeight, width: barWidth, height: barHeight - usedHeight).fill()
+            NSGraphicsContext.restoreGraphicsState()
+        }
         guard let used, used > 0 else { return }
         let percent = Int((used * 100).rounded())
         let color: NSColor

@@ -94,7 +94,7 @@ struct MainTabView: View {
                 providerRow(tool)
                     .dsCard()
                     // iStat-style detail window beside the panel on hover.
-                    .hoverDetail(id: "provider-\(tool.storageKey)", delay: 0.08) {
+                    .hoverDetail(id: "provider-\(tool.storageKey)", delay: 0) {
                         ProviderDetailView(tool: tool, state: appState.state(for: tool))
                     }
                     // Hover bubbles open upward, so later cards stack above
@@ -226,7 +226,10 @@ struct MainTabView: View {
             compact: true,
             displayMode: state.displayMode,
             settling: settlingActive,
-            inline: true
+            inline: true,
+            // Only the weekly window lasts long enough for "days left".
+            unusedSoon: windowDuration >= 86400 && !settlingActive
+                && UnusedQuotaRule.load().applies(remainingFraction: metric?.remainingFraction, resetAt: effectiveReset)
         )
     }
 

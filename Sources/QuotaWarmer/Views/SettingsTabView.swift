@@ -18,6 +18,9 @@ struct SettingsTabView: View {
     @AppStorage(QuotaAlertSettings.weeklyFirstKey)    private var alertWeeklyFirst: Int = QuotaAlertSettings.defaultWeeklyThresholds[0]
     @AppStorage(QuotaAlertSettings.weeklySecondKey)   private var alertWeeklySecond: Int = QuotaAlertSettings.defaultWeeklyThresholds[1]
     @AppStorage(QuotaAlertSettings.paceEnabledKey)    private var alertPace: Bool = true
+    @AppStorage(UnusedQuotaRule.enabledKey) private var alertUnused: Bool = true
+    @AppStorage(UnusedQuotaRule.daysKey)    private var alertUnusedDays: Int = UnusedQuotaRule.defaultDays
+    @AppStorage(UnusedQuotaRule.percentKey) private var alertUnusedPercent: Int = UnusedQuotaRule.defaultPercent
     @State private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
     @State private var launchAtLoginError: String?
     @State private var historyExpanded = true
@@ -244,6 +247,24 @@ struct SettingsTabView: View {
                         subtitle: "5h quota runs out before reset") {
                         Toggle(isOn: $alertPace) { Text("Pace Warning") }.labelsHidden()
                             .toggleStyle(.switch).scaleEffect(0.75).tint(DS.C.green)
+                    }
+
+                    Divider().background(DS.C.border).padding(.leading, 36)
+
+                    row(icon: "hourglass.bottomhalf.filled", title: "Unused Weekly Quota",
+                        subtitle: "Weekly resets soon with this much left; its bar turns yellow") {
+                        HStack(spacing: 6) {
+                            cyclePill(Text("≤\(alertUnusedDays)d"), enabled: alertUnused,
+                                      label: Text("Within \(alertUnusedDays) days of the reset. Activate to change.")) {
+                                alertUnusedDays = Self.next(after: alertUnusedDays, in: UnusedQuotaRule.dayChoices)
+                            }
+                            cyclePill(Text("≥\(alertUnusedPercent)%"), enabled: alertUnused,
+                                      label: Text("With at least \(alertUnusedPercent) percent left. Activate to change.")) {
+                                alertUnusedPercent = Self.next(after: alertUnusedPercent, in: UnusedQuotaRule.percentChoices)
+                            }
+                            Toggle(isOn: $alertUnused) { Text("Unused Weekly Quota") }.labelsHidden()
+                                .toggleStyle(.switch).scaleEffect(0.75).tint(DS.C.green)
+                        }
                     }
                 }
 
@@ -610,6 +631,28 @@ struct SettingsTabView: View {
 
     /// Click-to-cycle used% threshold (50 → … → 95 → 50), matching the
     /// app's other cycle controls instead of a popup menu in the scaled panel.
+    /// Next value in a click-to-cycle pill; wraps to the first.
+    private static func next(after value: Int, in choices: [Int]) -> Int {
+        choices.first { $0 > value } ?? choices[0]
+    }
+
+    /// Click-to-cycle pill, styled like `thresholdPill`.
+    private func cyclePill(_ text: Text, enabled: Bool, label: Text, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            text
+                .font(.system(size: 9, weight: .semibold).monospacedDigit())
+                .lineLimit(1)
+                .fixedSize()
+                .padding(.horizontal, 6).padding(.vertical, 4)
+                .background(DS.C.surfaceHigh, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .foregroundStyle(enabled ? DS.C.text : DS.C.textMuted)
+        }
+        .buttonStyle(PressableButtonStyle())
+        .disabled(!enabled)
+        .help("Click to change")
+        .accessibilityLabel(label)
+    }
+
     private func thresholdPill(_ value: Binding<Int>, enabled: Bool) -> some View {
         Button(action: { value.wrappedValue = QuotaAlertSettings.nextThreshold(after: value.wrappedValue) }) {
             Text("\(value.wrappedValue)%")

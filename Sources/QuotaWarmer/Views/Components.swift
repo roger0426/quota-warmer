@@ -18,6 +18,9 @@ struct UsageBar: View {
     var fill: Color = DS.C.ink
     var track: Color = DS.C.track
     var thumbFraction: Double? = nil
+    /// Part of the bar (as fractions of its width) drawn in a slow yellow
+    /// pulse: the unused weekly quota that is about to reset.
+    var highlight: ClosedRange<Double>? = nil
 
     private func clamp(_ value: Double) -> CGFloat { CGFloat(min(max(value, 0), 1)) }
 
@@ -27,8 +30,9 @@ struct UsageBar: View {
         // made while it ran (countdown ticks, panel resizes) and replayed it forever,
         // so the fill bobbed up and down away from the knob and the row titles.
         // Reduce Motion: no pulse; the fill stays solid while a refresh runs.
-        TimelineView(.animation(paused: !refreshing || reduceMotion)) { context in
-            bar(fillOpacity: refreshing && !reduceMotion ? pulseOpacity(at: context.date) : 1)
+        TimelineView(.animation(paused: (!refreshing && highlight == nil) || reduceMotion)) { context in
+            bar(fillOpacity: refreshing && !reduceMotion ? pulseOpacity(at: context.date) : 1,
+                highlightOpacity: reduceMotion ? 0.9 : highlightOpacity(at: context.date))
         }
         .frame(height: height)
         .accessibilityHidden(true)
@@ -40,7 +44,13 @@ struct UsageBar: View {
         return 0.85 + 0.15 * cos(phase)
     }
 
-    private func bar(fillOpacity: Double) -> some View {
+    /// Slow pulse for the unused-quota highlight: 0.35 → 1 → 0.35 every 2.4 s.
+    private func highlightOpacity(at date: Date) -> Double {
+        let phase = date.timeIntervalSinceReferenceDate * .pi / 1.2
+        return 0.675 + 0.325 * cos(phase)
+    }
+
+    private func bar(fillOpacity: Double, highlightOpacity: Double) -> some View {
         GeometryReader { geo in
             let w = geo.size.width
             let fillW = max(0, w * clamp(fraction))
@@ -50,6 +60,15 @@ struct UsageBar: View {
                     .fill(fill)
                     .frame(width: fillW)
                     .opacity(fillOpacity)
+                if let highlight {
+                    let from = w * clamp(highlight.lowerBound)
+                    Rectangle()
+                        .fill(DS.C.unusedYellow)
+                        .frame(width: max(0, w * clamp(highlight.upperBound) - from))
+                        .offset(x: from)
+                        .opacity(highlightOpacity)
+                        .clipShape(Capsule().size(width: w, height: height).offset(x: -from))
+                }
                 if let thumbFraction {
                     let thumbW: CGFloat = 5
                     Capsule()
@@ -315,6 +334,9 @@ struct QuotaWindowRow: View {
     /// iStat-style overview row: label | slim bar | value on one line, the reset
     /// and pace meta under the bar. Takes precedence over `compact`.
     var inline: Bool = false
+    /// Weekly window resetting soon with much left (`UnusedQuotaRule`): the
+    /// unused part of the bar pulses yellow.
+    var unusedSoon: Bool = false
 
     var body: some View {
         Group {
@@ -341,6 +363,7 @@ struct QuotaWindowRow: View {
 
     private var accessibilityValue: String {
         var parts = [accessibilityStatus, leftText, pace.resetText]
+        if unusedSoon { parts.append(String(localized: "unused quota resets soon")) }
         if let shortPercent = pace.shortPercent {
             parts.append(String(localized: "\(shortPercent)% short"))
             if let runsOut = pace.runsOutText { parts.append(runsOut) }
@@ -375,8 +398,17 @@ struct QuotaWindowRow: View {
             height: height,
             fill: barColor,
             track: trackColor,
-            thumbFraction: QuotaDisplay.thumbFraction(timeLeftFraction: pace.timeLeftFraction, mode: displayMode)
+            thumbFraction: QuotaDisplay.thumbFraction(timeLeftFraction: pace.timeLeftFraction, mode: displayMode),
+            highlight: unusedHighlight
         )
+    }
+
+    /// The unused part: the fill when the bar shows what is left, the empty
+    /// track after the fill when it shows what is used.
+    private var unusedHighlight: ClosedRange<Double>? {
+        guard unusedSoon, hasMetric else { return nil }
+        let fraction = min(max(QuotaDisplay.barFraction(remainingFraction: quotaLeft, hasMetric: true, mode: displayMode), 0), 1)
+        return displayMode == .remaining ? 0...fraction : fraction...1
     }
 
     private static let inlineLabelWidth: CGFloat = 52

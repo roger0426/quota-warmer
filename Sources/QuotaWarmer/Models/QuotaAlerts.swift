@@ -1,10 +1,46 @@
 import Foundation
 
-/// The three proactive quota warnings. Each fires at most once per quota window.
+/// The proactive quota warnings. Each fires at most once per quota window.
 enum QuotaAlertKind: String, Codable, CaseIterable {
     case session    // 5h window crossed a used% threshold
     case weekly     // weekly window crossed a used% threshold
     case pace       // 5h window projected to run out before it resets
+    case unused     // weekly window resets soon with much of it still left
+}
+
+/// "Use it or lose it": the weekly window resets within `days` days while at
+/// least `percent`% of it is still left. Drives a notification and the yellow
+/// highlight on the unused part of the weekly bar (panel, menu bar, widget).
+struct UnusedQuotaRule: Equatable {
+    var enabled = true
+    var days = Self.defaultDays
+    var percent = Self.defaultPercent
+
+    static let defaultDays = 2
+    static let defaultPercent = 30
+    static let dayChoices = [1, 2, 3]
+    static let percentChoices = [20, 30, 40, 50]
+
+    static let enabledKey = AppSettings.Key.alertUnusedEnabled
+    static let daysKey = AppSettings.Key.alertUnusedDays
+    static let percentKey = AppSettings.Key.alertUnusedPercent
+
+    static func load(from defaults: UserDefaults = .standard) -> UnusedQuotaRule {
+        UnusedQuotaRule(
+            enabled: defaults.object(forKey: enabledKey) as? Bool ?? true,
+            days: defaults.object(forKey: daysKey) as? Int ?? defaultDays,
+            percent: defaults.object(forKey: percentKey) as? Int ?? defaultPercent
+        )
+    }
+
+    /// Whether a weekly reading with `remainingFraction` left and resetting at
+    /// `resetAt` is in the "use it or lose it" stretch. Uses the displayed
+    /// (rounded) percent so it agrees with the number on screen.
+    func applies(remainingFraction: Double?, resetAt: Date?, now: Date = Date()) -> Bool {
+        guard enabled, let remainingFraction, let resetAt, resetAt > now else { return false }
+        return resetAt.timeIntervalSince(now) <= Double(days) * 86400
+            && QuotaDisplay.remainingPercent(remainingFraction: remainingFraction) >= percent
+    }
 }
 
 /// What was last alerted for one alert kind: the window it belonged to and the
@@ -83,6 +119,7 @@ struct QuotaAlert: Equatable {
         case .session: return String(localized: "\(toolName) — \(usedPercent)% of 5h quota used")
         case .weekly: return String(localized: "\(toolName) — \(usedPercent)% of weekly quota used")
         case .pace: return String(localized: "\(toolName) — On pace to run out")
+        case .unused: return String(localized: "\(toolName) — \(100 - usedPercent)% of weekly quota unused")
         }
     }
 
@@ -100,6 +137,8 @@ struct QuotaAlert: Equatable {
         case .pace:
             let runsOut = quotaDurationText(Int(runsOutIn ?? 0))
             return String(localized: "Runs out in \(runsOut) — before the 5h reset in \(reset). \(usedPercent)% used.")
+        case .unused:
+            return String(localized: "Resets in \(reset). What is left then is lost.")
         }
     }
 }
@@ -127,6 +166,7 @@ enum QuotaAlertPolicy {
     static func evaluate(
         snapshot: QuotaSnapshot,
         settings: QuotaAlertSettings,
+        unused: UnusedQuotaRule = UnusedQuotaRule(enabled: false),
         marks: [String: QuotaAlertMark],
         fiveHourDuration: TimeInterval,
         weeklyDuration: TimeInterval,
@@ -170,6 +210,18 @@ enum QuotaAlertPolicy {
                 result.alerts.append(QuotaAlert(kind: .weekly, usedPercent: used,
                                                 resetIn: resetAt.timeIntervalSince(now), runsOutIn: nil))
                 result.marks[QuotaAlertKind.weekly.rawValue] = window.mark(level: threshold)
+            }
+        }
+
+        if let metric = snapshot.weekly, !metric.isIdle,
+           let resetAt = metric.resetAt,
+           unused.applies(remainingFraction: metric.remainingFraction, resetAt: resetAt, now: now) {
+            let window = Window(key: "weekly|\(ISO8601DateFormatter().string(from: resetAt))", resetAt: resetAt, metric: metric)
+            if !isMarked(marks[QuotaAlertKind.unused.rawValue], window: window, level: 100, duration: weeklyDuration) {
+                result.alerts.append(QuotaAlert(kind: .unused,
+                                                usedPercent: QuotaDisplay.usedPercent(remainingFraction: metric.remainingFraction),
+                                                resetIn: resetAt.timeIntervalSince(now), runsOutIn: nil))
+                result.marks[QuotaAlertKind.unused.rawValue] = window.mark(level: 100)
             }
         }
         return result

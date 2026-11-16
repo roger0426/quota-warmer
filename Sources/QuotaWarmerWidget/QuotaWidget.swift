@@ -13,13 +13,29 @@ import WidgetKit
 struct WidgetStatusFile: Decodable {
     /// Settings → Warning At; absent in files from older app versions.
     var warningPercent: Int? = nil
+    /// Settings → Alerts → Unused Weekly Quota; absent when off or older.
+    var unusedAlert: WidgetUnusedAlert? = nil
     let providers: [WidgetProvider]
+}
+
+/// "Use it or lose it": a weekly window resetting within `days` days with at
+/// least `percent`% left gets its unused part drawn in yellow.
+struct WidgetUnusedAlert: Decodable {
+    let days: Int
+    let percent: Int
+
+    func applies(to window: WidgetWindow?, now: Date) -> Bool {
+        guard let window, !window.idle, !window.settling,
+              let resetAt = window.resetAt, resetAt > now else { return false }
+        return resetAt.timeIntervalSince(now) <= Double(days) * 86400 && window.remainingPercent >= percent
+    }
 }
 
 /// What the widget draws from one read of the status file.
 struct WidgetStatus {
     var providers: [WidgetProvider] = []
     var warningPercent: Int = RingValue.defaultWarningPercent
+    var unused: WidgetUnusedAlert? = nil
 }
 
 struct WidgetProvider: Decodable, Identifiable {
@@ -65,7 +81,8 @@ enum WidgetStatusReader {
               let file = try? decoder.decode(WidgetStatusFile.self, from: data) else { return WidgetStatus() }
         return WidgetStatus(
             providers: file.providers.filter { $0.mode != "off" },
-            warningPercent: file.warningPercent ?? RingValue.defaultWarningPercent
+            warningPercent: file.warningPercent ?? RingValue.defaultWarningPercent,
+            unused: file.unusedAlert
         )
     }
 }
@@ -117,6 +134,7 @@ struct QuotaEntry: TimelineEntry {
     let date: Date
     let providers: [WidgetProvider]
     let warningPercent: Int
+    var unused: WidgetUnusedAlert? = nil
     let configuration: QuotaWidgetIntent
 }
 
@@ -130,7 +148,7 @@ struct QuotaTimelineProvider: AppIntentTimelineProvider {
         let file = WidgetStatusReader.read()
         let providers = file.providers.isEmpty && context.isPreview ? Self.sample : file.providers
         return QuotaEntry(date: Date(), providers: providers, warningPercent: file.warningPercent,
-                          configuration: configuration)
+                          unused: file.unused, configuration: configuration)
     }
 
     func timeline(for configuration: QuotaWidgetIntent, in context: Context) async -> Timeline<QuotaEntry> {
@@ -141,7 +159,7 @@ struct QuotaTimelineProvider: AppIntentTimelineProvider {
         let file = WidgetStatusReader.read()
         let entries = (0..<12).map { step in
             QuotaEntry(date: now.addingTimeInterval(Double(step) * 600), providers: file.providers,
-                       warningPercent: file.warningPercent, configuration: configuration)
+                       warningPercent: file.warningPercent, unused: file.unused, configuration: configuration)
         }
         return Timeline(entries: entries, policy: .after(now.addingTimeInterval(12 * 600)))
     }
@@ -175,12 +193,16 @@ struct RingValue {
     let showsRemaining: Bool
     /// Used percent at which the ring turns red (Settings → Warning At).
     let warningPercent: Int
+    /// Weekly window resetting soon with much left: its unused part is yellow.
+    let unusedSoon: Bool
 
     /// Matches the app's default warning level.
     static let defaultWarningPercent = 80
 
-    init(window: WidgetWindow?, duration: TimeInterval, now: Date, showsRemaining: Bool, warningPercent: Int) {
+    init(window: WidgetWindow?, duration: TimeInterval, now: Date, showsRemaining: Bool, warningPercent: Int,
+         unusedSoon: Bool = false) {
         self.showsRemaining = showsRemaining
+        self.unusedSoon = unusedSoon
         self.warningPercent = warningPercent
         guard let window, !window.settling else {
             used = nil
@@ -200,6 +222,14 @@ struct RingValue {
 
     /// Ring fill, 0…1.
     var fraction: Double { Double(shown ?? 0) / 100 }
+
+    /// The unused part of the ring, drawn yellow when `unusedSoon`: the fill
+    /// when the ring shows what is left, the empty track after it when it
+    /// shows what is used.
+    var unusedArc: ClosedRange<Double>? {
+        guard unusedSoon, used != nil else { return nil }
+        return showsRemaining ? 0...fraction : fraction...1
+    }
 
     /// Two levels, like the app's bars: blue below the warning level, red at
     /// or above it.
@@ -236,7 +266,7 @@ struct RingMetrics {
 
 /// Batteries-style gauge for one account: a thick outer ring and a thin
 /// inner ring (5-hour and weekly, in the configured order) around the
-/// provider glyph. A white dot on the outer ring marks how far through that
+/// provider glyph. A white dot on each ring marks how far through that
 /// window the clock is.
 struct QuotaRing: View {
     let provider: WidgetProvider
@@ -252,25 +282,36 @@ struct QuotaRing: View {
             let m = RingMetrics(size: min(geo.size.width, geo.size.height))
             ZStack {
                 ring(outer, line: m.line, diameter: m.diameter)
-                if showsMarker, let elapsed = outer.elapsed {
-                    let angle = (elapsed * 360 - 90) * .pi / 180
-                    let dot = m.line * 0.64
-                    // White dot; on a light widget a darker outline and a
-                    // soft shadow keep it visible over the pale track.
-                    Circle()
-                        .fill(Color.white)
-                        .overlay(Circle().strokeBorder(Color.black.opacity(colorScheme == .light ? 0.5 : 0.35),
-                                                       lineWidth: colorScheme == .light ? 1 : 0.75))
-                        .shadow(color: .black.opacity(colorScheme == .light ? 0.35 : 0.25), radius: 1, y: 0.5)
-                        .frame(width: dot, height: dot)
-                        .offset(x: m.diameter / 2 * cos(angle), y: m.diameter / 2 * sin(angle))
-                }
                 ring(inner, line: m.innerLine, diameter: m.innerDiameter)
+                if showsMarker {
+                    // Inside the thick outer ring; a touch wider than the
+                    // thin inner ring so it still shows there.
+                    if let elapsed = outer.elapsed {
+                        marker(elapsed, radius: m.diameter / 2, size: m.line * 0.64)
+                    }
+                    if let elapsed = inner.elapsed {
+                        marker(elapsed, radius: m.innerDiameter / 2, size: m.innerLine * 1.35)
+                    }
+                }
                 glyph(size: m.glyph)
             }
             .frame(width: geo.size.width, height: geo.size.height)
         }
         .aspectRatio(1, contentMode: .fit)
+    }
+
+    /// White time marker at `elapsed` (0…1) around a ring of `radius`. On a
+    /// light widget a darker outline and a soft shadow keep it visible over
+    /// the pale track.
+    private func marker(_ elapsed: Double, radius: CGFloat, size: CGFloat) -> some View {
+        let angle = (elapsed * 360 - 90) * .pi / 180
+        return Circle()
+            .fill(Color.white)
+            .overlay(Circle().strokeBorder(Color.black.opacity(colorScheme == .light ? 0.5 : 0.35),
+                                           lineWidth: colorScheme == .light ? 1 : 0.75))
+            .shadow(color: .black.opacity(colorScheme == .light ? 0.35 : 0.25), radius: 1, y: 0.5)
+            .frame(width: size, height: size)
+            .offset(x: radius * cos(angle), y: radius * sin(angle))
     }
 
     private func ring(_ value: RingValue, line: CGFloat, diameter: CGFloat) -> some View {
@@ -284,6 +325,14 @@ struct QuotaRing: View {
                     .rotationEffect(.degrees(-90))
                     // In tinted / clear widgets the fill takes the accent tint.
                     .widgetAccentable()
+            }
+            if let arc = value.unusedArc, arc.upperBound > arc.lowerBound {
+                // Unused quota about to reset. Widgets can't animate, so it
+                // is steady here (the panel and menu bar pulse).
+                Circle()
+                    .trim(from: arc.lowerBound, to: arc.upperBound)
+                    .stroke(Color.yellow, style: StrokeStyle(lineWidth: line, lineCap: .butt))
+                    .rotationEffect(.degrees(-90))
             }
         }
         .frame(width: diameter, height: diameter)
@@ -370,6 +419,7 @@ struct QuotaCell: View {
     let provider: WidgetProvider
     let now: Date
     let warningPercent: Int
+    var unused: WidgetUnusedAlert? = nil
     let configuration: QuotaWidgetIntent
     let showsNumber: Bool
 
@@ -378,7 +428,8 @@ struct QuotaCell: View {
         let session = RingValue(window: provider.session, duration: sessionDuration, now: now,
                                 showsRemaining: remaining, warningPercent: warningPercent)
         let weekly = RingValue(window: provider.weekly, duration: weeklyDuration, now: now,
-                               showsRemaining: remaining, warningPercent: warningPercent)
+                               showsRemaining: remaining, warningPercent: warningPercent,
+                               unusedSoon: unused?.applies(to: provider.weekly, now: now) ?? false)
         let weeklyOuter = configuration.outerRing == .weekly
         let outer = weeklyOuter ? weekly : session
         let verb = remaining ? "left" : "used"
@@ -393,7 +444,8 @@ struct QuotaCell: View {
         }
         .opacity(provider.isStale(at: now) ? 0.45 : 1)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text("\(provider.name): session \(sessionText) \(verb), week \(weeklyText) \(verb)"))
+        .accessibilityLabel(Text("\(provider.name): session \(sessionText) \(verb), week \(weeklyText) \(verb)"
+                                 + (weekly.unusedSoon ? ", unused quota resets soon" : "")))
     }
 }
 
@@ -460,7 +512,7 @@ struct QuotaWidgetView: View {
     private func slot(_ index: Int) -> some View {
         if index < entry.providers.count {
             QuotaCell(provider: entry.providers[index], now: entry.date, warningPercent: entry.warningPercent,
-                      configuration: entry.configuration, showsNumber: showsNumber)
+                      unused: entry.unused, configuration: entry.configuration, showsNumber: showsNumber)
         } else {
             EmptyGauge(showsNumber: showsNumber)
         }
@@ -478,7 +530,7 @@ struct QuotaWarmerWidget: Widget {
             QuotaWidgetView(entry: entry)
         }
         .configurationDisplayName("Quota")
-        .description("Quota per account: a thick outer ring and a thin inner ring for the 5-hour and weekly windows. Blue turns red at the warning level; the white dot is the time elapsed in the outer window.")
+        .description("Quota per account: a thick outer ring and a thin inner ring for the 5-hour and weekly windows. Blue turns red at the warning level; the white dots are the time elapsed in each window.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }

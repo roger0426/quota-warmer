@@ -54,6 +54,9 @@ struct AppSettings: @unchecked Sendable {
         static let alertWeeklyFirst = "alertWeeklyFirst"
         static let alertWeeklySecond = "alertWeeklySecond"
         static let alertPaceEnabled = "alertPaceEnabled"
+        static let alertUnusedEnabled = "alertUnusedEnabled"
+        static let alertUnusedDays = "alertUnusedDays"
+        static let alertUnusedPercent = "alertUnusedPercent"
 
         // Appearance
         static let colorfulQuotaBars = "colorfulQuotaBars"

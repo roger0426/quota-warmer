@@ -26,6 +26,7 @@ struct QuotaDisplayRegression {
         testWarningSetting()
         testMenuBarGauge()
         testQuotaAlerts()
+        testUnusedQuotaAlert()
         testAutoWarmExplanation()
         testOnboardingFlow()
         testIntegrationURLs()
@@ -447,6 +448,55 @@ struct QuotaDisplayRegression {
 
     static func kinds(_ evaluation: QuotaAlertPolicy.Evaluation) -> [QuotaAlertKind] {
         evaluation.alerts.map(\.kind)
+    }
+
+    static func testUnusedQuotaAlert() {
+        // The rule: resets within `days` days and at least `percent`% left.
+        let rule = UnusedQuotaRule()
+        expect(rule.days, 2, "default: within 2 days of the reset")
+        expect(rule.percent, 30, "default: at least 30% left")
+        check(rule.applies(remainingFraction: 0.45, resetAt: alertNow.addingTimeInterval(36 * 3600), now: alertNow),
+              "45% left, 36h to reset: flagged")
+        check(rule.applies(remainingFraction: 0.30, resetAt: alertNow.addingTimeInterval(2 * 86_400), now: alertNow),
+              "exactly 30% left at exactly 2 days: flagged")
+        check(!rule.applies(remainingFraction: 0.29, resetAt: alertNow.addingTimeInterval(86_400), now: alertNow),
+              "29% left: not flagged")
+        check(!rule.applies(remainingFraction: 0.9, resetAt: alertNow.addingTimeInterval(3 * 86_400), now: alertNow),
+              "3 days to reset: not yet")
+        check(!rule.applies(remainingFraction: 0.9, resetAt: alertNow.addingTimeInterval(-60), now: alertNow),
+              "already reset: not flagged")
+        check(!rule.applies(remainingFraction: nil, resetAt: alertNow.addingTimeInterval(3600), now: alertNow),
+              "no reading: not flagged")
+        check(!UnusedQuotaRule(enabled: false).applies(remainingFraction: 0.9, resetAt: alertNow.addingTimeInterval(3600), now: alertNow),
+              "off: never flagged")
+
+        // Settings persistence.
+        let suite = "QuotaWarmerUnusedRegression.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        expect(UnusedQuotaRule.load(from: defaults), UnusedQuotaRule(), "unset defaults load the stock rule")
+        defaults.set(false, forKey: UnusedQuotaRule.enabledKey)
+        defaults.set(1, forKey: UnusedQuotaRule.daysKey)
+        defaults.set(50, forKey: UnusedQuotaRule.percentKey)
+        expect(UnusedQuotaRule.load(from: defaults), UnusedQuotaRule(enabled: false, days: 1, percent: 50), "stored rule is read")
+
+        // Notification: once per weekly window, only when the rule holds.
+        let lots = alertSnapshot(weeklyUsed: 0.40, weeklyResetIn: 30 * 3600)
+        let noWeekly = QuotaAlertSettings(sessionEnabled: false, weeklyEnabled: false, paceEnabled: false)
+        func run(_ snapshot: QuotaSnapshot, marks: [String: QuotaAlertMark] = [:], unused: UnusedQuotaRule = UnusedQuotaRule()) -> QuotaAlertPolicy.Evaluation {
+            QuotaAlertPolicy.evaluate(snapshot: snapshot, settings: noWeekly, unused: unused, marks: marks,
+                                      fiveHourDuration: fiveHours, weeklyDuration: oneWeek, now: alertNow)
+        }
+        let first = run(lots)
+        expect(kinds(first), [.unused], "60% left, 30h to the weekly reset: unused alert")
+        expect(first.alerts.first?.usedPercent, 40, "alert carries the used percent")
+        expect(kinds(run(lots, marks: first.marks)), [], "only once per weekly window")
+        expect(kinds(run(alertSnapshot(weeklyUsed: 0.40, weeklyResetIn: 4 * 86_400))), [], "4 days out: no alert yet")
+        expect(kinds(run(alertSnapshot(weeklyUsed: 0.80, weeklyResetIn: 30 * 3600))), [], "only 20% left: no alert")
+        expect(kinds(run(lots, unused: UnusedQuotaRule(enabled: false))), [], "off: no alert")
+        expect(kinds(evaluate(lots, settings: noWeekly)), [], "the evaluate default leaves the unused alert off")
+        expect(QuotaAlert(kind: .unused, usedPercent: 40, resetIn: 30 * 3600, runsOutIn: nil).title(toolName: "Claude"),
+               "Claude — 60% of weekly quota unused", "unused alert title names what is left")
     }
 
     static func testQuotaAlerts() {

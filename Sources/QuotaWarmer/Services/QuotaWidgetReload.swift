@@ -9,7 +9,7 @@ enum QuotaWidgetReload {
     nonisolated(unsafe) private static var lastSignature = ""
 
     static func reloadIfChanged(_ file: QuotaStatusFile) {
-        let signature = "\(file.warningPercent ?? 0)#" + file.providers.map { provider in
+        let signature = "\(file.warningPercent ?? 0)#\(file.unusedAlert.map { "\($0.days)/\($0.percent)" } ?? "-")#" + file.providers.map { provider in
             [
                 provider.id, provider.name, provider.mode, provider.displayMode,
                 window(provider.session), window(provider.weekly)

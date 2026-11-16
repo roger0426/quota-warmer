@@ -573,6 +573,28 @@
         }
       }
     },
+    "%@ — %lld%% of weekly quota unused": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — %lld%% of weekly quota unused"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — haftalık kotanın %%%lld'i kullanılmadı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — 每週額度還有 %lld%% 未使用"
+          }
+        }
+      }
+    },
     "%@ — %lld%% of weekly quota used": {
       "localizations": {
         "en": {
@@ -8779,6 +8801,28 @@
         }
       }
     },
+    "Resets in %@. What is left then is lost.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resets in %@. What is left then is lost."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ içinde sıfırlanıyor. Kalan kısım o zaman kaybolur."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 後重置，屆時剩下的額度就會失效。"
+          }
+        }
+      }
+    },
     "Restart": {
       "localizations": {
         "en": {
@@ -10913,6 +10957,28 @@
         }
       }
     },
+    "Unused Weekly Quota": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unused Weekly Quota"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kullanılmayan Haftalık Kota"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未使用的每週額度"
+          }
+        }
+      }
+    },
     "Updated %@": {
       "localizations": {
         "en": {
@@ -11991,6 +12057,28 @@
         }
       }
     },
+    "Weekly resets soon with this much left; its bar turns yellow": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weekly resets soon with this much left; its bar turns yellow"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haftalık kota bu kadarı kalmışken yakında sıfırlanıyor; çubuğu sarıya döner"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每週額度即將重置但還剩這麼多時，長條轉為黃色"
+          }
+        }
+      }
+    },
     "Weekly used": {
       "localizations": {
         "en": {
@@ -12339,6 +12427,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "已用 95%% 以上的時段%@——你在時段重置前已用完或幾乎用完。"
+          }
+        }
+      }
+    },
+    "With at least %lld percent left. Activate to change.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With at least %lld percent left. Activate to change."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En az yüzde %lld kalmışken. Değiştirmek için etkinleştirin."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "至少還剩 %lld%%。啟用以變更。"
+          }
+        }
+      }
+    },
+    "Within %lld days of the reset. Activate to change.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Within %lld days of the reset. Activate to change."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sıfırlanmaya %lld gün kala. Değiştirmek için etkinleştirin."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "距離重置 %lld 天內。啟用以變更。"
           }
         }
       }
@@ -13201,6 +13333,28 @@
         }
       }
     },
+    "unused quota resets soon": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "unused quota resets soon"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kullanılmayan kota yakında sıfırlanıyor"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未使用的額度即將重置"
+          }
+        }
+      }
+    },
     "update available": {
       "localizations": {
         "en": {
@@ -13417,6 +13571,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "~/.codex · 預設"
+          }
+        }
+      }
+    },
+    "≤%lldd": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "≤%lldd"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "≤%lld g"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "≤%lld 天"
           }
         }
       }

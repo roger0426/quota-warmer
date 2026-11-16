@@ -64,6 +64,8 @@ struct AccountsHistoryRegression {
             (K.alertSessionSecond, "alertSessionSecond"), (K.alertWeeklyEnabled, "alertWeeklyEnabled"),
             (K.alertWeeklyFirst, "alertWeeklyFirst"), (K.alertWeeklySecond, "alertWeeklySecond"),
             (K.alertPaceEnabled, "alertPaceEnabled"),
+            (K.alertUnusedEnabled, "alertUnusedEnabled"), (K.alertUnusedDays, "alertUnusedDays"),
+            (K.alertUnusedPercent, "alertUnusedPercent"),
             (K.colorfulQuotaBars, "colorfulQuotaBars"), (K.usageWarningPercent, "usageWarningPercent"), (K.menuBarStyle, "menuBarStyle"),
             (K.appearanceMode, "appearanceMode"),
             (K.historyRange, "historyRange"), (K.historyProvider, "historyProvider"),

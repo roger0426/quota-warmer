@@ -73,7 +73,8 @@ final class QuotaPollingCoordinator {
                 snapshot: state.quotaSnapshot
             )
         }
-        let file = QuotaStatusExport.make(entries, warningPercent: QuotaUsageLevel.storedWarningPercent())
+        let file = QuotaStatusExport.make(entries, warningPercent: QuotaUsageLevel.storedWarningPercent(),
+                                          unused: UnusedQuotaRule.load())
         QuotaStatusExport.write(file)
         QuotaWidgetReload.reloadIfChanged(file)
     }
@@ -259,7 +260,7 @@ final class QuotaPollingCoordinator {
     /// Settings → Alerts (session/weekly used% thresholds, pace warning).
     var quotaAlertSettings: QuotaAlertSettings { QuotaAlertSettings.load() }
 
-    /// Posts any session/weekly/pace warning a fresh snapshot makes due, each at
+    /// Posts any session/weekly/pace/unused warning a fresh snapshot makes due, each at
     /// most once per window (see `QuotaAlertPolicy`). Silent while paused.
     private func evaluateQuotaAlerts(for tool: ProviderID, snapshot: QuotaSnapshot) {
         guard !host.globalPassive else { return }
@@ -267,6 +268,7 @@ final class QuotaPollingCoordinator {
         let evaluation = QuotaAlertPolicy.evaluate(
             snapshot: snapshot,
             settings: quotaAlertSettings,
+            unused: UnusedQuotaRule.load(),
             marks: marks,
             fiveHourDuration: tool.windowDuration,
             weeklyDuration: tool.weeklyWindowDuration

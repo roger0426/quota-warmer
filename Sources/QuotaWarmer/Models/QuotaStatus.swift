@@ -16,7 +16,16 @@ struct QuotaStatusFile: Codable, Equatable {
     /// Settings → "Warning at": used-percent from which quota shows red.
     /// Optional so files written before it existed still decode.
     var warningPercent: Int? = nil
+    /// Settings → Alerts → Unused Weekly Quota, when on: a weekly window that
+    /// resets within `days` days with at least `percent`% left is flagged.
+    /// Absent when the alert is off or the file is older.
+    var unusedAlert: QuotaStatusUnusedAlert? = nil
     let providers: [QuotaStatusProvider]
+}
+
+struct QuotaStatusUnusedAlert: Codable, Equatable {
+    let days: Int
+    let percent: Int
 }
 
 /// One watched account. `freshness` is as of `generatedAt`; consumers should
@@ -64,11 +73,13 @@ enum QuotaStatusExport {
     }
 
     static func make(_ entries: [Entry], now: Date = Date(),
-                     warningPercent: Int = QuotaUsageLevel.defaultWarningPercent) -> QuotaStatusFile {
+                     warningPercent: Int = QuotaUsageLevel.defaultWarningPercent,
+                     unused: UnusedQuotaRule? = nil) -> QuotaStatusFile {
         QuotaStatusFile(
             schemaVersion: QuotaStatusFile.schemaVersion,
             generatedAt: now,
             warningPercent: QuotaUsageLevel.clampedWarningPercent(warningPercent),
+            unusedAlert: unused.flatMap { $0.enabled ? QuotaStatusUnusedAlert(days: $0.days, percent: $0.percent) : nil },
             providers: entries.map { provider($0, now: now) }
         )
     }
