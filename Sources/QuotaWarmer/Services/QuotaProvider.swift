@@ -45,8 +45,8 @@ final class QuotaProvider: QuotaProviding {
         }
 
         if credential.isExpired {
-            // The mirrored copy aged out; the CLI's item is the only place a
-            // newer token can appear, so stop trusting the mirror.
+            // The kept copy aged out; the CLI's item is the only place a
+            // newer token can appear, so stop trusting the copy.
             credentialStore.invalidateCachedClaudeCredential(for: provider)
             throw QuotaProviderError.cliRefreshRequired(
                 "Claude is signed in, but its quota credential needs a CLI refresh."
@@ -62,7 +62,7 @@ final class QuotaProvider: QuotaProviding {
         } catch QuotaProviderError.authFailure {
             // Do not consume a potentially rotating refresh token here. Claude
             // Code refreshes and persists its own credential when it next runs.
-            // Drop the mirror so the retry reads Claude Code's item directly.
+            // Drop the kept copy so the retry reads Claude Code's item directly.
             credentialStore.invalidateCachedClaudeCredential(for: provider)
             throw QuotaProviderError.cliRefreshRequired(
                 "Claude is signed in, but its quota credential needs a CLI refresh."

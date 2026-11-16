@@ -17,16 +17,16 @@ final class CredentialStore {
 
     private func claudeCredential(for provider: ProviderID, allowsUserInteraction: Bool) throws -> Credential {
         // Claude Code owns its Keychain item and rotates the access token inside
-        // it roughly every 8 hours. Mirror the still-valid token into an item
-        // QuotaWarmer itself owns so the common path touches nothing foreign.
+        // it roughly every 8 hours. The still-valid token is kept in memory so
+        // the common path does not run a subprocess on every quota check.
         if let cached = cachedClaudeCredential(for: provider), !cached.isExpired {
-            DiagnosticLogger.append("claude_credential_source=mirror prompt=no")
+            DiagnosticLogger.append("claude_credential_source=memory prompt=no")
             return cached
         }
 
         let services = claudeKeychainServices(for: provider)
 
-        // The mirror aged out with the token, so a fresh one has to come from
+        // Nothing kept (first read since launch, or the token aged out), so a fresh one has to come from
         // Claude Code's own item. Read it the way Claude Code wrote it — see
         // securityToolPassword for why that read is the one that never prompts.
         for service in services {
@@ -172,95 +172,70 @@ final class CredentialStore {
         return item as? Data
     }
 
-    /// Generic-password item created and owned by QuotaWarmer. Because this
-    /// process added it, SecItemCopyMatching returns it without an approval
-    /// dialog, which is the whole point of mirroring the token here.
-    private static let claudeCacheService = "com.quotawarmer.app.claude-oauth-cache"
+    /// Keychain item older builds mirrored the access token into. Nothing is
+    /// written there any more; it is only named so the leftover can be deleted.
+    private static let legacyCacheService = "com.quotawarmer.app.claude-oauth-cache"
 
-    /// One mirror per account; the default keeps the original name so an
-    /// existing mirror stays valid across the upgrade.
-    private static func claudeCacheService(for provider: ProviderID) -> String {
-        provider.isDefault ? claudeCacheService : "\(claudeCacheService).\(provider.accountID)"
+    private static func legacyCacheService(for provider: ProviderID) -> String {
+        provider.isDefault ? legacyCacheService : "\(legacyCacheService).\(provider.accountID)"
     }
 
-    private struct CachedClaudeCredential: Codable {
-        let accessToken: String
-        let expiresAt: Date?
-        let source: String
-    }
+    /// The still-valid Claude access token per account, held only in this
+    /// process's memory. It saves one `/usr/bin/security` run per quota check
+    /// and disappears when the app quits, so QuotaWarmer leaves no copy of the
+    /// token on disk or in the Keychain. Shared across instances because
+    /// `CredentialStore()` is created in more than one place.
+    private static let memoryLock = NSLock()
+    nonisolated(unsafe) private static var memoryCache: [String: Credential] = [:]
+    nonisolated(unsafe) private static var legacyMirrorChecked = Set<String>()
 
-    /// Returns the mirrored credential, or nil when absent/unreadable/malformed.
-    /// Never throws: a bad cache must always fall through to the real source.
     private func cachedClaudeCredential(for provider: ProviderID) -> Credential? {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: Self.claudeCacheService(for: provider),
-            kSecReturnData as String: true,
-            kSecMatchLimit as String: kSecMatchLimitOne
-        ]
-        var item: CFTypeRef?
-        // Owned by this app, so it normally reads straight through — but a
-        // mirror written by an older, differently signed build no longer
-        // matches the ACL. Never let that corner turn into a dialog; an
-        // unreadable mirror simply falls through to the real source.
-        let status = Self.withoutKeychainDialogs {
-            SecItemCopyMatching(query as CFDictionary, &item)
-        }
-        guard status == errSecSuccess,
-              let data = item as? Data,
-              let cached = try? JSONDecoder().decode(CachedClaudeCredential.self, from: data) else {
-            return nil
-        }
-        return Credential(
-            accessToken: cached.accessToken,
-            // Deliberately not mirrored: QuotaWarmer never refreshes Claude's
-            // rotating refresh token, so it has no reason to hold a copy.
-            refreshToken: nil,
-            accountID: nil,
-            // Marked so the diagnostics log distinguishes a prompt-free mirror
-            // read from a read that had to touch Claude Code's own item.
-            source: "\(cached.source) (cached)",
-            expiresAt: cached.expiresAt
-        )
+        Self.memoryLock.lock()
+        let cached = Self.memoryCache[provider.storageKey]
+        let firstUse = Self.legacyMirrorChecked.insert(provider.storageKey).inserted
+        Self.memoryLock.unlock()
+        if firstUse { removeLegacyKeychainMirror(for: provider) }
+        return cached
     }
 
     private func storeCachedClaudeCredential(_ credential: Credential, for provider: ProviderID) {
         // An access token with no known expiry can never be aged out, so it is
-        // not safe to mirror — always re-read those from the owning source.
+        // not kept: always re-read those from the owning source.
         guard credential.expiresAt != nil else { return }
-        let cached = CachedClaudeCredential(
+        let kept = Credential(
             accessToken: credential.accessToken,
-            expiresAt: credential.expiresAt,
-            source: credential.source
+            // QuotaWarmer never refreshes Claude's rotating refresh token, so
+            // it has no reason to hold on to it.
+            refreshToken: nil,
+            accountID: nil,
+            source: "\(credential.source) (cached)",
+            expiresAt: credential.expiresAt
         )
-        guard let data = try? JSONEncoder().encode(cached) else { return }
-
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: Self.claudeCacheService(for: provider)
-        ]
-        let attributes: [String: Any] = [
-            kSecValueData as String: data,
-            // Cache only needs to be readable while the user is logged in, and
-            // must never sync to another machine.
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
-        ]
-        let status = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
-        if status == errSecItemNotFound {
-            var insert = query
-            insert.merge(attributes) { current, _ in current }
-            SecItemAdd(insert as CFDictionary, nil)
-        }
+        Self.memoryLock.lock()
+        Self.memoryCache[provider.storageKey] = kept
+        Self.memoryLock.unlock()
     }
 
-    /// Drops the mirror so the next read goes back to Claude Code's own item.
-    /// Used when the mirrored token is rejected by the API.
+    /// Forgets the kept token so the next read goes back to Claude Code's own
+    /// item. Used when the token is rejected by the API or the account is removed.
     func invalidateCachedClaudeCredential(for provider: ProviderID) {
+        Self.memoryLock.lock()
+        Self.memoryCache[provider.storageKey] = nil
+        Self.memoryLock.unlock()
+        removeLegacyKeychainMirror(for: provider)
+    }
+
+    /// Deletes the token mirror an older build left in the Keychain. Never
+    /// raises a dialog; a failed delete is harmless (the item is no longer read).
+    private func removeLegacyKeychainMirror(for provider: ProviderID) {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: Self.claudeCacheService(for: provider)
+            kSecAttrService as String: Self.legacyCacheService(for: provider)
         ]
-        SecItemDelete(query as CFDictionary)
+        let status = Self.withoutKeychainDialogs { SecItemDelete(query as CFDictionary) }
+        if status == errSecSuccess {
+            DiagnosticLogger.append("claude_legacy_keychain_mirror_removed account=\(provider.storageKey)")
+        }
     }
 
     private enum ClaudeKeychainRead {

@@ -31,7 +31,7 @@ By default it only **monitors**: it watches live quota snapshots and shows each 
 
 - **Live quota tracking**: reset decisions use fresh server quota snapshots; local logs are display context only.
 - **Rate-limit guard**: failed checks and warm-ups back off exponentially instead of hammering the provider.
-- **Quiet credentials**: background checks never raise a Keychain password dialog. After `claude auth login`, the app re-checks automatically within seconds.
+- **Quiet credentials**: background checks never raise a Keychain password dialog. After `claude auth login`, the app re-checks automatically within seconds. The Claude access token is held only in memory while the app runs: this fork keeps no copy of it in the Keychain or on disk, and removes the copy older builds left behind.
 - **Liveness watchdog**: if the app ever stops checking quota, the menu bar and popover say so instead of looking healthy.
 
 ### Everyday use
