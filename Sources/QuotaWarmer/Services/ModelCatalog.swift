@@ -89,8 +89,9 @@ struct ModelCatalog: Codable, Equatable {
     }
 
     /// The remote copy is untrusted input: prices only feed a display estimate,
-    /// but warm-up model names are interpolated into a `zsh -lc` command, so
-    /// they are restricted to a plain model-id alphabet.
+    /// but warm-up model names become a CLI argument, so they are
+    /// restricted to a plain model-id alphabet (the command itself is run as
+    /// an argument vector, see `WarmupRunner.shellArguments`).
     func validationProblem() -> String? {
         guard schemaVersion == Self.supportedSchemaVersion else { return "unsupported schemaVersion \(schemaVersion)" }
         guard revision >= 1 else { return "revision must be >= 1" }

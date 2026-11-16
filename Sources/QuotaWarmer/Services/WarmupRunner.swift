@@ -76,7 +76,6 @@ class WarmupRunner {
     func warmup(_ provider: ProviderID) async throws -> WarmupResult {
         let tool = provider.kind
         let cliName = tool == .claude ? "claude" : "codex"
-        let envPrefix = Self.environmentPrefix(for: provider)
         guard let cliURL = await resolveCLI(named: cliName) else {
             throw WarmupError.cliNotFound(cliName)
         }
@@ -96,8 +95,8 @@ class WarmupRunner {
         let preferred = AppSettings.shared.warmupModel(provider.storageKey)
         return try await Self.runCatalogWarmup(store: .shared(for: tool), preferred: preferred) { model in
             try await self.runWithOptionFallback(
-                primary: envPrefix + tool.warmupCommand(model: model, instructionsFile: instructionsFile),
-                fallback: tool.legacyWarmupCommand(model: model).map { envPrefix + $0 },
+                primary: Self.invocation(tool.warmupArguments(model: model, instructionsFile: instructionsFile), for: provider),
+                fallback: tool.legacyWarmupArguments(model: model).map { Self.invocation($0, for: provider) },
                 tool: tool,
                 cliName: cliName,
                 pathPrefix: pathPrefix,
@@ -151,8 +150,8 @@ class WarmupRunner {
     }
 
     private func runWithOptionFallback(
-        primary: String,
-        fallback: String?,
+        primary: CLIInvocation,
+        fallback: CLIInvocation?,
         tool: ToolID,
         cliName: String,
         pathPrefix: String,
@@ -253,7 +252,7 @@ class WarmupRunner {
         }
         return await claudeAuthenticationStatus(
             pathPrefix: cliURL.deletingLastPathComponent().path,
-            envPrefix: Self.environmentPrefix(for: provider)
+            environmentArguments: Self.environmentArguments(for: provider)
         )
     }
 
@@ -264,8 +263,8 @@ class WarmupRunner {
         guard provider.kind == .claude, let cliURL = await resolveCLI(named: "claude") else { return false }
         let workspace = FileManager.default.temporaryDirectory.appendingPathComponent("QuotaWarmerTokenRefresh", isDirectory: true)
         try? FileManager.default.createDirectory(at: workspace, withIntermediateDirectories: true)
-        let result = await runShellCommand(
-            Self.environmentPrefix(for: provider) + ToolID.claudeTokenRefreshCommand,
+        let result = await runCLI(
+            Self.environmentArguments(for: provider) + ToolID.claudeTokenRefreshArguments,
             pathPrefix: cliURL.deletingLastPathComponent().path,
             currentDirectoryURL: workspace,
             timeout: 30
@@ -273,9 +272,41 @@ class WarmupRunner {
         return result.exitCode == 0
     }
 
-    /// `CLAUDE_CONFIG_DIR='/Users/me/.claude-work' ` for an added account, empty
-    /// for the default one. Set on the command line rather than the process
-    /// environment so a login shell profile cannot override it.
+    /// A CLI run: the argument vector that is executed and the one-line form
+    /// shown in the warm-up log and History.
+    struct CLIInvocation {
+        let arguments: [String]
+        let display: String
+    }
+
+    static func invocation(_ arguments: [String], for provider: ProviderID) -> CLIInvocation {
+        CLIInvocation(
+            arguments: environmentArguments(for: provider) + arguments,
+            display: environmentPrefix(for: provider) + ToolID.commandLine(arguments)
+        )
+    }
+
+    /// Every CLI launch goes through a login shell so the user's profile
+    /// supplies PATH and proxy settings, but the shell source is this fixed
+    /// string: it replaces the shell with the arguments it was handed. No
+    /// model name, path or account value is ever parsed as shell code.
+    static let execScript = "exec \"$@\""
+
+    /// `/bin/zsh` arguments that run `arguments` as given.
+    static func shellArguments(_ arguments: [String]) -> [String] {
+        ["-lc", execScript, "zsh"] + arguments
+    }
+
+    /// `["/usr/bin/env", "CLAUDE_CONFIG_DIR=/Users/me/.claude-work"]` for an
+    /// added account, empty for the default one. Applied after the login
+    /// profile has run, so the profile cannot override it.
+    static func environmentArguments(for provider: ProviderID) -> [String] {
+        let pairs = provider.cliEnvironment.sorted { $0.key < $1.key }.map { "\($0.key)=\($0.value)" }
+        return pairs.isEmpty ? [] : ["/usr/bin/env"] + pairs
+    }
+
+    /// Display form of `environmentArguments`:
+    /// `CLAUDE_CONFIG_DIR='/Users/me/.claude-work' `, or empty.
     static func environmentPrefix(for provider: ProviderID) -> String {
         provider.cliEnvironment
             .sorted { $0.key < $1.key }
@@ -283,11 +314,12 @@ class WarmupRunner {
             .joined()
     }
 
-    private func runWarmupCommand(_ command: String, cliName: String, pathPrefix: String, workspaceURL: URL) async throws -> WarmupResult {
+    private func runWarmupCommand(_ invocation: CLIInvocation, cliName: String, pathPrefix: String, workspaceURL: URL) async throws -> WarmupResult {
+        let command = invocation.display
         return try await withCheckedThrowingContinuation { continuation in
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-            process.arguments = ["-lc", command]
+            process.arguments = Self.shellArguments(invocation.arguments)
             process.currentDirectoryURL = workspaceURL
             process.environment = environment(prependingPath: pathPrefix)
             // The CLI (e.g. `codex exec`) reads stdin when it is not a tty and a
@@ -373,8 +405,8 @@ class WarmupRunner {
     func cliInfo(_ tool: ToolID) async -> (path: String, version: String?)? {
         let name = tool == .claude ? "claude" : "codex"
         guard let url = await resolveCLI(named: name) else { return nil }
-        let result = await runShellCommand(
-            "\(name) --version",
+        let result = await runCLI(
+            [name, "--version"],
             pathPrefix: url.deletingLastPathComponent().path,
             currentDirectoryURL: nil,
             timeout: 10
@@ -383,9 +415,9 @@ class WarmupRunner {
         return (url.path, result.exitCode == 0 ? line : nil)
     }
 
-    private func claudeAuthenticationStatus(pathPrefix: String, envPrefix: String) async -> CLIAuthenticationStatus {
-        let result = await runShellCommand(
-            envPrefix + "claude auth status",
+    private func claudeAuthenticationStatus(pathPrefix: String, environmentArguments: [String]) async -> CLIAuthenticationStatus {
+        let result = await runCLI(
+            environmentArguments + ["claude", "auth", "status"],
             pathPrefix: pathPrefix,
             currentDirectoryURL: nil,
             timeout: 15
@@ -443,8 +475,8 @@ class WarmupRunner {
         let output: String
     }
 
-    private func runShellCommand(
-        _ command: String,
+    private func runCLI(
+        _ arguments: [String],
         pathPrefix: String?,
         currentDirectoryURL: URL?,
         timeout: TimeInterval
@@ -452,7 +484,7 @@ class WarmupRunner {
         await withCheckedContinuation { continuation in
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-            process.arguments = ["-lc", command]
+            process.arguments = Self.shellArguments(arguments)
             process.currentDirectoryURL = currentDirectoryURL
             process.environment = environment(prependingPath: pathPrefix)
             process.standardInput = FileHandle.nullDevice
@@ -513,7 +545,7 @@ class WarmupRunner {
         await withCheckedContinuation { continuation in
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-            process.arguments = ["-lc", "command -v \(name)"]
+            process.arguments = ["-lc", "command -v \"$1\"", "zsh", name]
             process.environment = environment(prependingPath: nil)
 
             let outPipe = Pipe()

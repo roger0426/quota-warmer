@@ -597,10 +597,14 @@ struct SettingsTabView: View {
     /// Starts a fresh copy once this one has quit (the language is read only
     /// at launch), then quits.
     private func relaunch() {
-        let path = Bundle.main.bundlePath.replacingOccurrences(of: "'", with: "'\\''")
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/bin/sh")
-        task.arguments = ["-c", "while /bin/kill -0 \(ProcessInfo.processInfo.processIdentifier) 2>/dev/null; do sleep 0.2; done; /usr/bin/open '\(path)'"]
+        // Fixed script; the pid and bundle path are passed as arguments, not
+        // written into the shell source.
+        task.arguments = [
+            "-c", "while /bin/kill -0 \"$1\" 2>/dev/null; do sleep 0.2; done; /usr/bin/open \"$2\"",
+            "sh", String(ProcessInfo.processInfo.processIdentifier), Bundle.main.bundlePath
+        ]
         do {
             try task.run()
             NSApplication.shared.terminate(nil)

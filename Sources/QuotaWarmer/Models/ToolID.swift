@@ -87,23 +87,47 @@ enum ToolID: String, CaseIterable, Identifiable, Codable {
         "in_app_browser", "worktrees", "skill_mcp_dependency_install", "shell_tool", "unified_exec"
     ]
 
-    /// `model` must pass `ModelCatalog.isSafeWarmupModel`: it is interpolated
-    /// into a `zsh -lc` command line. `instructionsFile` (Codex only) is an
-    /// absolute path to a short file that replaces Codex's built-in system
-    /// prompt; a path with a quote or backslash is ignored.
-    func warmupCommand(model: String, instructionsFile: String? = nil) -> String {
+    /// The warm-up as an argument vector, CLI name first. It is handed to the
+    /// CLI as-is (`WarmupRunner.shellArguments`), never spliced into shell
+    /// source. `model` should still pass `ModelCatalog.isSafeWarmupModel`.
+    /// `instructionsFile` (Codex only) is an absolute path to a short file that
+    /// replaces Codex's built-in system prompt; the value is TOML, so a path
+    /// with a quote or backslash is ignored.
+    func warmupArguments(model: String, instructionsFile: String? = nil) -> [String] {
         switch self {
         case .claude:
-            return "claude --model \(model) --effort low --settings '{\"alwaysThinkingEnabled\":false}' --safe-mode --strict-mcp-config --system-prompt 'Reply with one word.' --no-session-persistence --max-turns 1 --tools '' --output-format json -p 'hi'"
+            return [
+                "claude", "--model", model, "--effort", "low",
+                "--settings", "{\"alwaysThinkingEnabled\":false}",
+                "--safe-mode", "--strict-mcp-config", "--system-prompt", "Reply with one word.",
+                "--no-session-persistence", "--max-turns", "1", "--tools", "",
+                "--output-format", "json", "-p", "hi"
+            ]
         case .codex:
-            var instructions = ""
+            var arguments = ["codex", "exec", "--model", model, "-c", "model_reasoning_effort=\"low\""]
             if let path = instructionsFile, path.hasPrefix("/"),
                !path.contains("'"), !path.contains("\""), !path.contains("\\") {
-                instructions = " -c 'model_instructions_file=\"\(path)\"'"
+                arguments += ["-c", "model_instructions_file=\"\(path)\""]
             }
-            let disabled = Self.codexWarmupDisabledFeatures.map { " --disable \($0)" }.joined()
-            return "codex exec --model \(model) -c model_reasoning_effort=\"low\"\(instructions) --skip-git-repo-check --ephemeral --ignore-user-config --ignore-rules\(disabled) 'hi'"
+            arguments += ["--skip-git-repo-check", "--ephemeral", "--ignore-user-config", "--ignore-rules"]
+            arguments += Self.codexWarmupDisabledFeatures.flatMap { ["--disable", $0] }
+            return arguments + ["hi"]
         }
+    }
+
+    /// `warmupArguments` as one line, for the warm-up log and History.
+    func warmupCommand(model: String, instructionsFile: String? = nil) -> String {
+        Self.commandLine(warmupArguments(model: model, instructionsFile: instructionsFile))
+    }
+
+    /// Display form of an argument vector: arguments with anything beyond
+    /// plain flag characters are single-quoted. For reading, not for running.
+    static func commandLine(_ arguments: [String]) -> String {
+        let plain = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-./=:,@%+")
+        return arguments.map { argument in
+            if !argument.isEmpty, argument.unicodeScalars.allSatisfy(plain.contains) { return argument }
+            return ProviderID.shellQuoted(argument)
+        }.joined(separator: " ")
     }
 
     /// Makes the Claude CLI refresh its expired access token without a model
@@ -113,10 +137,17 @@ enum ToolID: String, CaseIterable, Identifiable, Codable {
     /// `--safe-mode` keeps the user's hooks, plugins and CLAUDE.md out of this
     /// background run (checked 2026-11-15 on CLI 2.1.322: `/usage` still works).
     static let claudeTokenRefreshModel = "quotawarmer-no-model"
-    static let claudeTokenRefreshCommand =
-        "claude --model \(claudeTokenRefreshModel) --safe-mode --strict-mcp-config --no-session-persistence --max-turns 1 --tools '' -p '/usage'"
+    static let claudeTokenRefreshArguments = [
+        "claude", "--model", claudeTokenRefreshModel, "--safe-mode", "--strict-mcp-config",
+        "--no-session-persistence", "--max-turns", "1", "--tools", "", "-p", "/usage"
+    ]
+    static let claudeTokenRefreshCommand = commandLine(claudeTokenRefreshArguments)
 
     func legacyWarmupCommand(model: String) -> String? {
+        legacyWarmupArguments(model: model).map(Self.commandLine)
+    }
+
+    func legacyWarmupArguments(model: String) -> [String]? {
         switch self {
         // None in this fork: a run without `--safe-mode` loads the user's
         // CLAUDE.md, hooks, plugins and MCP tool schemas (~51K tokens for one
@@ -124,7 +155,11 @@ enum ToolID: String, CaseIterable, Identifiable, Codable {
         case .claude: return nil
         // Same pinned model, without the feature switches: for a Codex CLI
         // that no longer knows one of `codexWarmupDisabledFeatures`.
-        case .codex:  return "codex exec --model \(model) -c model_reasoning_effort=\"low\" --skip-git-repo-check --ephemeral --ignore-user-config --ignore-rules 'hi'"
+        case .codex:
+            return [
+                "codex", "exec", "--model", model, "-c", "model_reasoning_effort=\"low\"",
+                "--skip-git-repo-check", "--ephemeral", "--ignore-user-config", "--ignore-rules", "hi"
+            ]
         }
     }
 

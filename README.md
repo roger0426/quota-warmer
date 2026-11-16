@@ -53,8 +53,8 @@ Claude Code and Codex CLI use rolling quota windows. If a window starts only whe
 QuotaWarmer keeps the app running in the menu bar and periodically checks quota state for monitored providers. For a tool set to Auto-warm, when a fresh reset is detected it runs a minimal warm-up command from an isolated temporary working directory:
 
 ```bash
-claude --model haiku --effort low --settings '{"alwaysThinkingEnabled":false}' --safe-mode --strict-mcp-config --system-prompt 'Reply with one word.' --no-session-persistence --max-turns 1 --tools '' --output-format json -p 'hi'
-codex exec --model gpt-5.6-luna -c model_reasoning_effort="low" -c 'model_instructions_file="…/warmup-instructions.md"' --skip-git-repo-check --ephemeral --ignore-user-config --ignore-rules --disable hooks --disable apps … 'hi'
+claude --model haiku --effort low --settings '{"alwaysThinkingEnabled":false}' --safe-mode --strict-mcp-config --system-prompt 'Reply with one word.' --no-session-persistence --max-turns 1 --tools '' --output-format json -p hi
+codex exec --model gpt-5.6-luna -c 'model_reasoning_effort="low"' -c 'model_instructions_file="…/warmup-instructions.md"' --skip-git-repo-check --ephemeral --ignore-user-config --ignore-rules --disable hooks --disable apps … hi
 ```
 
 Both commands pin a bounded low-cost model and do not fall back to the user's default model. The Claude run skips your `CLAUDE.md`, MCP servers, skills and thinking, so a warm-up costs roughly 400 tokens. Codex ignores user configuration for this isolated run while continuing to use the existing Codex authentication. The warm-up model lists live in `Sources/QuotaWarmer/Resources/*-models.json`; if a CLI rejects a model, the next one in the list is tried. To use a different model for one account, pick it under Settings → Accounts → Warm-up model: the menu lists the bundled models with their price (USD per million tokens, input / output), and Custom… takes any model id. If the CLI rejects your choice, the default list is used and History says so.

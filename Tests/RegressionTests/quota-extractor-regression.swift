@@ -107,6 +107,19 @@ struct QuotaExtractorRegression {
             "Codex warmup should take an absolute instructions file and ignore a path it cannot quote safely"
         )
 
+        // Commands run as argument vectors behind a fixed shell script, so a
+        // value can never be parsed as shell code.
+        let hostile = "x; echo $(id) 'q'"
+        require(
+            WarmupRunner.shellArguments(["claude", "--model", hostile]) == ["-lc", "exec \"$@\"", "zsh", "claude", "--model", hostile]
+                && ToolID.claude.warmupArguments(model: hostile).contains(hostile)
+                && ToolID.claude.warmupArguments(model: "haiku").first == "claude"
+                && ToolID.codex.warmupArguments(model: "gpt-5.6-luna").prefix(2) == ["codex", "exec"]
+                && ToolID.codex.warmupArguments(model: "gpt-5.6-luna").last == "hi"
+                && ToolID.commandLine(["a", "", "b c", "it's"]) == "a '' 'b c' 'it'\\''s'",
+            "CLI runs should pass arguments through a fixed shell script without re-parsing them"
+        )
+
         let sanitizedFailure = WarmupRunner.sanitizedFailureDetail(
             #"""
             invalid request
@@ -1399,7 +1412,7 @@ access_token=private-value
             "CLI token refresh: retries once the interval passed"
         )
         let refreshCommand = ToolID.claudeTokenRefreshCommand
-        require(refreshCommand.hasSuffix("-p '/usage'"), "CLI token refresh: runs the local /usage command")
+        require(refreshCommand.hasSuffix("-p /usage"), "CLI token refresh: runs the local /usage command")
         require(refreshCommand.contains("--safe-mode "), "CLI token refresh: keeps user hooks and plugins out of the background run")
         require(
             refreshCommand.contains("--model \(ToolID.claudeTokenRefreshModel) "),

@@ -158,6 +158,7 @@ struct AccountsHistoryRegression {
         expect(work.cliEnvironment, ["CLAUDE_CONFIG_DIR": "/Users/test/.claude-work"], "Claude account exports CLAUDE_CONFIG_DIR")
         expect(work.loginCommand, "CLAUDE_CONFIG_DIR='/Users/test/.claude-work' claude auth login", "Claude login command")
         expect(WarmupRunner.environmentPrefix(for: work), "CLAUDE_CONFIG_DIR='/Users/test/.claude-work' ", "warm-up prefix")
+        expect(WarmupRunner.environmentArguments(for: work), ["/usr/bin/env", "CLAUDE_CONFIG_DIR=/Users/test/.claude-work"], "warm-up environment arguments")
         expect(work.logDirectoryURL?.path, "/Users/test/.claude-work/projects", "Claude account logs live in its home")
 
         let codex = ProviderAccount(id: "side", kind: .codex, name: "Side", home: "/Users/test/.codex side").providerID
@@ -168,6 +169,7 @@ struct AccountsHistoryRegression {
         let claude = ProviderID.default(.claude)
         check(claude.cliEnvironment.isEmpty, "default account exports nothing")
         expect(WarmupRunner.environmentPrefix(for: claude), "", "default warm-up command is unchanged")
+        expect(WarmupRunner.environmentArguments(for: claude), [], "default account adds no environment arguments")
         expect(claude.loginCommand, "claude auth login", "default login command")
         expect(claude.logDirectoryURL, ToolID.claude.logDirectoryURL, "default logs stay in ~/.claude")
 
