@@ -281,12 +281,12 @@ final class AppState: ObservableObject, CoordinatorHost {
     @Published var panelContentHeight: CGFloat = 0
 
     static func panelHeight(forMeasured measured: CGFloat) -> CGFloat {
-        measured > 0 ? min(max(measured, 300), maxPanelHeight) : DS.totalHeight
+        min(max(measured, DS.totalHeight), maxPanelHeight)
     }
 
     /// Tallest unscaled panel that still fits under the menu bar on the
-    /// current screen (with a small margin), so a long tab such as History is
-    /// shown whole instead of being clipped at a fixed cap.
+    /// current screen (with a small margin); the cap for an overview or
+    /// tool tab whose content is taller than `DS.totalHeight`.
     static var maxPanelHeight: CGFloat {
         let visible = NSScreen.main?.visibleFrame.height ?? 800
         return max(400, (visible - 24) / DS.panelScale)

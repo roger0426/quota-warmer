@@ -138,13 +138,17 @@ enum DS {
     // MARK: - Layout
     // The panel is laid out at totalWidth × totalHeight then uniformly
     // scaled by panelScale, so this knob shrinks the whole UI proportionally
-    // without any reflow. 0.81 = a 10% more compact panel than the prior 0.90.
-    static let panelScale: CGFloat = 0.81
+    // without any reflow. At 1.0 the type is drawn at its nominal size: body
+    // text 11–12 pt and labels 10 pt, the range macOS uses for menu-bar panels
+    // (system font 13 pt, small 11 pt). The earlier 0.81 drew 10 pt labels at 8 pt.
+    static let panelScale: CGFloat = 1.0
     static let sidebarWidth: CGFloat = 56
     static let contentWidth: CGFloat = 372
     static let totalWidth:   CGFloat = sidebarWidth + contentWidth
-    // Fallback height for tabs that scroll (Settings). The overview and tool tabs measure
-    // their own content and the panel follows it (see `PanelHeightKey`).
+    // The panel height on every tab. History and Settings scroll inside it;
+    // the overview and tool tabs do not scroll, so they report their content
+    // height (see `PanelHeightKey`) and the panel grows only when that content
+    // would not fit.
     static let totalHeight: CGFloat = 462
 
     // MARK: - Page layout

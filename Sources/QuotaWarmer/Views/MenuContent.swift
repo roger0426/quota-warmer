@@ -43,8 +43,8 @@ struct MenuContent: View {
 
     private var appearance: AppearanceMode { AppearanceMode(rawValue: appearanceRaw) ?? .system }
 
-    /// Content-driven height (clamped); Settings and the not-yet-measured first
-    /// frame fall back to the fixed height.
+    /// One height for every tab (`DS.totalHeight`); taller only when the
+    /// overview or a tool tab reports content that would not fit.
     private var panelHeight: CGFloat { AppState.panelHeight(forMeasured: appState.panelContentHeight) }
 
     var body: some View {
@@ -131,6 +131,10 @@ struct MenuContent: View {
         .padding(.bottom, 14)
         .frame(width: DS.sidebarWidth)
         .background(DS.C.sidebar)
+        // Opening the panel puts keyboard focus on the first slot (Home); the
+        // selected slot already has its own highlight, so the system's blue
+        // focus ring is not drawn here. Tab and ⌘1–3 still work.
+        .focusEffectDisabled()
     }
 
     // MARK: - Main content

@@ -72,9 +72,6 @@ struct HistoryTabView: View {
             .padding(.horizontal, DS.Page.side)
             .padding(.top, DS.Page.top)
             .padding(.bottom, DS.Page.bottom)
-            // Size the panel to show every chart; the scroll view only kicks in
-            // when the screen is too short for the whole tab.
-            .reportsPanelHeight()
         }
         .background(DS.C.bg)
         .task(id: loadKey) {
