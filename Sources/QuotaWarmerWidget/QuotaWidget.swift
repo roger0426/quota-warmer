@@ -1,3 +1,4 @@
+import AppIntents
 import SwiftUI
 import WidgetKit
 
@@ -10,7 +11,15 @@ import WidgetKit
 // MARK: - Status file (the fields the widget shows)
 
 struct WidgetStatusFile: Decodable {
+    /// Settings → Warning At; absent in files from older app versions.
+    var warningPercent: Int? = nil
     let providers: [WidgetProvider]
+}
+
+/// What the widget draws from one read of the status file.
+struct WidgetStatus {
+    var providers: [WidgetProvider] = []
+    var warningPercent: Int = RingValue.defaultWarningPercent
 }
 
 struct WidgetProvider: Decodable, Identifiable {
@@ -49,13 +58,57 @@ enum WidgetStatusReader {
             .appendingPathComponent("Library/Application Support/io.github.roger0426.quotawarmer/status.json")
     }
 
-    static func read() -> [WidgetProvider] {
+    static func read() -> WidgetStatus {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         guard let data = try? Data(contentsOf: statusURL),
-              let file = try? decoder.decode(WidgetStatusFile.self, from: data) else { return [] }
-        return file.providers.filter { $0.mode != "off" }
+              let file = try? decoder.decode(WidgetStatusFile.self, from: data) else { return WidgetStatus() }
+        return WidgetStatus(
+            providers: file.providers.filter { $0.mode != "off" },
+            warningPercent: file.warningPercent ?? RingValue.defaultWarningPercent
+        )
     }
+}
+
+// MARK: - Configuration (Edit Widget)
+
+/// Number under each ring (medium widget only).
+enum WidgetNumber: String, AppEnum {
+    case used, remaining, off
+
+    static let typeDisplayRepresentation: TypeDisplayRepresentation = "Number"
+    static let caseDisplayRepresentations: [WidgetNumber: DisplayRepresentation] = [
+        .used: "Used",
+        .remaining: "Remaining",
+        .off: "Off",
+    ]
+}
+
+/// Which quota window the thick outer ring shows; the other goes inside.
+enum WidgetOuterRing: String, AppEnum {
+    case session, weekly
+
+    static let typeDisplayRepresentation: TypeDisplayRepresentation = "Outer Ring"
+    static let caseDisplayRepresentations: [WidgetOuterRing: DisplayRepresentation] = [
+        .session: "5-hour",
+        .weekly: "Weekly",
+    ]
+}
+
+struct QuotaWidgetIntent: WidgetConfigurationIntent {
+    static let title: LocalizedStringResource = "Quota"
+    static let description = IntentDescription("Choose the number, which window is the outer ring, and the time marker.")
+
+    @Parameter(title: "Number", default: .used)
+    var number: WidgetNumber
+
+    @Parameter(title: "Outer Ring", default: .session)
+    var outerRing: WidgetOuterRing
+
+    @Parameter(title: "Time Marker", default: true)
+    var timeMarker: Bool
+
+    init() {}
 }
 
 // MARK: - Timeline
@@ -63,28 +116,34 @@ enum WidgetStatusReader {
 struct QuotaEntry: TimelineEntry {
     let date: Date
     let providers: [WidgetProvider]
+    let warningPercent: Int
+    let configuration: QuotaWidgetIntent
 }
 
-struct QuotaTimelineProvider: TimelineProvider {
+struct QuotaTimelineProvider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> QuotaEntry {
-        QuotaEntry(date: Date(), providers: Self.sample)
+        QuotaEntry(date: Date(), providers: Self.sample, warningPercent: RingValue.defaultWarningPercent,
+                   configuration: QuotaWidgetIntent())
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (QuotaEntry) -> Void) {
-        let providers = WidgetStatusReader.read()
-        completion(QuotaEntry(date: Date(), providers: providers.isEmpty && context.isPreview ? Self.sample : providers))
+    func snapshot(for configuration: QuotaWidgetIntent, in context: Context) async -> QuotaEntry {
+        let file = WidgetStatusReader.read()
+        let providers = file.providers.isEmpty && context.isPreview ? Self.sample : file.providers
+        return QuotaEntry(date: Date(), providers: providers, warningPercent: file.warningPercent,
+                          configuration: configuration)
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<QuotaEntry>) -> Void) {
+    func timeline(for configuration: QuotaWidgetIntent, in context: Context) async -> Timeline<QuotaEntry> {
         // The app asks WidgetKit to reload when a reading changes. Between
         // reloads the same reading is re-drawn every 10 minutes so the time
         // marker keeps moving and a reading that stopped updating turns dim.
         let now = Date()
-        let providers = WidgetStatusReader.read()
+        let file = WidgetStatusReader.read()
         let entries = (0..<12).map { step in
-            QuotaEntry(date: now.addingTimeInterval(Double(step) * 600), providers: providers)
+            QuotaEntry(date: now.addingTimeInterval(Double(step) * 600), providers: file.providers,
+                       warningPercent: file.warningPercent, configuration: configuration)
         }
-        completion(Timeline(entries: entries, policy: .after(now.addingTimeInterval(12 * 600))))
+        return Timeline(entries: entries, policy: .after(now.addingTimeInterval(12 * 600)))
     }
 
     static let sample: [WidgetProvider] = [
@@ -112,11 +171,17 @@ struct RingValue {
     let used: Int?
     /// 0…1 of the window's time that has passed; nil when it is not running.
     let elapsed: Double?
+    /// Fill with what is left (like a battery) instead of what is used.
+    let showsRemaining: Bool
+    /// Used percent at which the ring turns red (Settings → Warning At).
+    let warningPercent: Int
 
-    /// Same threshold as the app's red bar: 80% used.
-    static let criticalUsedPercent = 80
+    /// Matches the app's default warning level.
+    static let defaultWarningPercent = 80
 
-    init(window: WidgetWindow?, duration: TimeInterval, now: Date) {
+    init(window: WidgetWindow?, duration: TimeInterval, now: Date, showsRemaining: Bool, warningPercent: Int) {
+        self.showsRemaining = showsRemaining
+        self.warningPercent = warningPercent
         guard let window, !window.settling else {
             used = nil
             elapsed = nil
@@ -130,10 +195,17 @@ struct RingValue {
         }
     }
 
-    /// Green, like a battery ring; red once the quota is nearly gone.
+    /// The percent the widget shows: used, or what is left.
+    var shown: Int? { used.map { showsRemaining ? 100 - $0 : $0 } }
+
+    /// Ring fill, 0…1.
+    var fraction: Double { Double(shown ?? 0) / 100 }
+
+    /// Two levels, like the app's bars: blue below the warning level, red at
+    /// or above it.
     var color: Color {
         guard let used else { return .secondary }
-        return used >= Self.criticalUsedPercent ? .red : .green
+        return used >= warningPercent ? .red : .blue
     }
 }
 
@@ -142,206 +214,96 @@ private let weeklyDuration: TimeInterval = 7 * 86400
 
 // MARK: - Views
 
-/// Sizes for a gauge drawn in a `size` × `size` square.
-struct GaugeMetrics {
+/// Sizes for a ring drawn in a `size` × `size` square.
+struct RingMetrics {
     let line: CGFloat
+    let innerLine: CGFloat
     let diameter: CGFloat
+    let innerDiameter: CGFloat
     let glyph: CGFloat
 
     init(size: CGFloat) {
-        line = max(3, size * 0.09)
-        // Leave room for the time knob, which is slightly wider than the ring.
-        diameter = size - line * 1.2
-        glyph = max(10, diameter - line * 3.2)
+        // Batteries widget: the ring is about a tenth of its diameter.
+        line = max(3, size * 0.105)
+        diameter = size - line
+        innerLine = max(2, line * 0.45)
+        innerDiameter = diameter - line - innerLine * 1.6
+        glyph = max(10, (innerDiameter - innerLine) * 0.46)
     }
 }
 
-/// One arc of the split ring: the clockwise range `low…high` in screen angles
-/// (degrees, clockwise from 3 o'clock), cut into `segments` equal pieces, and
-/// filled from its left end, which is `low` or `high` depending on the arc.
-struct RingArc {
-    let low: Double
-    let high: Double
-    let segments: Int
-    /// The fill starts at `low` and runs clockwise; otherwise it starts at
-    /// `high` and runs anticlockwise.
-    let fillsClockwise: Bool
-    /// Angle between neighbouring segments.
-    let segmentGap: Double
-
-    var length: Double { high - low }
-
-    /// Angle `fraction` (0…1) of the way along the arc from its left end.
-    func angle(at fraction: Double) -> Double {
-        fillsClockwise ? low + length * fraction : high - length * fraction
-    }
-
-    /// The segments as clockwise `(start, end)` ranges, clipped to `range`.
-    func pieces(within range: ClosedRange<Double>? = nil) -> [(Double, Double)] {
-        let count = max(segments, 1)
-        let piece = (length - segmentGap * Double(count - 1)) / Double(count)
-        return (0..<count).compactMap { index in
-            let start = low + Double(index) * (piece + segmentGap)
-            let end = start + piece
-            let clippedStart = max(start, range?.lowerBound ?? start)
-            let clippedEnd = min(end, range?.upperBound ?? end)
-            return clippedEnd > clippedStart ? (clippedStart, clippedEnd) : nil
-        }
-    }
-
-    /// The part of the arc a `fraction` (0…1) fill covers, as a clockwise range.
-    func filledRange(_ fraction: Double) -> ClosedRange<Double> {
-        let fill = length * fraction
-        return fillsClockwise ? low...(low + fill) : (high - fill)...high
-    }
-}
-
-/// Where the two arcs of the split ring sit. The weekly arc is centred on
-/// 12 o'clock and spans `topSpan` in 7 segments, one per day; the session arc
-/// takes the rest of the circle in 5 segments, one per hour. The segment count
-/// is what tells the two apart, so it still reads when the system drains the
-/// colour (tinted, clear or vibrant widgets). Both fill from their left end
-/// towards the right: the weekly arc clockwise over the top, the session arc
-/// anticlockwise round the bottom.
-struct SplitRing {
-    /// Degrees of the circle given to the weekly arc.
-    static let defaultTopSpan: Double = 120
-
-    let weekly: RingArc
-    let session: RingArc
-
-    init(topSpan: Double, line: CGFloat, diameter: CGFloat) {
-        let radius = Double(diameter) / 2
-        let degrees = { (length: Double) in length / radius * 180 / .pi }
-        // Between the arcs: two cap radii plus a little air. Between the
-        // segments of one arc: a bit less, so the arcs still read as two.
-        let gap = degrees(Double(line) * 1.9)
-        let segmentGap = degrees(Double(line) * 1.35)
-        let leftSplit = 270 - topSpan / 2
-        weekly = RingArc(
-            low: leftSplit + gap / 2, high: leftSplit + topSpan - gap / 2,
-            segments: 7, fillsClockwise: true, segmentGap: segmentGap
-        )
-        session = RingArc(
-            low: leftSplit + topSpan + gap / 2, high: leftSplit + 360 - gap / 2,
-            segments: 5, fillsClockwise: false, segmentGap: segmentGap
-        )
-    }
-}
-
-/// Clockwise pieces of a circle, stroked with round caps.
-struct ArcPieces: View {
-    let pieces: [(Double, Double)]
-    let line: CGFloat
-
-    var body: some View {
-        ZStack {
-            ForEach(pieces.indices, id: \.self) { index in
-                let (start, end) = pieces[index]
-                Circle()
-                    .trim(from: 0, to: (end - start) / 360)
-                    .stroke(style: StrokeStyle(lineWidth: line, lineCap: .round))
-                    .rotationEffect(.degrees(start))
-            }
-        }
-    }
-}
-
-/// Gauge for one account: a single ring split in two. The short arc over the
-/// top is the weekly window (7 day segments), the long arc round the bottom the
-/// session (5h) window (5 hour segments), both as quota used and both filling
-/// left to right. A white dot on each arc marks how far through the window the
-/// clock is, so a fill that runs ahead of its dot means quota is being used
-/// faster than time.
-struct QuotaGauge: View {
+/// Batteries-style gauge for one account: a thick outer ring and a thin
+/// inner ring (5-hour and weekly, in the configured order) around the
+/// provider glyph. A white dot on the outer ring marks how far through that
+/// window the clock is.
+struct QuotaRing: View {
     let provider: WidgetProvider
-    let now: Date
-    var topSpan: Double = SplitRing.defaultTopSpan
-    @Environment(\.colorScheme) private var colorScheme
+    let outer: RingValue
+    let inner: RingValue
+    let showsMarker: Bool
 
-    private var session: RingValue { RingValue(window: provider.session, duration: sessionDuration, now: now) }
-    private var weekly: RingValue { RingValue(window: provider.weekly, duration: weeklyDuration, now: now) }
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         GeometryReader { geo in
-            let metrics = GaugeMetrics(size: min(geo.size.width, geo.size.height))
-            let split = SplitRing(topSpan: topSpan, line: metrics.line, diameter: metrics.diameter)
+            let m = RingMetrics(size: min(geo.size.width, geo.size.height))
             ZStack {
-                SplitRingTracks(split: split, line: metrics.line, opacity: 0.13)
-                arc(weekly, on: split.weekly, metrics: metrics)
-                arc(session, on: split.session, metrics: metrics)
-                glyph
-                    .frame(width: metrics.glyph, height: metrics.glyph)
+                ring(outer, line: m.line, diameter: m.diameter)
+                if showsMarker, let elapsed = outer.elapsed {
+                    let angle = (elapsed * 360 - 90) * .pi / 180
+                    let dot = m.line * 0.64
+                    // White dot; on a light widget a darker outline and a
+                    // soft shadow keep it visible over the pale track.
+                    Circle()
+                        .fill(Color.white)
+                        .overlay(Circle().strokeBorder(Color.black.opacity(colorScheme == .light ? 0.5 : 0.35),
+                                                       lineWidth: colorScheme == .light ? 1 : 0.75))
+                        .shadow(color: .black.opacity(colorScheme == .light ? 0.35 : 0.25), radius: 1, y: 0.5)
+                        .frame(width: dot, height: dot)
+                        .offset(x: m.diameter / 2 * cos(angle), y: m.diameter / 2 * sin(angle))
+                }
+                ring(inner, line: m.innerLine, diameter: m.innerDiameter)
+                glyph.frame(width: m.glyph, height: m.glyph)
             }
-            .frame(width: metrics.diameter, height: metrics.diameter)
             .frame(width: geo.size.width, height: geo.size.height)
         }
         .aspectRatio(1, contentMode: .fit)
     }
 
-    /// The used fill and the time knob of one arc.
-    private func arc(_ value: RingValue, on arc: RingArc, metrics: GaugeMetrics) -> some View {
-        let radius = metrics.diameter / 2
-        let line = metrics.line
-        return ZStack {
-            if let used = value.used, used > 0 {
-                ArcPieces(pieces: arc.pieces(within: arc.filledRange(Double(used) / 100)), line: line)
-                    .foregroundStyle(value.color)
-                    // In tinted / clear widgets the fill takes the accent tint
-                    // and the tracks stay in the primary group.
+    private func ring(_ value: RingValue, line: CGFloat, diameter: CGFloat) -> some View {
+        ZStack {
+            Circle()
+                .stroke(Color.primary.opacity(0.12), lineWidth: line)
+            if value.fraction > 0 {
+                Circle()
+                    .trim(from: 0, to: value.fraction)
+                    .stroke(value.color, style: StrokeStyle(lineWidth: line, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    // In tinted / clear widgets the fill takes the accent tint.
                     .widgetAccentable()
             }
-            if let elapsed = value.elapsed {
-                let angle = arc.angle(at: elapsed) * .pi / 180
-                // A knob a little wider than the ring, with a dark rim so it
-                // reads on the track and on a green or red fill alike. On a
-                // light background the white knob needs a heavier rim.
-                let light = colorScheme == .light
-                Circle()
-                    .fill(Color.white)
-                    .overlay(Circle().stroke(
-                        Color.black.opacity(light ? 0.85 : 0.55),
-                        lineWidth: light ? max(1.2, line * 0.26) : max(0.75, line * 0.14)
-                    ))
-                    .frame(width: line * 1.05, height: line * 1.05)
-                    .offset(x: radius * cos(angle), y: radius * sin(angle))
-            }
         }
-        .frame(width: metrics.diameter, height: metrics.diameter)
+        .frame(width: diameter, height: diameter)
     }
 
-    /// The provider glyph, with the account's initial in its centre.
+    /// The provider glyph, with the account's initial as a corner badge.
     private var glyph: some View {
         Image(provider.tool == "claude" ? "ClaudeCode" : "Codex")
             .resizable()
             .renderingMode(.template)
             .scaledToFit()
             .foregroundStyle(.primary)
-            .overlay {
+            .overlay(alignment: .bottomTrailing) {
                 if let badge = provider.badge {
                     Text(badge)
-                        .font(.system(size: 9, weight: .heavy, design: .rounded))
+                        .font(.system(size: 8, weight: .heavy, design: .rounded))
                         .foregroundStyle(.background)
-                        .frame(minWidth: 13, minHeight: 13)
+                        .frame(minWidth: 11, minHeight: 11)
                         .background(Color.primary, in: Circle())
-                        .overlay(Circle().stroke(.background, lineWidth: 1.5))
+                        .overlay(Circle().stroke(.background, lineWidth: 1.2))
+                        .offset(x: 4, y: 4)
                 }
             }
-    }
-}
-
-/// The empty, segmented tracks of a split ring.
-struct SplitRingTracks: View {
-    let split: SplitRing
-    let line: CGFloat
-    let opacity: Double
-
-    var body: some View {
-        ZStack {
-            ArcPieces(pieces: split.weekly.pieces(), line: line)
-            ArcPieces(pieces: split.session.pieces(), line: line)
-        }
-        .foregroundStyle(Color.primary.opacity(opacity))
     }
 }
 
@@ -359,40 +321,66 @@ extension WidgetProvider {
     }
 }
 
-/// One account's gauge. No text: like the Batteries widget's rings, the fill,
-/// its colour and the glyph carry everything; VoiceOver gets the numbers.
+/// Number under a ring, like the Batteries widget: semibold value, smaller
+/// "%". Plain text colour; only the ring carries blue / red.
+private func percentLabel(_ value: String, unit: Bool = true) -> some View {
+    (Text(verbatim: value).font(.system(size: 15, weight: .semibold, design: .rounded))
+        + Text(verbatim: unit ? "%" : "").font(.system(size: 11, weight: .semibold, design: .rounded)))
+        .monospacedDigit()
+        .foregroundStyle(.primary)
+        .lineLimit(1)
+        .minimumScaleFactor(0.7)
+}
+
+/// One account: two rings, plus the outer ring's number when shown.
 struct QuotaCell: View {
     let provider: WidgetProvider
     let now: Date
+    let warningPercent: Int
+    let configuration: QuotaWidgetIntent
+    let showsNumber: Bool
 
     var body: some View {
-        let session = RingValue(window: provider.session, duration: sessionDuration, now: now)
-        let weekly = RingValue(window: provider.weekly, duration: weeklyDuration, now: now)
-        let sessionText = session.used.map { "\($0)%" } ?? "–"
-        let weeklyText = weekly.used.map { "\($0)%" } ?? "–"
-        QuotaGauge(provider: provider, now: now)
-            .opacity(provider.isStale(at: now) ? 0.45 : 1)
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(Text("\(provider.name): session \(sessionText) used, week \(weeklyText) used"))
+        let remaining = configuration.number == .remaining
+        let session = RingValue(window: provider.session, duration: sessionDuration, now: now,
+                                showsRemaining: remaining, warningPercent: warningPercent)
+        let weekly = RingValue(window: provider.weekly, duration: weeklyDuration, now: now,
+                               showsRemaining: remaining, warningPercent: warningPercent)
+        let weeklyOuter = configuration.outerRing == .weekly
+        let outer = weeklyOuter ? weekly : session
+        let verb = remaining ? "left" : "used"
+        let sessionText = session.shown.map { "\($0)%" } ?? "–"
+        let weeklyText = weekly.shown.map { "\($0)%" } ?? "–"
+        VStack(spacing: 4) {
+            QuotaRing(provider: provider, outer: outer, inner: weeklyOuter ? session : weekly,
+                      showsMarker: configuration.timeMarker)
+            if showsNumber {
+                percentLabel(outer.shown.map(String.init) ?? "–", unit: outer.shown != nil)
+            }
+        }
+        .opacity(provider.isStale(at: now) ? 0.45 : 1)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("\(provider.name): session \(sessionText) \(verb), week \(weeklyText) \(verb)"))
     }
 }
 
-/// Empty slot: the two tracks only, as the Batteries widget draws an unused ring.
+/// Empty slot: a grey ring only, as the Batteries widget draws an unused one.
 struct EmptyGauge: View {
-    var topSpan: Double = SplitRing.defaultTopSpan
+    let showsNumber: Bool
 
     var body: some View {
-        GeometryReader { geo in
-            let metrics = GaugeMetrics(size: min(geo.size.width, geo.size.height))
-            SplitRingTracks(
-                split: SplitRing(topSpan: topSpan, line: metrics.line, diameter: metrics.diameter),
-                line: metrics.line,
-                opacity: 0.08
-            )
-            .frame(width: metrics.diameter, height: metrics.diameter)
-            .frame(width: geo.size.width, height: geo.size.height)
+        VStack(spacing: 4) {
+            GeometryReader { geo in
+                let m = RingMetrics(size: min(geo.size.width, geo.size.height))
+                Circle()
+                    .stroke(Color.primary.opacity(0.1), lineWidth: m.line)
+                    .frame(width: m.diameter, height: m.diameter)
+                    .frame(width: geo.size.width, height: geo.size.height)
+            }
+            .aspectRatio(1, contentMode: .fit)
+            // Keeps the ring the same size as a filled slot's.
+            if showsNumber { percentLabel("–").hidden() }
         }
-        .aspectRatio(1, contentMode: .fit)
         .accessibilityHidden(true)
     }
 }
@@ -400,6 +388,11 @@ struct EmptyGauge: View {
 struct QuotaWidgetView: View {
     @Environment(\.widgetFamily) private var family
     let entry: QuotaEntry
+
+    /// Small widget: rings only, like Batteries. Medium: numbers unless Off.
+    private var showsNumber: Bool {
+        family == .systemMedium && entry.configuration.number != .off
+    }
 
     var body: some View {
         Group {
@@ -414,26 +407,29 @@ struct QuotaWidgetView: View {
                 .foregroundStyle(.secondary)
             } else if family == .systemMedium {
                 // One row of four slots.
-                HStack(spacing: 12) {
+                HStack(spacing: 16) {
                     ForEach(0..<4, id: \.self) { index in slot(index) }
                 }
             } else {
-                // 2 × 2 slots.
+                // 2 × 2 rings filling the tile.
                 VStack(spacing: 10) {
                     HStack(spacing: 10) { slot(0); slot(1) }
                     HStack(spacing: 10) { slot(2); slot(3) }
                 }
             }
         }
+        // The system's widget background: on macOS 26 it renders as the
+        // translucent glass the Batteries widget uses.
         .containerBackground(.fill.tertiary, for: .widget)
     }
 
     @ViewBuilder
     private func slot(_ index: Int) -> some View {
         if index < entry.providers.count {
-            QuotaCell(provider: entry.providers[index], now: entry.date)
+            QuotaCell(provider: entry.providers[index], now: entry.date, warningPercent: entry.warningPercent,
+                      configuration: entry.configuration, showsNumber: showsNumber)
         } else {
-            EmptyGauge()
+            EmptyGauge(showsNumber: showsNumber)
         }
     }
 }
@@ -445,11 +441,11 @@ struct QuotaWarmerWidget: Widget {
     static let kind = "io.github.roger0426.quotawarmer.widget.quota"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: Self.kind, provider: QuotaTimelineProvider()) { entry in
+        AppIntentConfiguration(kind: Self.kind, intent: QuotaWidgetIntent.self, provider: QuotaTimelineProvider()) { entry in
             QuotaWidgetView(entry: entry)
         }
         .configurationDisplayName("Quota")
-        .description("Quota used per account: week on the top arc (7 days), session on the bottom arc (5 hours), both filling left to right. The white dot is the time elapsed.")
+        .description("Quota per account: a thick outer ring and a thin inner ring for the 5-hour and weekly windows. Blue turns red at the warning level; the white dot is the time elapsed in the outer window.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
