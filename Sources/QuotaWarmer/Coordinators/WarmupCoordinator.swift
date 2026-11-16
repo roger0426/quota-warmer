@@ -138,6 +138,9 @@ final class WarmupCoordinator {
                     detail += " · \(tokens) tokens"
                 }
             }
+            if let rejected = result.rejectedModel {
+                detail += " · the chosen model \(rejected) was rejected, so the default was used"
+            }
             host.events.addHistory(
                 tool: tool,
                 kind: historyKind(forWarmupMode: mode),

@@ -35,6 +35,9 @@ struct WarmupResult {
     let output: String
     /// Tokens the CLI reported for this run; nil when it reported none.
     var tokens: Int? = nil
+    /// The user's chosen model when the CLI rejected it and a catalog model
+    /// was used instead.
+    var rejectedModel: String? = nil
 }
 
 enum CLIAuthenticationStatus: Equatable {
@@ -90,7 +93,8 @@ class WarmupRunner {
                 instructionsFile = url.path
             }
         }
-        return try await Self.runCatalogWarmup(store: .shared(for: tool)) { model in
+        let preferred = AppSettings.shared.warmupModel(provider.storageKey)
+        return try await Self.runCatalogWarmup(store: .shared(for: tool), preferred: preferred) { model in
             try await self.runWithOptionFallback(
                 primary: envPrefix + tool.warmupCommand(model: model, instructionsFile: instructionsFile),
                 fallback: tool.legacyWarmupCommand(model: model).map { envPrefix + $0 },
@@ -106,18 +110,34 @@ class WarmupRunner {
     /// rejects moves on to the next one; the first rejection also refreshes the
     /// catalog early, so a model list published after a retirement is used in
     /// the same warm-up. Any other failure is thrown as-is (no extra requests).
+    ///
+    /// `preferred` is the model the user picked for the account. It is tried
+    /// first; if it is rejected the catalog models follow, and the result
+    /// names the rejected model so History can show it.
     static func runCatalogWarmup(
         store: ModelCatalogStore,
+        preferred: String? = nil,
         run: (String) async throws -> WarmupResult
     ) async throws -> WarmupResult {
         var tried: [String] = []
         var refreshedCatalog = false
+        var rejectedPreferred: String?
+        if let preferred, ModelCatalog.isSafeWarmupModel(preferred) {
+            tried.append(preferred)
+            do {
+                return try await run(preferred)
+            } catch WarmupError.invalidModel(let rejected, _) {
+                DiagnosticLogger.append("warmup_model_invalid tool=\(store.tool.rawValue) model=\(rejected) source=user")
+                rejectedPreferred = preferred
+            }
+        }
         while let model = store.warmupModels.first(where: { !tried.contains($0) }) {
             tried.append(model)
             guard ModelCatalog.isSafeWarmupModel(model) else { continue }
             do {
-                let result = try await run(model)
+                var result = try await run(model)
                 store.rememberWorkingWarmupModel(model)
+                result.rejectedModel = rejectedPreferred
                 return result
             } catch WarmupError.invalidModel(let rejected, _) {
                 DiagnosticLogger.append("warmup_model_invalid tool=\(store.tool.rawValue) model=\(rejected) catalog=\(store.summary)")

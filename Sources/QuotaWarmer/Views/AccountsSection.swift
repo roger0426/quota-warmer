@@ -36,17 +36,20 @@ struct AccountsSection: View {
     }
 
     private func defaultRow(_ kind: ToolID) -> some View {
-        HStack(spacing: DS.Space.sm) {
-            AccountGlyph(tool: .default(kind))
-            VStack(alignment: .leading, spacing: 1) {
-                Text(kind.shortName)
-                    .font(.system(size: 11.5, weight: .medium))
-                    .foregroundStyle(DS.C.text)
-                Text(kind == .claude ? "~/.claude · default" : "~/.codex · default")
-                    .font(.system(size: 9.5))
-                    .foregroundStyle(DS.C.textMuted)
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: DS.Space.sm) {
+                AccountGlyph(tool: .default(kind))
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(kind.shortName)
+                        .font(.system(size: 11.5, weight: .medium))
+                        .foregroundStyle(DS.C.text)
+                    Text(kind == .claude ? "~/.claude · default" : "~/.codex · default")
+                        .font(.system(size: 9.5))
+                        .foregroundStyle(DS.C.textMuted)
+                }
+                Spacer()
             }
-            Spacer()
+            WarmupModelControl(tool: .default(kind))
         }
         .padding(.horizontal, DS.Space.md)
         .padding(.vertical, DS.Space.sm - 1)
@@ -166,6 +169,108 @@ struct AccountsSection: View {
     }
 }
 
+/// Picks the model one account's warm-ups use: the built-in default, a priced
+/// model from the catalog bundled with the app, or a model id typed by the
+/// user. The value is stored per account (`AppSettings.Key.warmupModel`) and
+/// read by `WarmupRunner`, which validates it again before building a command.
+private struct WarmupModelControl: View {
+    let tool: ProviderID
+    @AppStorage private var stored: String
+    @State private var editingCustom = false
+    @State private var draft = ""
+    @State private var invalid = false
+
+    init(tool: ProviderID) {
+        self.tool = tool
+        _stored = AppStorage(wrappedValue: "", AppSettings.Key.warmupModel(tool.storageKey))
+    }
+
+    /// Catalog models as `--model` values, cheapest input price first.
+    private struct Choice: Identifiable {
+        let model: String
+        let label: String
+        var id: String { model }
+    }
+
+    private var choices: [Choice] {
+        let models = ModelCatalogStore.shared(for: tool.kind).catalog?.models ?? []
+        return models.sorted { $0.input < $1.input }.compactMap { entry -> Choice? in
+            let model = tool.kind == .claude ? "claude-\(entry.id)" : entry.id
+            guard ModelCatalog.isSafeWarmupModel(model) else { return nil }
+            return Choice(
+                model: model,
+                label: "\(entry.name ?? entry.id) · \(Self.price(entry.input)) / \(Self.price(entry.output))"
+            )
+        }
+    }
+
+    private static func price(_ value: Double) -> String {
+        String(format: "$%g", locale: Locale(identifier: "en_US_POSIX"), value)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Spacer().frame(width: 28)
+                Text("Warm-up model")
+                    .font(.system(size: 10.5, weight: .medium))
+                    .foregroundStyle(DS.C.textSub)
+                Spacer(minLength: 4)
+                Menu {
+                    Button { select("") } label: { Text("Default (\(tool.kind.defaultWarmupModel))") }
+                    Divider()
+                    ForEach(choices) { choice in
+                        Button(choice.label) { select(choice.model) }
+                    }
+                    Divider()
+                    Button("Custom…") {
+                        draft = stored
+                        invalid = false
+                        editingCustom = true
+                    }
+                } label: {
+                    if stored.isEmpty {
+                        Text("Default (\(tool.kind.defaultWarmupModel))")
+                    } else {
+                        Text(verbatim: stored)
+                    }
+                }
+                .font(.system(size: 10.5))
+                .fixedSize()
+                .help("Model used for this account's warm-ups. Prices are USD per million tokens, input / output. If the CLI rejects the model, the default is used and History says so.")
+            }
+            if editingCustom {
+                HStack(spacing: 6) {
+                    Spacer().frame(width: 28)
+                    DSTextField(placeholder: "Model id", text: $draft, onSubmit: commitCustom)
+                    SmallButton(title: "Save", systemImage: nil) { commitCustom() }
+                    SmallButton(title: "Cancel", systemImage: nil) { editingCustom = false }
+                }
+                if invalid {
+                    Text("Use lowercase letters, digits, dots and dashes.")
+                        .font(.system(size: 10))
+                        .foregroundStyle(DS.C.red)
+                        .padding(.leading, 34)
+                }
+            }
+        }
+    }
+
+    private func select(_ model: String) {
+        stored = model
+        editingCustom = false
+    }
+
+    private func commitCustom() {
+        let model = draft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard model.isEmpty || ModelCatalog.isSafeWarmupModel(model) else {
+            invalid = true
+            return
+        }
+        select(model)
+    }
+}
+
 /// One added account: name, folder, sign-in state and actions.
 private struct AccountRow: View {
     @EnvironmentObject var appState: AppState
@@ -236,6 +341,7 @@ private struct AccountRow: View {
                     }
                 }
             }
+            WarmupModelControl(tool: tool)
         }
         .padding(.horizontal, DS.Space.md)
         .padding(.vertical, DS.Space.sm)

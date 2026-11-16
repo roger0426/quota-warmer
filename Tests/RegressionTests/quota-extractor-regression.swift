@@ -1775,6 +1775,47 @@ access_token=private-value
                 "\(tool): a new catalog revision should reset the remembered model to the catalog's order"
             )
 
+            // The user's model goes first; a rejected one falls back to the
+            // catalog and is named in the result.
+            let userStore = isolatedCatalogStore(tool, catalog(tool, revision: 2, warmupModels: [fallback]))
+            tried = []
+            do {
+                let chosen = try await WarmupRunner.runCatalogWarmup(store: userStore, preferred: "my-model") { model in
+                    tried.append(model)
+                    return succeed(tool, model)
+                }
+                require(tried == ["my-model"], "\(tool): the user's warm-up model should be the only one tried when it works")
+                require(chosen.rejectedModel == nil, "\(tool): an accepted user model is not reported as rejected")
+                tried = []
+                let fellBack = try await WarmupRunner.runCatalogWarmup(store: userStore, preferred: "my-model") { model in
+                    tried.append(model)
+                    if model == "my-model" { throw WarmupError.invalidModel(model, "gone") }
+                    return succeed(tool, model)
+                }
+                require(tried == ["my-model", fallback], "\(tool): a rejected user model should fall back to the catalog")
+                require(fellBack.rejectedModel == "my-model", "\(tool): the rejected user model should be reported")
+                tried = []
+                _ = try await WarmupRunner.runCatalogWarmup(store: userStore, preferred: "bad model; rm") { model in
+                    tried.append(model)
+                    return succeed(tool, model)
+                }
+                require(tried == [fallback], "\(tool): an unsafe user model name must never reach the command")
+            } catch {
+                fatalError("\(tool) user warm-up model: \(error)")
+            }
+            tried = []
+            do {
+                _ = try await WarmupRunner.runCatalogWarmup(store: userStore, preferred: "my-model") { model in
+                    tried.append(model)
+                    throw WarmupError.exitCode(1, "API Error: 529 overloaded")
+                }
+                fatalError("A non-model failure of the user's model should be thrown")
+            } catch WarmupError.exitCode {
+                require(tried == ["my-model"], "\(tool): only a rejected user model may fall back")
+            } catch {
+                fatalError("Unexpected warm-up error: \(error)")
+            }
+
             // Any other failure must not spend a second request on another model.
             let failingStore = isolatedCatalogStore(tool, catalog(tool, revision: 2, warmupModels: [fallback, "second-model"]))
             tried = []

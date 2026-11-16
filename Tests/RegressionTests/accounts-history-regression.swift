@@ -78,6 +78,7 @@ struct AccountsHistoryRegression {
             (K.lastAutoWarmEndsAt("claude"), "lastAutoWarmEndsAt.claude"),
             (K.confirmedWarmupResetAt("claude"), "confirmedWarmupResetAt.claude"),
             (K.lastMorningWarmDay("claude"), "lastMorningWarmDay.claude"),
+            (K.warmupModel("claude.work"), "warmupModel.claude.work"),
         ]
         for (actual, expected) in pinned { expect(actual, expected, "settings key \(expected)") }
 

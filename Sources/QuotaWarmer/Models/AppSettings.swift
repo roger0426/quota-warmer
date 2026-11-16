@@ -84,6 +84,7 @@ struct AppSettings: @unchecked Sendable {
         static func lastAutoWarmEndsAt(_ suffix: String) -> String { "lastAutoWarmEndsAt.\(suffix)" }
         static func confirmedWarmupResetAt(_ suffix: String) -> String { "confirmedWarmupResetAt.\(suffix)" }
         static func lastMorningWarmDay(_ suffix: String) -> String { "lastMorningWarmDay.\(suffix)" }
+        static func warmupModel(_ suffix: String) -> String { "warmupModel.\(suffix)" }
     }
 
     // MARK: Defaults
@@ -151,6 +152,15 @@ struct AppSettings: @unchecked Sendable {
         defaults.set(day, forKey: Key.lastMorningWarmDay(suffix))
     }
     var lastMorningWarmDayLegacy: String? { defaults.string(forKey: Key.lastMorningWarmDayLegacy) }
+
+    // MARK: Warm-up model
+
+    /// The `--model` the user picked for this account's warm-ups; nil means
+    /// the catalog's own order. Callers validate it before use.
+    func warmupModel(_ suffix: String) -> String? {
+        guard let model = defaults.string(forKey: Key.warmupModel(suffix)), !model.isEmpty else { return nil }
+        return model
+    }
 
     // MARK: Onboarding
 

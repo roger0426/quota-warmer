@@ -2625,6 +2625,22 @@
         }
       }
     },
+    "Custom…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Özel…"
+          }
+        }
+      }
+    },
     "DISPLAY": {
       "localizations": {
         "en": {
@@ -2701,6 +2717,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hata ayıklama düzeyi"
+          }
+        }
+      }
+    },
+    "Default (%@)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default (%@)"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varsayılan (%@)"
           }
         }
       }
@@ -3933,6 +3965,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mod: %@. Kapalı → İzleme → Otomatik ısıtma arasında geçmek için tıklayın."
+          }
+        }
+      }
+    },
+    "Model id": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model id"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model kimliği"
+          }
+        }
+      }
+    },
+    "Model used for this account's warm-ups. Prices are USD per million tokens, input / output. If the CLI rejects the model, the default is used and History says so.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model used for this account's warm-ups. Prices are USD per million tokens, input / output. If the CLI rejects the model, the default is used and History says so."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu hesabın ısıtmalarında kullanılan model. Fiyatlar milyon token başına ABD doları, girdi / çıktı. CLI modeli reddederse varsayılan kullanılır ve Geçmiş bunu belirtir."
           }
         }
       }
@@ -7329,6 +7393,22 @@
         }
       }
     },
+    "Use lowercase letters, digits, dots and dashes.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use lowercase letters, digits, dots and dashes."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Küçük harf, rakam, nokta ve tire kullanın."
+          }
+        }
+      }
+    },
     "Use this banked reset (asks to confirm)": {
       "localizations": {
         "en": {
@@ -7613,6 +7693,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Isıtma başarısız: %@"
+          }
+        }
+      }
+    },
+    "Warm-up model": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warm-up model"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isıtma modeli"
           }
         }
       }
