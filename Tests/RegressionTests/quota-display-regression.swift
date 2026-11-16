@@ -279,7 +279,7 @@ struct QuotaDisplayRegression {
         defer { defaults.removePersistentDomain(forName: suite) }
         expect(AppLanguage.stored(defaults: defaults, domain: suite), .system, "language defaults to system")
         expect(AppLanguage.stored(defaults: defaults, domain: nil), .system, "no bundle id reads as system")
-        for language in [AppLanguage.english, .turkish] {
+        for language in [AppLanguage.english, .turkish, .traditionalChinese] {
             language.store(defaults: defaults)
             expect(defaults.persistentDomain(forName: suite)?[AppLanguage.defaultsKey] as? [String], [language.rawValue],
                    "\(language) is stored as the per-app AppleLanguages list")
@@ -288,7 +288,9 @@ struct QuotaDisplayRegression {
         AppLanguage.system.store(defaults: defaults)
         check(defaults.persistentDomain(forName: suite)?[AppLanguage.defaultsKey] == nil, "System removes the per-app override")
         expect(AppLanguage.stored(defaults: defaults, domain: suite), .system, "and reads back as system")
-        for (stored, expected) in [("tr-TR", AppLanguage.turkish), ("en_GB", .english), ("TR", .turkish), ("de", .system)] {
+        for (stored, expected) in [("tr-TR", AppLanguage.turkish), ("en_GB", .english), ("TR", .turkish), ("de", .system),
+                                   ("zh-Hant", .traditionalChinese), ("zh-TW", .traditionalChinese), ("zh_Hant_HK", .traditionalChinese),
+                                   ("zh-Hans", .system), ("zh-CN", .system)] {
             defaults.set([stored, "en"], forKey: AppLanguage.defaultsKey)
             expect(AppLanguage.stored(defaults: defaults, domain: suite), expected, "a list starting with \(stored) reads as \(expected)")
         }

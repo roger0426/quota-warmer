@@ -27,6 +27,7 @@ targets:
         CFBundleLocalizations:
           - en
           - tr
+          - zh-Hant
         LSUIElement: true
         CFBundleURLTypes:
           - CFBundleURLName: io.github.roger0426.quotawarmer

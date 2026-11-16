@@ -14,6 +14,12 @@
             "state": "translated",
             "value": " (%@ okuma)"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " （%@ 讀數）"
+          }
         }
       }
     },
@@ -29,6 +35,12 @@
           "stringUnit": {
             "state": "translated",
             "value": " (%@ sıfırlanır)"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " （%@ 重置）"
           }
         }
       }
@@ -46,6 +58,12 @@
             "state": "translated",
             "value": " Her hesap çubukta ayrı bir bölüm olarak gösterilir."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " 每個帳號是長條中的一段。"
+          }
         }
       }
     },
@@ -61,6 +79,12 @@
           "stringUnit": {
             "state": "translated",
             "value": " Turuncu Claude, mavi Codex’tir; ikisinin de kullandığı (hiçbirinin token’larının %80’ini aşmadığı) kare mor renktedir."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " 橘色是 Claude、藍色是 Codex；兩者都用到（且都未超過自身 token 的 80%）的格子為紫色。"
           }
         }
       }
@@ -78,6 +102,12 @@
             "state": "translated",
             "value": " tüm hesaplarda"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " 所有帳號合計"
+          }
         }
       }
     },
@@ -94,6 +124,12 @@
             "state": "translated",
             "value": " · tahmini"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " · 估計"
+          }
         }
       }
     },
@@ -106,6 +142,12 @@
           }
         },
         "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@"
+          }
+        },
+        "zh-Hant": {
           "stringUnit": {
             "state": "translated",
             "value": "%@"
@@ -126,6 +168,12 @@
             "state": "translated",
             "value": "%@ %%%lld kullanıldı, %%%lld kaldı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 已用 %lld%%，剩餘 %lld%%"
+          }
         }
       }
     },
@@ -141,6 +189,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ %lld:00 · %@ token"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %lld:00 · %@ tokens"
           }
         }
       }
@@ -158,6 +212,12 @@
             "state": "translated",
             "value": "%@ %lld:00 · %@ token (son 30 gün)"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %lld:00 · 30 天共 %@ tokens"
+          }
         }
       }
     },
@@ -173,6 +233,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ - %%%lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ - %lld%%"
           }
         }
       }
@@ -190,6 +256,12 @@
             "state": "translated",
             "value": "%@ 5 saatlik pencere"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 5 小時時段"
+          }
         }
       }
     },
@@ -205,6 +277,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ 5 saatlik pencere ısıtması gönderildi"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 已送出 5 小時時段預熱"
           }
         }
       }
@@ -222,6 +300,12 @@
             "state": "translated",
             "value": "%@ artık %@."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 現在是%@。"
+          }
         }
       }
     },
@@ -237,6 +321,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ yeni sıfırlandı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 剛重置"
           }
         }
       }
@@ -254,6 +344,12 @@
             "state": "translated",
             "value": "%@ modu"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@模式"
+          }
         }
       }
     },
@@ -269,6 +365,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ için oturum açmak gerekiyor. Ayarlar › Hesaplar bölümünden Oturum aç’ı kullanın, ardından Yenile’ye basın."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 需要登入。請在「設定 › 帳號」中登入，再重新整理。"
           }
         }
       }
@@ -286,6 +388,12 @@
             "state": "translated",
             "value": "%@ başlamadı (%%100 kaldı)"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 尚未開始（剩餘 100%%）"
+          }
         }
       }
     },
@@ -298,6 +406,12 @@
           }
         },
         "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ / %lld"
+          }
+        },
+        "zh-Hant": {
           "stringUnit": {
             "state": "translated",
             "value": "%@ / %lld"
@@ -318,6 +432,12 @@
             "state": "translated",
             "value": "%@ QuotaWarmer’ı açar"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 開啟 QuotaWarmer"
+          }
         }
       }
     },
@@ -333,6 +453,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ kotası kalan yüzde olarak gösteriliyor. Kullanılan yüzdeyi göstermek için etkinleştirin."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 額度以剩餘百分比顯示。啟用以改為顯示已用百分比。"
           }
         }
       }
@@ -350,6 +476,12 @@
             "state": "translated",
             "value": "%@ kotası kullanılan yüzde olarak gösteriliyor. Kalan yüzdeyi göstermek için etkinleştirin."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 額度以已用百分比顯示。啟用以改為顯示剩餘百分比。"
+          }
         }
       }
     },
@@ -365,6 +497,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ token"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ tokens"
           }
         }
       }
@@ -382,6 +520,12 @@
             "state": "translated",
             "value": "%@ haftalık pencere"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 每週時段"
+          }
         }
       }
     },
@@ -397,6 +541,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ · %@ token"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@ tokens"
           }
         }
       }
@@ -414,6 +564,12 @@
             "state": "translated",
             "value": "%@ — 5 saatlik kotanın %%%lld’i kullanıldı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — 5 小時額度已用 %lld%%"
+          }
         }
       }
     },
@@ -429,6 +585,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ — haftalık kotanın %%%lld’i kullanıldı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — 每週額度已用 %lld%%"
           }
         }
       }
@@ -446,6 +608,12 @@
             "state": "translated",
             "value": "%@ — bu hızda tükenecek"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — 照目前速度將會用完"
+          }
         }
       }
     },
@@ -461,6 +629,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ — pencere yakında sona eriyor"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — 時段即將結束"
           }
         }
       }
@@ -478,6 +652,12 @@
             "state": "translated",
             "value": "%@ — pencere başladı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — 時段已開始"
+          }
         }
       }
     },
@@ -493,6 +673,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ — yeni kontrol bekleniyor"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — 等待新的檢查"
           }
         }
       }
@@ -510,6 +696,12 @@
             "state": "translated",
             "value": "%@, bu yüzden kota kontrol edilemez ya da ısıtılamaz."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@，因此無法檢查額度或預熱。"
+          }
         }
       }
     },
@@ -525,6 +717,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@: %@%@."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@：%@%@。"
           }
         }
       }
@@ -542,6 +740,12 @@
             "state": "translated",
             "value": "%@: henüz kota okuması yok."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@：尚無額度讀數。"
+          }
         }
       }
     },
@@ -557,6 +761,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ mlr token"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@B tokens"
           }
         }
       }
@@ -574,6 +784,12 @@
             "state": "translated",
             "value": "%@ bin token"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@K tokens"
+          }
         }
       }
     },
@@ -590,6 +806,12 @@
             "state": "translated",
             "value": "%@ mn token"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@M tokens"
+          }
         }
       }
     },
@@ -602,6 +824,12 @@
           }
         },
         "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld"
+          }
+        },
+        "zh-Hant": {
           "stringUnit": {
             "state": "translated",
             "value": "%lld"
@@ -622,6 +850,12 @@
             "state": "translated",
             "value": "%lld otomatik"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 自動"
+          }
         }
       }
     },
@@ -637,6 +871,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld kullanılabilir"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 可用"
           }
         }
       }
@@ -654,6 +894,12 @@
             "state": "translated",
             "value": "%lld önceki"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更早 %lld 筆"
+          }
         }
       }
     },
@@ -669,6 +915,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld elle"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 手動"
           }
         }
       }
@@ -686,6 +938,12 @@
             "state": "translated",
             "value": "%lld sabah"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 早晨"
+          }
         }
       }
     },
@@ -698,6 +956,12 @@
           }
         },
         "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / %lld"
+          }
+        },
+        "zh-Hant": {
           "stringUnit": {
             "state": "translated",
             "value": "%lld / %lld"
@@ -718,6 +982,12 @@
             "state": "translated",
             "value": "%lld kısayol"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 捷徑"
+          }
         }
       }
     },
@@ -733,6 +1003,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld ısıtma × yaklaşık 15 bin girdi ve 100 çıktı token’ı, kullanılan modelin katalog fiyatıyla. Bu bir tahmindir, fatura verisi değildir; \"fiyatsız\", modelin henüz fiyat kataloğunda olmadığı anlamına gelir."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 次預熱 × 約 15K 輸入與 100 輸出 tokens，依所用模型的目錄價格計算。這是估計值，不是帳單資料；「unpriced」表示該模型尚未列入價格目錄。"
           }
         }
       }
@@ -750,6 +1026,12 @@
             "state": "translated",
             "value": "%lld pencere (bu aralıkta)"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "範圍內 %lld 個時段"
+          }
         }
       }
     },
@@ -765,6 +1047,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%%%lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld%%"
           }
         }
       }
@@ -782,6 +1070,12 @@
             "state": "translated",
             "value": "%%%lld (son bilinen)"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最後已知 %lld%%"
+          }
         }
       }
     },
@@ -797,6 +1091,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%%%lld kaldı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剩餘 %lld%%"
           }
         }
       }
@@ -814,6 +1114,12 @@
             "state": "translated",
             "value": "%%%lld kaldı, %@ sonra sıfırlanır."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剩餘 %lld%%，%@ 後重置。"
+          }
         }
       }
     },
@@ -829,6 +1135,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%%%lld geride"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不足 %lld%%"
           }
         }
       }
@@ -846,6 +1158,12 @@
             "state": "translated",
             "value": "%%%lld kullanıldı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已用 %lld%%"
+          }
         }
       }
     },
@@ -861,6 +1179,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lldg %lldsa"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lldd %lldh"
           }
         }
       }
@@ -878,6 +1202,12 @@
             "state": "translated",
             "value": "%lldg%lldsa"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lldd%lldh"
+          }
         }
       }
     },
@@ -893,6 +1223,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld sa"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lldh"
           }
         }
       }
@@ -910,6 +1246,12 @@
             "state": "translated",
             "value": "%lld sa %lld dk"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lldh %lldm"
+          }
         }
       }
     },
@@ -925,6 +1267,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lldsa%@dk"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lldh%@m"
           }
         }
       }
@@ -942,6 +1290,12 @@
             "state": "translated",
             "value": "%lld dk"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lldm"
+          }
         }
       }
     },
@@ -957,6 +1311,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld sn"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%llds"
           }
         }
       }
@@ -974,6 +1334,12 @@
             "state": "translated",
             "value": "-- kaldı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剩餘 --"
+          }
         }
       }
     },
@@ -989,6 +1355,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "-- kullanıldı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已用 --"
           }
         }
       }
@@ -1006,6 +1378,12 @@
             "state": "translated",
             "value": "1 Gün"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 天"
+          }
         }
       }
     },
@@ -1021,6 +1399,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "1 Saat"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 小時"
           }
         }
       }
@@ -1038,6 +1422,12 @@
             "state": "translated",
             "value": "10 dk"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "10 分"
+          }
         }
       }
     },
@@ -1053,6 +1443,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "12 Saat"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "12 小時"
           }
         }
       }
@@ -1070,6 +1466,12 @@
             "state": "translated",
             "value": "14 Gün"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "14 天"
+          }
         }
       }
     },
@@ -1085,6 +1487,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "15 dk"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "15 分"
           }
         }
       }
@@ -1102,6 +1510,12 @@
             "state": "translated",
             "value": "24sa"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "24 小時"
+          }
         }
       }
     },
@@ -1117,6 +1531,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "28 Gün"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "28 天"
           }
         }
       }
@@ -1134,6 +1554,12 @@
             "state": "translated",
             "value": "3 Gün"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 天"
+          }
         }
       }
     },
@@ -1149,6 +1575,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "3 Saat"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 小時"
           }
         }
       }
@@ -1166,6 +1598,12 @@
             "state": "translated",
             "value": "Sıfırlanmadan 30 dk önce"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置前 30 分鐘"
+          }
         }
       }
     },
@@ -1181,6 +1619,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "5 saatlik kota penceresinde 30 dakika kaldı. QuotaWarmer sıfırlanmada otomatik olarak tetiklenecek."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 小時額度時段剩 30 分鐘。重置時 QuotaWarmer 會自動觸發。"
           }
         }
       }
@@ -1198,6 +1642,12 @@
             "state": "translated",
             "value": "30g"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 天"
+          }
         }
       }
     },
@@ -1213,6 +1663,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "30 dk"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 分"
           }
         }
       }
@@ -1230,6 +1686,12 @@
             "state": "translated",
             "value": "5 saatlik ve haftalık çubuklar, uyarı eşiğinden itibaren kırmızı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 小時與每週長條，達預警值起轉紅"
+          }
         }
       }
     },
@@ -1245,6 +1707,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "5 saatlik kota penceresi artık etkin. Bir sonraki otomatik tetikleme 5 saat sonra."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 小時額度時段已啟動。下次自動觸發在 5 小時後。"
           }
         }
       }
@@ -1262,6 +1730,12 @@
             "state": "translated",
             "value": "QuotaWarmer’ın sizin için açtığı ve canlı kotanın doğruladığı 5 saatlik pencereler. Kaçırılan veya başarısız ısıtmalar sayılmaz."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuotaWarmer 為你開啟、且經即時額度確認的 5 小時時段。未送出或失敗的預熱不計入。"
+          }
         }
       }
     },
@@ -1277,6 +1751,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "5sa"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5h"
           }
         }
       }
@@ -1294,6 +1774,12 @@
             "state": "translated",
             "value": "5 saatlik kullanım"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 小時用量"
+          }
         }
       }
     },
@@ -1309,6 +1795,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "5 saatlik kota sıfırlanmadan önce tükenir"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 小時額度會在重置前用完"
           }
         }
       }
@@ -1326,6 +1818,12 @@
             "state": "translated",
             "value": "5 dk"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 分"
+          }
         }
       }
     },
@@ -1341,6 +1839,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "6 Saat"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "6 小時"
           }
         }
       }
@@ -1358,6 +1862,12 @@
             "state": "translated",
             "value": "7 Gün"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 天"
+          }
         }
       }
     },
@@ -1373,6 +1883,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "7g"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 天"
           }
         }
       }
@@ -1390,6 +1906,12 @@
             "state": "translated",
             "value": "<%%%lld"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "<%lld%%"
+          }
         }
       }
     },
@@ -1405,6 +1927,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yeni bir pencere algılandı ve ısıtma gönderildi."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "偵測到新的時段，已送出預熱。"
           }
         }
       }
@@ -1422,6 +1950,12 @@
             "state": "translated",
             "value": "Önce güncel ve sağlıklı bir kota okuması gerekiyordu; ancak bulunamadı."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要先取得新鮮且正常的額度讀數，但目前沒有。"
+          }
         }
       }
     },
@@ -1437,6 +1971,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ için bir ısıtma zaten çalışıyor."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 的預熱已在進行中。"
           }
         }
       }
@@ -1454,6 +1994,12 @@
             "state": "translated",
             "value": "Şu anda bir ısıtma gönderiliyor."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在送出預熱。"
+          }
         }
       }
     },
@@ -1469,6 +2015,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bir pencere zaten açık; kazanılacak bir şey yok."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時段已經開啟，沒有可領取的時段。"
           }
         }
       }
@@ -1486,6 +2038,12 @@
             "state": "translated",
             "value": "Bir pencere zaten çalışıyor; açılacak bir şey yok."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時段已在進行，不需要再開啟。"
+          }
         }
       }
     },
@@ -1501,6 +2059,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "HAKKINDA"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關於"
           }
         }
       }
@@ -1518,6 +2082,12 @@
             "state": "translated",
             "value": "HESAPLAR"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "帳號"
+          }
         }
       }
     },
@@ -1533,6 +2103,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "UYARILAR"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提醒"
           }
         }
       }
@@ -1550,6 +2126,12 @@
             "state": "translated",
             "value": "Hakkında"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關於"
+          }
         }
       }
     },
@@ -1565,6 +2147,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ hakkında"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關於 %@"
           }
         }
       }
@@ -1582,6 +2170,12 @@
             "state": "translated",
             "value": "QuotaWarmer hakkında"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關於 QuotaWarmer"
+          }
         }
       }
     },
@@ -1597,6 +2191,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hesap"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "帳號"
           }
         }
       }
@@ -1614,6 +2214,12 @@
             "state": "translated",
             "value": "Hesaplar"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "帳號"
+          }
         }
       }
     },
@@ -1629,6 +2235,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Etkin"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用中"
           }
         }
       }
@@ -1646,6 +2258,12 @@
             "state": "translated",
             "value": "Ekle"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增"
+          }
         }
       }
     },
@@ -1661,6 +2279,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hesap ekle"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新增帳號"
           }
         }
       }
@@ -1678,6 +2302,12 @@
             "state": "translated",
             "value": "Geri ekle"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加回"
+          }
         }
       }
     },
@@ -1693,6 +2323,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Isıtma başarılı olduktan sonra"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預熱成功後"
           }
         }
       }
@@ -1710,6 +2346,12 @@
             "state": "translated",
             "value": "Kullanım % olduğunda uyar"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已用 % 時提醒"
+          }
         }
       }
     },
@@ -1725,6 +2367,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kullanım %lld%% olduğunda uyar. Değiştirmek için etkinleştirin."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已用 %lld%% 時提醒。啟用以變更。"
           }
         }
       }
@@ -1742,6 +2390,12 @@
             "state": "translated",
             "value": "Uyarılar"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提醒"
+          }
         }
       }
     },
@@ -1757,6 +2411,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tümü"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部"
           }
         }
       }
@@ -1774,6 +2434,12 @@
             "state": "translated",
             "value": "Tüm sağlayıcılar"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有服務"
+          }
         }
       }
     },
@@ -1789,6 +2455,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tüm ısıtmalar duraklatıldı; bu yüzden hiçbir şey gönderilmiyor."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有預熱已暫停，不會送出任何內容。"
           }
         }
       }
@@ -1806,6 +2478,12 @@
             "state": "translated",
             "value": "Bildirimlere izin ver"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允許通知"
+          }
         }
       }
     },
@@ -1821,6 +2499,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "İzin verildi"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已允許"
           }
         }
       }
@@ -1838,6 +2522,12 @@
             "state": "translated",
             "value": "Bu pencere zaten ısıtıldı (%@ sıfırlanır)"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本時段已預熱（%@ 重置）"
+          }
         }
       }
     },
@@ -1853,6 +2543,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu pencere zaten ısıtıldı%@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本時段已預熱%@"
           }
         }
       }
@@ -1870,6 +2566,12 @@
             "state": "translated",
             "value": "Başka bir hesap bu klasörü zaten kullanıyor."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "另一個帳號已使用這個資料夾。"
+          }
         }
       }
     },
@@ -1885,6 +2587,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu hızla %@ sonra tükenir — sıfırlanmadan önce."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "照這個速度會在 %@ 後用完——早於重置。"
           }
         }
       }
@@ -1902,6 +2610,12 @@
             "state": "translated",
             "value": "Otomatik kontrol: %@."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 自動檢查。"
+          }
         }
       }
     },
@@ -1917,6 +2631,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Otomatik ısıtma"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動預熱"
           }
         }
       }
@@ -1934,6 +2654,12 @@
             "state": "translated",
             "value": "Otomatik ısıtma bu sağlayıcıyı henüz değerlendirmedi."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動預熱尚未評估這個服務。"
+          }
         }
       }
     },
@@ -1949,6 +2675,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Otomatik ısıtma duraklatıldı."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動預熱已暫停。"
           }
         }
       }
@@ -1966,6 +2698,12 @@
             "state": "translated",
             "value": "Otomatik ısıtma devam ediyor."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動預熱已恢復。"
+          }
         }
       }
     },
@@ -1981,6 +2719,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Otomatik ısıtma bu sağlayıcı için etkin değil."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這個服務未啟用自動預熱。"
           }
         }
       }
@@ -1998,6 +2742,12 @@
             "state": "translated",
             "value": "Otomatik ısıtma yalnızca son 5 dakikadaki bir okumaya göre işlem yapar."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動預熱只依據最近 5 分鐘內的讀數動作。"
+          }
         }
       }
     },
@@ -2013,6 +2763,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Otomatik ısıtma — yeni bir pencere açıldığında CLI üzerinden tek bir kısa \"hi\" da gönderir."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動預熱——新時段開啟時，也會透過 CLI 送出一則最簡短的「hi」。"
           }
         }
       }
@@ -2030,6 +2786,12 @@
             "state": "translated",
             "value": "Otomatik ısıtma — pencereleri kazan"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動預熱——領取時段"
+          }
         }
       }
     },
@@ -2045,6 +2807,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ort. erken başlangıç"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平均領先時間"
           }
         }
       }
@@ -2062,6 +2830,12 @@
             "state": "translated",
             "value": "Ort. zirve"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平均高峰"
+          }
         }
       }
     },
@@ -2077,6 +2851,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geri"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "返回"
           }
         }
       }
@@ -2094,6 +2874,12 @@
             "state": "translated",
             "value": "Hatalardan sonra geri çekil"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "失敗後暫緩"
+          }
         }
       }
     },
@@ -2109,6 +2895,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Başarısız bir ısıtmadan sonra %@ saatine kadar bekleniyor"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預熱失敗，暫緩至 %@"
           }
         }
       }
@@ -2126,6 +2918,12 @@
             "state": "translated",
             "value": "Biriken sıfırlamalar"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "累積的重置"
+          }
         }
       }
     },
@@ -2141,6 +2939,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Çubuklar"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "長條"
           }
         }
       }
@@ -2158,6 +2962,12 @@
             "state": "translated",
             "value": "Taban"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "基準"
+          }
         }
       }
     },
@@ -2173,6 +2983,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Engellendi — Sistem Ayarları → Bildirimler’den etkinleştirin"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已封鎖——請在「系統設定 → 通知」中啟用"
           }
         }
       }
@@ -2190,6 +3006,12 @@
             "state": "translated",
             "value": "Mavi, uyarı eşiğinden itibaren kırmızı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "藍色，達預警值起轉紅"
+          }
         }
       }
     },
@@ -2205,6 +3027,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "İkisi"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "兩者"
           }
         }
       }
@@ -2222,6 +3050,12 @@
             "state": "translated",
             "value": "İkisi de varsayılan olarak kapalıdır ve daha sonra Ayarlar’dan değiştirilebilir."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "兩者預設皆關閉，之後可在設定中變更。"
+          }
         }
       }
     },
@@ -2237,6 +3071,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yoğun saatler ısı haritası"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "忙碌時段熱圖"
           }
         }
       }
@@ -2254,6 +3094,12 @@
             "state": "translated",
             "value": "Yoğun saatler · %@"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "忙碌時段 · %@"
+          }
         }
       }
     },
@@ -2269,6 +3115,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "KONTROLLER"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "檢查"
           }
         }
       }
@@ -2286,6 +3138,12 @@
             "state": "translated",
             "value": "Haftalık kotanın %95’e ulaştığı takvim haftaları."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每週額度達到 95% 的日曆週。"
+          }
         }
       }
     },
@@ -2301,6 +3159,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "İptal"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消"
           }
         }
       }
@@ -2318,6 +3182,12 @@
             "state": "translated",
             "value": "Ayarlar’dan değiştirin veya kapatın."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可在設定中變更或停用。"
+          }
         }
       }
     },
@@ -2333,6 +3203,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kontrol et"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "檢查"
           }
         }
       }
@@ -2350,6 +3226,12 @@
             "state": "translated",
             "value": "En son sürüm için GitHub’ı kontrol et"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 GitHub 檢查最新版本"
+          }
         }
       }
     },
@@ -2365,6 +3247,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Güncellemeleri denetle"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "檢查更新"
           }
         }
       }
@@ -2382,6 +3270,12 @@
             "state": "translated",
             "value": "Kontrol ediliyor"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "檢查中"
+          }
         }
       }
     },
@@ -2397,6 +3291,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Şimdi kontrol ediliyor…"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在檢查…"
           }
         }
       }
@@ -2414,6 +3314,12 @@
             "state": "translated",
             "value": "Kontrol ediliyor…"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "檢查中…"
+          }
         }
       }
     },
@@ -2429,6 +3335,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bir mod seçin"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇模式"
           }
         }
       }
@@ -2446,6 +3358,12 @@
             "state": "translated",
             "value": "Seç…"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇…"
+          }
         }
       }
     },
@@ -2461,6 +3379,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kazanılan"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已領取"
           }
         }
       }
@@ -2478,6 +3402,12 @@
             "state": "translated",
             "value": "Yerel CLI kullanımı olmadan biten kazanılmış pencereler; bu yüzden erken başlangıç ölçülmedi."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已領取但結束時沒有本機 CLI 使用紀錄的時段，因此無法量測領先時間。"
+          }
         }
       }
     },
@@ -2493,6 +3423,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kazanıldı, kullanılmadı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已領取、未使用"
           }
         }
       }
@@ -2510,6 +3446,12 @@
             "state": "translated",
             "value": "Claude erişimi duraklatıldı. Anahtar Zinciri erişimini onaylamak için Yenile’ye tıklayın."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude 存取已暫停。按「重新整理」以允許鑰匙圈存取。"
+          }
         }
       }
     },
@@ -2525,6 +3467,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Claude’da oturum açık. Kotası Claude çalıştığında yenilenecek; bağlam için son bilinen okuma gösteriliyor."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude 已登入。Claude 執行時會更新額度；目前顯示最後已知的讀數供參考。"
           }
         }
       }
@@ -2542,6 +3490,12 @@
             "state": "translated",
             "value": "Claude’un yeniden bağlanması gerekiyor. Terminal’de claude auth login komutunu çalıştırın, ardından Yenile’ye basın."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude 需要重新連線。請在終端機執行 claude auth login，再重新整理。"
+          }
         }
       }
     },
@@ -2557,6 +3511,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu sıfırlamayı şimdi kullanmak için tekrar tıklayın"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再按一次以立即使用這次重置"
           }
         }
       }
@@ -2574,6 +3534,12 @@
             "state": "translated",
             "value": "Değiştirmek için tıklayın"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按一下以變更"
+          }
         }
       }
     },
@@ -2589,6 +3555,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Eşiği değiştirmek için tıklayın"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按一下以變更門檻"
           }
         }
       }
@@ -2606,6 +3578,12 @@
             "state": "translated",
             "value": "Codex’in yeniden bağlanması gerekiyor. Tekrar oturum açın, ardından Yenile’ye basın."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Codex 需要重新連線。請重新登入，再重新整理。"
+          }
         }
       }
     },
@@ -2621,6 +3599,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ bölümünü daralt"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收合 %@ 區段"
           }
         }
       }
@@ -2638,6 +3622,12 @@
             "state": "translated",
             "value": "Geçmişi daralt"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "收合紀錄"
+          }
         }
       }
     },
@@ -2654,6 +3644,12 @@
             "state": "translated",
             "value": "Renkli kota çubukları"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "彩色額度長條"
+          }
         }
       }
     },
@@ -2666,6 +3662,12 @@
           }
         },
         "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Command"
+          }
+        },
+        "zh-Hant": {
           "stringUnit": {
             "state": "translated",
             "value": "Command"
@@ -2686,6 +3688,12 @@
             "state": "translated",
             "value": "%@ tarihinde komut gönderildi, ancak canlı kota pencerenin açıldığını doğrulamadı."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已於 %@ 送出指令，但即時額度未確認時段已開啟。"
+          }
         }
       }
     },
@@ -2701,6 +3709,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Komut satırı araçları"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "命令列工具"
           }
         }
       }
@@ -2718,6 +3732,12 @@
             "state": "translated",
             "value": "Tamamlanan her ısıtmanın içinde doğrulanan pencereler (doğrulanan, kaçırılan veya başarısız)."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在所有已完成的預熱（已確認、未送出或失敗）中，確認開啟時段的比例。"
+          }
         }
       }
     },
@@ -2734,6 +3754,12 @@
             "state": "translated",
             "value": "Güncellemek için bağlan"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "連線以更新"
+          }
         }
       }
     },
@@ -2746,6 +3772,12 @@
           }
         },
         "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Control"
+          }
+        },
+        "zh-Hant": {
           "stringUnit": {
             "state": "translated",
             "value": "Control"
@@ -2766,6 +3798,12 @@
             "state": "translated",
             "value": "Kopyalandı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已拷貝"
+          }
         }
       }
     },
@@ -2781,6 +3819,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu hesap olarak %@ çalıştıran bir kabuk takma adını kopyalar:\n%@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷貝一個以此帳號執行 %@ 的 shell alias：\n%@"
           }
         }
       }
@@ -2798,6 +3842,12 @@
             "state": "translated",
             "value": "Kopyala"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷貝"
+          }
         }
       }
     },
@@ -2813,6 +3863,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Komutu kopyala"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷貝指令"
           }
         }
       }
@@ -2830,6 +3886,12 @@
             "state": "translated",
             "value": "Değiştirilemedi: %@"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法變更：%@"
+          }
         }
       }
     },
@@ -2845,6 +3907,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Klasör oluşturulamadı: %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法建立資料夾：%@"
           }
         }
       }
@@ -2862,6 +3930,12 @@
             "state": "translated",
             "value": "Sıfırlama kullanılamadı."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法使用這次重置。"
+          }
         }
       }
     },
@@ -2877,6 +3951,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kimlik bilgisi erişimi"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "憑證存取"
           }
         }
       }
@@ -2894,6 +3974,12 @@
             "state": "translated",
             "value": "Özel…"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自訂…"
+          }
         }
       }
     },
@@ -2909,6 +3995,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "GÖRÜNÜM"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示"
           }
         }
       }
@@ -2926,6 +4018,12 @@
             "state": "translated",
             "value": "Günlük token"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每日 tokens"
+          }
         }
       }
     },
@@ -2941,6 +4039,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Koyu"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "深色"
           }
         }
       }
@@ -2958,6 +4062,12 @@
             "state": "translated",
             "value": "Gün"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日"
+          }
         }
       }
     },
@@ -2973,6 +4083,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hata ayıklama düzeyi"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "除錯層級"
           }
         }
       }
@@ -2990,6 +4106,12 @@
             "state": "translated",
             "value": "Varsayılan (%@)"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預設（%@）"
+          }
         }
       }
     },
@@ -3005,6 +4127,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Varsayılan 5 dakika"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預設 5 分鐘"
           }
         }
       }
@@ -3022,6 +4150,12 @@
             "state": "translated",
             "value": "Ayrıntılar"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "詳細資訊"
+          }
         }
       }
     },
@@ -3037,6 +4171,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kapat"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關閉"
           }
         }
       }
@@ -3054,6 +4194,12 @@
             "state": "translated",
             "value": "Kurulumu kapat"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "略過設定"
+          }
         }
       }
     },
@@ -3069,6 +4215,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bitti"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成"
           }
         }
       }
@@ -3086,6 +4238,12 @@
             "state": "translated",
             "value": "Tamamlandı. QuotaWarmer bu hesabı bir sonraki kontrolünde alacak (ya da Yenile’ye basın)."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成。QuotaWarmer 會在下次檢查時納入這個帳號（或按「重新整理」）。"
+          }
         }
       }
     },
@@ -3101,6 +4259,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "v%@ indir"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下載 v%@"
           }
         }
       }
@@ -3118,6 +4282,12 @@
             "state": "translated",
             "value": "Her satır son 7 günden birini gösterir; bugün en altta. Her sütun günün bir saatidir, 00’dan 23’e (yerel saatiniz). Koyu kareler daha fazla token anlamına gelir; toplamı görmek için kareye üzerinize gelin.%@"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每一列是最近 7 天中的一天，今天在最下方；每一欄是一天中的一個小時，00 到 23（當地時間）。顏色越深代表 tokens 越多；游標停在格子上可看總數。%@"
+          }
         }
       }
     },
@@ -3133,6 +4303,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tahmini API eşdeğeri maliyet"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "估計的等值 API 費用"
           }
         }
       }
@@ -3150,6 +4326,12 @@
             "state": "translated",
             "value": "Olay Geçmişi"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "事件紀錄"
+          }
         }
       }
     },
@@ -3165,6 +4347,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ bölümünü genişlet"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "展開 %@ 區段"
           }
         }
       }
@@ -3182,6 +4370,12 @@
             "state": "translated",
             "value": "Geçmişi genişlet"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "展開紀錄"
+          }
         }
       }
     },
@@ -3197,6 +4391,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tanılamayı dışa aktar…"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "匯出診斷資料…"
           }
         }
       }
@@ -3214,6 +4414,12 @@
             "state": "translated",
             "value": "Klasör"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "資料夾"
+          }
         }
       }
     },
@@ -3229,6 +4435,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bulundu"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已找到"
           }
         }
       }
@@ -3246,6 +4458,12 @@
             "state": "translated",
             "value": "Güncel"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新鮮"
+          }
         }
       }
     },
@@ -3261,6 +4479,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Güncellik"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新鮮度"
           }
         }
       }
@@ -3278,6 +4502,12 @@
             "state": "translated",
             "value": "Cum"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "週五"
+          }
         }
       }
     },
@@ -3293,6 +4523,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Genel"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一般"
           }
         }
       }
@@ -3310,6 +4546,12 @@
             "state": "translated",
             "value": "Kotayı al"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取得額度"
+          }
         }
       }
     },
@@ -3325,6 +4567,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "${account} için kotayı al"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取得 ${account} 的額度"
           }
         }
       }
@@ -3342,6 +4590,12 @@
             "state": "translated",
             "value": "Hesaba bir ad verin."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "為這個帳號命名。"
+          }
         }
       }
     },
@@ -3357,6 +4611,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Genel kısayol"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全域快速鍵"
           }
         }
       }
@@ -3374,6 +4634,12 @@
             "state": "translated",
             "value": "Genel kısayol"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全域快速鍵"
+          }
         }
       }
     },
@@ -3389,6 +4655,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ayarlar’a git"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "前往設定"
           }
         }
       }
@@ -3406,6 +4678,12 @@
             "state": "translated",
             "value": "SS:dd"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HH:mm"
+          }
         }
       }
     },
@@ -3421,6 +4699,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "GEÇMİŞ"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "紀錄"
           }
         }
       }
@@ -3438,6 +4722,12 @@
             "state": "translated",
             "value": "NASIL ÇALIŞIR"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "運作方式"
+          }
         }
       }
     },
@@ -3453,6 +4743,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Erken başlangıç"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "領先時間"
           }
         }
       }
@@ -3470,6 +4766,12 @@
             "state": "translated",
             "value": "Menü çubuğunda gizli — göstermek için tıklayın"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已從選單列隱藏——按一下以顯示"
+          }
         }
       }
     },
@@ -3485,6 +4787,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ menü çubuğundan gizle"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "從選單列隱藏 %@"
           }
         }
       }
@@ -3502,6 +4810,12 @@
             "state": "translated",
             "value": "En yüksek pencere zirvesi %%%lld"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時段最高峰 %lld%%"
+          }
         }
       }
     },
@@ -3517,6 +4831,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geçmiş"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "紀錄"
           }
         }
       }
@@ -3534,6 +4854,12 @@
             "state": "translated",
             "value": "Geçmiş ~/Library/Application Support/io.github.roger0426.quotawarmer/events.jsonl dosyasında tutulur ve ~/Library/Logs/io.github.roger0426.quotawarmer/diagnostics.log dosyasına yansıtılır. Token’lar ve yetkilendirme başlıkları gizlenir; geçmişe veya ısıtma günlüklerine hiçbir zaman yazılmaz."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "紀錄保存在 ~/Library/Application Support/io.github.roger0426.quotawarmer/events.jsonl，並同步寫入 ~/Library/Logs/io.github.roger0426.quotawarmer/diagnostics.log。Tokens 與授權標頭都會遮蔽，絕不寫入紀錄或預熱記錄。"
+          }
         }
       }
     },
@@ -3549,6 +4875,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Limite ulaştı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "達到上限"
           }
         }
       }
@@ -3566,6 +4898,12 @@
             "state": "translated",
             "value": "Saatlik token"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每小時 tokens"
+          }
         }
       }
     },
@@ -3581,6 +4919,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu aralıkta açılan 5 saatlik kota penceresi sayısı%@. Bir pencere ilk mesajınızla (ya da bir ısıtmayla) başlar ve 5 saat sonra sıfırlanır."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這段範圍內%@開啟了多少個 5 小時額度時段。時段從你的第一則訊息（或一次預熱）開始，5 小時後重置。"
           }
         }
       }
@@ -3598,6 +4942,12 @@
             "state": "translated",
             "value": "Bir ısıtmayla her %@ kaç pencere açıldı. Otomatik = yeni pencere algılandı; sabah = günlük sabah ön ısıtması; elle = Şimdi ısıt’a bastınız."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每%@由預熱開啟的時段數。自動 = 偵測到新時段；早晨 = 每日預熱；手動 = 你按了「預熱」。"
+          }
         }
       }
     },
@@ -3613,6 +4963,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pencereleriniz, her biri ilk gerçek kullanımınızda başlamış olsaydı olacağından ne kadar önce sıfırlanıyor. Bir ısıtma, siz çalışmadan önce pencereyi açar; böylece kota daha erken yenilenir. Pencerenin başlangıcından ilk yerel CLI etkinliğinize kadar ölçülür; talep başına en fazla bir tam pencere."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "相較於每個時段都從你第一次實際使用時才開始，你的時段提早了多久重置。預熱會在你開始工作前開啟時段，讓額度更早恢復。從時段開始量到你第一次本機 CLI 活動，每次領取最多計一個完整時段。"
           }
         }
       }
@@ -3630,6 +4986,12 @@
             "state": "translated",
             "value": "Kotanın zaman içinde ne kadarının kullanıldığı. Düz çizgi 5 saatlik penceredir — pencere sıfırlandığında 0’a döner; kesikli çizgi haftalık kotadır. Boşluklar QuotaWarmer’ın kontrol etmediği zamanlardır (Mac uykudayken ya da uygulama kapalıyken); soluk noktalı bir çizgi, haftalık kotayı 12 saate kadar olan boşluklar boyunca birleştirir."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "額度隨時間的使用量。實線是 5 小時時段——時段重置時會回到 0；虛線是每週額度。空白處是 QuotaWarmer 沒有在檢查的時間（Mac 睡眠或 app 關閉）；在 12 小時以內的空白，每週額度會以淡淡的點線連接。"
+          }
         }
       }
     },
@@ -3645,6 +5007,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kotanın zaman içinde ne kadarının kullanıldığı. Düz çizgi 5 saatlik penceredir — pencere sıfırlandığında 0’a döner; kesikli çizgi haftalık kotadır. Boşluklar QuotaWarmer’ın kontrol etmediği zamanlardır (Mac uykudayken ya da uygulama kapalıyken); soluk noktalı bir çizgi, haftalık kotayı 12 saate kadar olan boşluklar boyunca birleştirir. Her hesabın kendi rengi vardır."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "額度隨時間的使用量。實線是 5 小時時段——時段重置時會回到 0；虛線是每週額度。空白處是 QuotaWarmer 沒有在檢查的時間（Mac 睡眠或 app 關閉）；在 12 小時以內的空白，每週額度會以淡淡的點線連接。每個帳號有自己的顏色。"
           }
         }
       }
@@ -3662,6 +5030,12 @@
             "state": "translated",
             "value": "Haftalık kotanın zaman içinde ne kadarının kullanıldığı. 30 günde 5 saatlik çizgi okunamayacak kadar sık sıfırlandığı için her pencerenin zirvesi için alttaki grafiğe bakın. Boşluklar QuotaWarmer’ın kontrol etmediği zamanlardır (Mac uykudayken ya da uygulama kapalıyken); soluk noktalı bir çizgi, haftalık kotayı 12 saate kadar olan boşluklar boyunca birleştirir."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每週額度隨時間的使用量。在 30 天範圍內，5 小時線重置太頻繁而難以閱讀，請看下方圖表中各時段的高峰。空白處是 QuotaWarmer 沒有在檢查的時間（Mac 睡眠或 app 關閉）；在 12 小時以內的空白，每週額度會以淡淡的點線連接。"
+          }
         }
       }
     },
@@ -3677,6 +5051,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Haftalık kotanın zaman içinde ne kadarının kullanıldığı. 30 günde 5 saatlik çizgi okunamayacak kadar sık sıfırlandığı için her pencerenin zirvesi için alttaki grafiğe bakın. Boşluklar QuotaWarmer’ın kontrol etmediği zamanlardır (Mac uykudayken ya da uygulama kapalıyken); soluk noktalı bir çizgi, haftalık kotayı 12 saate kadar olan boşluklar boyunca birleştirir. Her hesabın kendi rengi vardır."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每週額度隨時間的使用量。在 30 天範圍內，5 小時線重置太頻繁而難以閱讀，請看下方圖表中各時段的高峰。空白處是 QuotaWarmer 沒有在檢查的時間（Mac 睡眠或 app 關閉）；在 12 小時以內的空白，每週額度會以淡淡的點線連接。每個帳號有自己的顏色。"
           }
         }
       }
@@ -3694,6 +5074,12 @@
             "state": "translated",
             "value": "Haftalık kotanızın ne kadarının kullanıldığı, son okumaya göre. Haftada bir sıfırlanır."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依最新讀數，每週額度已用了多少。每週重置一次。"
+          }
         }
       }
     },
@@ -3709,6 +5095,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Etki"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "成效"
           }
         }
       }
@@ -3726,6 +5118,12 @@
             "state": "translated",
             "value": "En az ⌃, ⌥ veya ⌘ içermeli"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需包含 ⌃、⌥ 或 ⌘"
+          }
         }
       }
     },
@@ -3741,6 +5139,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kurun, ardından Yeniden kontrol et’e basın:"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安裝後按「重新檢查」："
           }
         }
       }
@@ -3758,6 +5162,12 @@
             "state": "translated",
             "value": "Buna izin veriliyor mu?"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這樣可以嗎？"
+          }
         }
       }
     },
@@ -3773,6 +5183,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sorun"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "問題"
           }
         }
       }
@@ -3790,6 +5206,12 @@
             "state": "translated",
             "value": "Limitlerinizi hiçbir zaman aşmaz veya yükseltmez, kimlik bilgilerinizi hiçbir zaman paylaşmaz veya yüklemez ve İzleme veya Kapalı’da bırakılan araçlar için hiçbir şey göndermez."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它絕不會繞過或提高你的限制，絕不分享或上傳你的憑證，對設為「監看」或「關閉」的工具也絕不送出任何內容。"
+          }
         }
       }
     },
@@ -3805,6 +5227,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "İzleme modunda başlar; yalnızca kotanızı okur ve hiçbir şey göndermez. Otomatik ısıtma isteğe bağlıdır ve araç bazında etkinleştirilebilir."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它一開始處於「監看」模式，只讀取你的額度，不送出任何內容。自動預熱需要你逐一工具自行開啟。"
           }
         }
       }
@@ -3822,6 +5250,12 @@
             "state": "translated",
             "value": "Kendi Claude Code ve Codex kota pencerelerinizi izler. Yalnızca Otomatik ısıtma’ya aldığınız araçlar için, yeni bir pencere açıldığı anda, zaten oturum açtığınız CLI üzerinden tek bir kısa \"hi\" gönderir."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它監看你自己的 Claude Code 與 Codex 額度時段。只有對你切換為「自動預熱」的工具，才會在新時段開啟的那一刻，透過你已登入的 CLI 送出一則最簡短的「hi」。"
+          }
         }
       }
     },
@@ -3837,6 +5271,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mac’i uyanık tutun veya Ayarlar’dan uyandırma programını etkinleştirin."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "讓 Mac 保持喚醒，或在設定中啟用喚醒排程。"
           }
         }
       }
@@ -3854,6 +5294,12 @@
             "state": "translated",
             "value": "Yeniden başlatmadan sonra kota takibini sürdürür."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新開機後持續追蹤額度。"
+          }
         }
       }
     },
@@ -3869,6 +5315,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tuş"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按鍵"
           }
         }
       }
@@ -3886,6 +5338,12 @@
             "state": "translated",
             "value": "Anahtar Zinciri"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "鑰匙圈"
+          }
         }
       }
     },
@@ -3901,6 +5359,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tuşlar"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按鍵"
           }
         }
       }
@@ -3918,6 +5382,12 @@
             "state": "translated",
             "value": "Tür"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "類型"
+          }
         }
       }
     },
@@ -3933,6 +5403,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dil"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "語言"
           }
         }
       }
@@ -3950,6 +5426,12 @@
             "state": "translated",
             "value": "Son 30 gün"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近 30 天"
+          }
         }
       }
     },
@@ -3965,6 +5447,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Son kontrol: %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上次檢查 %@"
           }
         }
       }
@@ -3982,6 +5470,12 @@
             "state": "translated",
             "value": "Son bilinen"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最後已知"
+          }
         }
       }
     },
@@ -3997,6 +5491,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bağlam için son kota gösteriliyor."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示最後的額度供參考。"
           }
         }
       }
@@ -4014,6 +5514,12 @@
             "state": "translated",
             "value": "Son ısıtma başarısız: %@"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上次預熱失敗 %@"
+          }
         }
       }
     },
@@ -4029,6 +5535,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Son ısıtma %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上次預熱 %@"
           }
         }
       }
@@ -4046,6 +5558,12 @@
             "state": "translated",
             "value": "Son ısıtma %@, pencere doğrulandı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上次預熱 %@，時段已確認"
+          }
         }
       }
     },
@@ -4061,6 +5579,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Oturum açılışında başlat"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登入時啟動"
           }
         }
       }
@@ -4078,6 +5602,12 @@
             "state": "translated",
             "value": "Oturum açılışında başlatma değiştirilemedi: %@"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法變更「登入時啟動」：%@"
+          }
         }
       }
     },
@@ -4093,6 +5623,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Oturum açılışında başlat"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登入時啟動"
           }
         }
       }
@@ -4110,6 +5646,12 @@
             "state": "translated",
             "value": "İzlenen her hesabı yenilemek için boş bırakın."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "留空則重新整理所有監看中的帳號。"
+          }
         }
       }
     },
@@ -4125,6 +5667,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kalan"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剩餘"
           }
         }
       }
@@ -4142,6 +5690,12 @@
             "state": "translated",
             "value": "Açık"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "淺色"
+          }
         }
       }
     },
@@ -4157,6 +5711,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sınır"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上限"
           }
         }
       }
@@ -4174,6 +5734,12 @@
             "state": "translated",
             "value": "%@ tarihinden beri canlı kota güncellenmedi. Son bilinen okuma gösteriliyor."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即時額度自 %@ 後未更新。顯示最後已知的讀數。"
+          }
         }
       }
     },
@@ -4189,6 +5755,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yükleniyor…"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "載入中…"
           }
         }
       }
@@ -4206,6 +5778,12 @@
             "state": "translated",
             "value": "QuotaWarmer’ın burada izlemesini istediğiniz hesapla oturum açın."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在這裡用你要讓 QuotaWarmer 監看的帳號登入。"
+          }
         }
       }
     },
@@ -4221,6 +5799,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Günlükler"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記錄"
           }
         }
       }
@@ -4238,6 +5822,12 @@
             "state": "translated",
             "value": "SABAH ÖN ISITMASI"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "早晨預熱"
+          }
         }
       }
     },
@@ -4253,6 +5843,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mac %@’de uyanacak ve pencerenizi başlatacak."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 會在 %@ 喚醒並開始你的時段。"
           }
         }
       }
@@ -4270,6 +5866,12 @@
             "state": "translated",
             "value": "Elle yenileme"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手動重新整理"
+          }
         }
       }
     },
@@ -4285,6 +5887,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Menü Çubuğu"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選單列"
           }
         }
       }
@@ -4302,6 +5910,12 @@
             "state": "translated",
             "value": "Kaçırılan / başarısız"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未送出／失敗"
+          }
         }
       }
     },
@@ -4317,6 +5931,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mod"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模式"
           }
         }
       }
@@ -4334,6 +5954,12 @@
             "state": "translated",
             "value": "Mod: %@. Değiştirmek için etkinleştirin."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模式：%@。啟用以變更。"
+          }
         }
       }
     },
@@ -4349,6 +5975,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mod: %@. Kapalı → İzleme → Otomatik ısıtma arasında geçmek için tıklayın."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模式：%@。按一下在 關閉 → 監看 → 自動預熱 間切換。"
           }
         }
       }
@@ -4366,6 +5998,12 @@
             "state": "translated",
             "value": "Model kimliği"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模型 id"
+          }
         }
       }
     },
@@ -4381,6 +6019,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu hesabın ısıtmalarında kullanılan model. Fiyatlar milyon token başına ABD doları, girdi / çıktı. CLI modeli reddederse varsayılan kullanılır ve Geçmiş bunu belirtir."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此帳號預熱所用的模型。價格為每百萬 tokens 的美元，輸入／輸出。若 CLI 拒絕該模型，會改用預設模型，並在紀錄中註明。"
           }
         }
       }
@@ -4398,6 +6042,12 @@
             "state": "translated",
             "value": "Modlar, CLI kontrolü ve izinler"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "模式、CLI 檢查與權限"
+          }
         }
       }
     },
@@ -4413,6 +6063,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pzt"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "週一"
           }
         }
       }
@@ -4430,6 +6086,12 @@
             "state": "translated",
             "value": "İzleme"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "監看"
+          }
         }
       }
     },
@@ -4445,6 +6107,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "İzleme modu — ısıtmalar hiçbir zaman gönderilmez"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "監看模式——絕不送出預熱"
           }
         }
       }
@@ -4462,6 +6130,12 @@
             "state": "translated",
             "value": "Yalnızca izleme — kotayı izle"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "僅監看——查看額度"
+          }
         }
       }
     },
@@ -4477,6 +6151,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "İzleme — kotayı ve uyarıları gösterir. Hiçbir şey göndermez. (Varsayılan)"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "監看——顯示額度與提醒，絕不送出任何內容。（預設）"
           }
         }
       }
@@ -4494,6 +6174,12 @@
             "state": "translated",
             "value": "Yalnızca izlenen hesaplar. Claude, Anahtar Zinciri’ndeki Claude Code-credentials öğesini, CLAUDE_CODE_OAUTH_TOKEN ortam değişkenini veya ~/.claude/.credentials.json dosyasını okur. Codex, auth.json dosyasını veya Anahtar Zinciri’ndeki Codex Auth öğesini okur. Eklenen bir hesap yalnızca kendi klasöründeki Anahtar Zinciri öğesini veya kimlik bilgileri dosyasını okur."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "僅限監看中的帳號。Claude 讀取鑰匙圈中的 Claude Code-credentials、環境變數 CLAUDE_CODE_OAUTH_TOKEN，或 ~/.claude/.credentials.json。Codex 讀取 auth.json 或鑰匙圈中的 Codex Auth。新增的帳號只讀取它自己資料夾的鑰匙圈項目或憑證檔。"
+          }
         }
       }
     },
@@ -4509,6 +6195,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yalnızca izlenen araçlar"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "僅限監看中的工具"
           }
         }
       }
@@ -4526,6 +6218,12 @@
             "state": "translated",
             "value": "İzleme kapalı. Kota geçmişini kaydetmeye başlamak için bir hesabı İzleme’ye alın."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "監看已關閉。將帳號切換為「監看」即可開始記錄額度紀錄。"
+          }
         }
       }
     },
@@ -4541,6 +6239,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sabah Ön Isıtması"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "早晨預熱"
           }
         }
       }
@@ -4558,6 +6262,12 @@
             "state": "translated",
             "value": "Sabah ön ısıtması — yetişildi"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "早晨預熱——已補上"
+          }
         }
       }
     },
@@ -4573,6 +6283,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sabah ön ısıtması bugün tamamlandı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今天的早晨預熱已完成"
           }
         }
       }
@@ -4590,6 +6306,12 @@
             "state": "translated",
             "value": "Sabah ön ısıtması kapalı."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "早晨預熱已關閉。"
+          }
         }
       }
     },
@@ -4605,6 +6327,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sabah ön ısıtması kaçırıldı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "早晨預熱未執行"
           }
         }
       }
@@ -4622,6 +6350,12 @@
             "state": "translated",
             "value": "Sabah ön ısıtması henüz zamanı gelmedi"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "還沒到早晨預熱的時間"
+          }
         }
       }
     },
@@ -4637,6 +6371,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sabah ön ısıtması atlandı — kota kullanılamıyor"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已略過早晨預熱——無法取得額度"
           }
         }
       }
@@ -4654,6 +6394,12 @@
             "state": "translated",
             "value": "Sabah ön ısıtması atlandı — pencere zaten çalışıyor"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已略過早晨預熱——時段已在進行"
+          }
         }
       }
     },
@@ -4669,6 +6415,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sabah uyandırma kurulu değil veya değiştirildi. Onarmak için Uyandır ve Isıt’ı kapatıp yeniden açın."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "早晨喚醒未安裝或已被取代。請將「喚醒並預熱」關閉再開啟以修復。"
           }
         }
       }
@@ -4686,6 +6438,12 @@
             "state": "translated",
             "value": "Ad"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名稱"
+          }
         }
       }
     },
@@ -4701,6 +6459,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yeni %@ hesabı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新的 %@ 帳號"
           }
         }
       }
@@ -4718,6 +6482,12 @@
             "state": "translated",
             "value": "İleri"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一步"
+          }
         }
       }
     },
@@ -4733,6 +6503,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sonraki uygun zaman: %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下次可執行：%@"
           }
         }
       }
@@ -4750,6 +6526,12 @@
             "state": "translated",
             "value": "Henüz 5 saatlik kota okuması yok"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚無 5 小時額度讀數"
+          }
         }
       }
     },
@@ -4765,6 +6547,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu filtreyle eşleşen olay yok"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有符合此篩選的事件"
           }
         }
       }
@@ -4782,6 +6570,12 @@
             "state": "translated",
             "value": "Henüz olay yok"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚無事件"
+          }
         }
       }
     },
@@ -4797,6 +6591,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Canlı kota yok"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有即時額度"
           }
         }
       }
@@ -4814,6 +6614,12 @@
             "state": "translated",
             "value": "Bu aralıkta yerel CLI kullanımı yok."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這段範圍內沒有本機 CLI 使用紀錄。"
+          }
         }
       }
     },
@@ -4829,6 +6635,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu aralıkta açılan pencere yok."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這段範圍內沒有開啟的時段。"
           }
         }
       }
@@ -4846,6 +6658,12 @@
             "state": "translated",
             "value": "Bu aralıkta okuma yok"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這段範圍內沒有讀數"
+          }
         }
       }
     },
@@ -4861,6 +6679,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu aralıkta henüz okuma yok."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這段範圍內尚無讀數。"
           }
         }
       }
@@ -4878,6 +6702,12 @@
             "state": "translated",
             "value": "Oturum açma bulunamadı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到登入資訊"
+          }
         }
       }
     },
@@ -4893,6 +6723,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld dk içinde başarılı kontrol yok"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lldm 內沒有成功的檢查"
           }
         }
       }
@@ -4910,6 +6746,12 @@
             "state": "translated",
             "value": "Açılıştan beri ısıtma yok"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "啟動後尚未預熱"
+          }
         }
       }
     },
@@ -4925,6 +6767,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Henüz sorulmadı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未詢問"
           }
         }
       }
@@ -4942,6 +6790,12 @@
             "state": "translated",
             "value": "Henüz yeterli veri yok — etki, ilk kazanılan pencereden sonra görünür."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "資料還不夠——第一個領取的時段之後才會顯示成效。"
+          }
         }
       }
     },
@@ -4957,6 +6811,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bulunamadı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到"
           }
         }
       }
@@ -4974,6 +6834,12 @@
             "state": "translated",
             "value": "Oturum açılmamış"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未登入"
+          }
         }
       }
     },
@@ -4989,6 +6855,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Oturum açılmamış — bir terminalde `claude auth login` çalıştırın"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未登入——請在終端機執行 `claude auth login`"
           }
         }
       }
@@ -5006,6 +6878,12 @@
             "state": "translated",
             "value": "Başlamadı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未開始"
+          }
         }
       }
     },
@@ -5021,6 +6899,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Henüz başlamadı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未開始"
           }
         }
       }
@@ -5038,6 +6922,12 @@
             "state": "translated",
             "value": "Henüz güncellenmedi"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未更新"
+          }
         }
       }
     },
@@ -5053,6 +6943,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hiçbir şey yenilenmedi: hesap kapalı ya da son 30 saniye içinde yenilendi."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有重新整理：帳號已關閉，或在 30 秒內剛重新整理過。"
           }
         }
       }
@@ -5070,6 +6966,12 @@
             "state": "translated",
             "value": "Bildirimler"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通知"
+          }
         }
       }
     },
@@ -5085,6 +6987,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kapalı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關閉"
           }
         }
       }
@@ -5102,6 +7010,12 @@
             "state": "translated",
             "value": "Kapalı — izleme"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關閉——不監看"
+          }
         }
       }
     },
@@ -5117,6 +7031,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kapalı — hiç izlenmiyor."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關閉——完全不監看。"
           }
         }
       }
@@ -5134,6 +7054,12 @@
             "state": "translated",
             "value": "Her pencerenin%@ sıfırlanmadan önce ortalama ne kadar dolduğu. Düşük, kotanın kullanılmadan kaldığı; yüksek, çoğunu kullandığınız anlamına gelir."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "平均而言，每個時段%@在重置前用到多滿。偏低表示額度沒用完；偏高表示大部分都用掉了。"
+          }
         }
       }
     },
@@ -5149,6 +7075,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "5 saatlik pencere başına bir çubuk; açık kaldığı saatleri kapsar; yüksekliği, sıfırlanmadan önce pencerenin en çok kullanılan kısmıdır. Kesikli çizgi %95 sınırıdır."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每個 5 小時時段一條長條，橫跨它開啟的時間；高度是時段在重置前的最高用量。虛線是 95% 上限。"
           }
         }
       }
@@ -5166,6 +7098,12 @@
             "state": "translated",
             "value": "5 saatlik pencere başına bir çubuk; açık kaldığı saatleri kapsar; yüksekliği, sıfırlanmadan önce pencerenin en çok kullanılan kısmıdır. Kesikli çizgi %95 sınırıdır. Her hesabın kendi rengi vardır; pencerelerin çakıştığı yerlerde yarı saydamdır."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每個 5 小時時段一條長條，橫跨它開啟的時間；高度是時段在重置前的最高用量。虛線是 95% 上限。每個帳號有自己的顏色，時段重疊處呈半透明。"
+          }
         }
       }
     },
@@ -5181,6 +7119,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gün başına bir çubuk: o gün açılan en dolu 5 saatlik pencere, sıfırlanmadan önce en çok kullanılan kısmıyla. Kesikli çizgi %95 sınırıdır."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每天一條長條：當天開啟、用量最高的 5 小時時段，以重置前的最高用量表示。虛線是 95% 上限。"
           }
         }
       }
@@ -5198,6 +7142,12 @@
             "state": "translated",
             "value": "Gün başına bir çubuk: o gün açılan en dolu 5 saatlik pencere, sıfırlanmadan önce en çok kullanılan kısmıyla. Kesikli çizgi %95 sınırıdır. Hesaplar yan yana gösterilir."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每天一條長條：當天開啟、用量最高的 5 小時時段，以重置前的最高用量表示。虛線是 95% 上限。各帳號並排顯示。"
+          }
         }
       }
     },
@@ -5214,6 +7164,12 @@
             "state": "translated",
             "value": "Açılır paneli her yerden aç"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在任何地方開啟面板"
+          }
         }
       }
     },
@@ -5226,6 +7182,12 @@
           }
         },
         "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Option"
+          }
+        },
+        "zh-Hant": {
           "stringUnit": {
             "state": "translated",
             "value": "Option"
@@ -5246,6 +7208,12 @@
             "state": "translated",
             "value": "İsteğe bağlı ekstralar"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他選用功能"
+          }
         }
       }
     },
@@ -5261,6 +7229,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Diğer"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他"
           }
         }
       }
@@ -5278,6 +7252,12 @@
             "state": "translated",
             "value": "Genel bakış"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "總覽"
+          }
         }
       }
     },
@@ -5293,6 +7273,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "GİZLİLİK"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隱私"
           }
         }
       }
@@ -5310,6 +7296,12 @@
             "state": "translated",
             "value": "Tempo uyarısı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "速度警告"
+          }
         }
       }
     },
@@ -5325,6 +7317,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Otomatik ısıtmayı duraklat"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暫停自動預熱"
           }
         }
       }
@@ -5342,6 +7340,12 @@
             "state": "translated",
             "value": "Tüm otomatik ısıtmaları duraklat"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暫停所有自動預熱"
+          }
         }
       }
     },
@@ -5357,6 +7361,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Duraklatıldı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已暫停"
           }
         }
       }
@@ -5374,6 +7384,12 @@
             "state": "translated",
             "value": "Genel olarak duraklatıldı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已全域暫停"
+          }
         }
       }
     },
@@ -5389,6 +7405,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Devam ettirilene kadar tüm hesaplar için otomatik ısıtmaları duraklatır."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暫停所有帳號的自動預熱，直到恢復為止。"
           }
         }
       }
@@ -5406,6 +7428,12 @@
             "state": "translated",
             "value": "Zirve"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高峰"
+          }
         }
       }
     },
@@ -5421,6 +7449,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zirve %@ token"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高峰 %@ tokens"
           }
         }
       }
@@ -5438,6 +7472,12 @@
             "state": "translated",
             "value": "Gün başına zirve 5 saatlik pencere"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每日 5 小時時段高峰"
+          }
         }
       }
     },
@@ -5453,6 +7493,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gün başına zirve 5sa pencere"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每日 5 小時時段高峰"
           }
         }
       }
@@ -5470,6 +7516,12 @@
             "state": "translated",
             "value": "5 saatlik pencere başına zirve"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每個 5 小時時段的高峰"
+          }
         }
       }
     },
@@ -5485,6 +7537,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "5 saatlik pencere başına zirve"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每個 5 小時時段的高峰"
           }
         }
       }
@@ -5502,6 +7560,12 @@
             "state": "translated",
             "value": "Yüzde ve sıfırlanmaya kalan süre"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "百分比與距離重置的時間"
+          }
         }
       }
     },
@@ -5517,6 +7581,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gösterilen yüzde"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示的百分比"
           }
         }
       }
@@ -5534,6 +7604,12 @@
             "state": "translated",
             "value": "İzinler"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "權限"
+          }
         }
       }
     },
@@ -5549,6 +7625,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Her araç için bir mod seçin. Aracın sekmesinden istediğiniz zaman değiştirebilirsiniz."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "為每個工具選擇模式。之後隨時可在該工具的分頁中變更。"
           }
         }
       }
@@ -5566,6 +7648,12 @@
             "state": "translated",
             "value": "Şimdi kontrol etmek için Yenile’ye basın."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按「重新整理」立即檢查。"
+          }
         }
       }
     },
@@ -5581,6 +7669,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yenile’ye basın; sorun sürerse oturum açmayı kontrol edin."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按「重新整理」；若持續發生，請檢查登入狀態。"
           }
         }
       }
@@ -5598,6 +7692,12 @@
             "state": "translated",
             "value": "Gizlilik"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隱私"
+          }
         }
       }
     },
@@ -5613,6 +7713,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sorunlar"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "問題"
           }
         }
       }
@@ -5630,6 +7736,12 @@
             "state": "translated",
             "value": "Sağlayıcı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服務"
+          }
         }
       }
     },
@@ -5645,6 +7757,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Çık"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "結束"
           }
         }
       }
@@ -5662,6 +7780,12 @@
             "state": "translated",
             "value": "QuotaWarmer’dan çık"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "結束 QuotaWarmer"
+          }
         }
       }
     },
@@ -5677,6 +7801,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kota"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "額度"
           }
         }
       }
@@ -5694,6 +7824,12 @@
             "state": "translated",
             "value": "Kota okuması"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "額度讀數"
+          }
         }
       }
     },
@@ -5709,6 +7845,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kota yenileme aralığı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "額度更新間隔"
           }
         }
       }
@@ -5726,6 +7868,12 @@
             "state": "translated",
             "value": "Kota kontrolü"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "額度檢查"
+          }
         }
       }
     },
@@ -5741,6 +7889,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kota okuması: %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "額度讀數 %@"
           }
         }
       }
@@ -5758,6 +7912,12 @@
             "state": "translated",
             "value": "Kota kaynağı: %@"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "額度來源 %@"
+          }
         }
       }
     },
@@ -5773,6 +7933,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kota kaynağı hız sınırında. %@ saatinde yeniden denenecek."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "額度來源受到速率限制。將於 %@ 重試。"
           }
         }
       }
@@ -5790,6 +7956,12 @@
             "state": "translated",
             "value": "Kota kaynağı geçici olarak kullanılamıyor."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "額度來源暫時無法使用。"
+          }
         }
       }
     },
@@ -5805,6 +7977,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kota kaynağı geçici olarak kullanılamıyor. Son bilinen okuma gösteriliyor."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "額度來源暫時無法使用。顯示最後已知的讀數。"
           }
         }
       }
@@ -5822,6 +8000,12 @@
             "state": "translated",
             "value": "Kota kullanımı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "額度用量"
+          }
         }
       }
     },
@@ -5837,6 +8021,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kullanılan kota"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已用額度"
           }
         }
       }
@@ -5854,6 +8044,12 @@
             "state": "translated",
             "value": "%@ boyunca kullanılan kota"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 的額度用量"
+          }
         }
       }
     },
@@ -5866,6 +8062,12 @@
           }
         },
         "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuotaWarmer"
+          }
+        },
+        "zh-Hant": {
           "stringUnit": {
             "state": "translated",
             "value": "QuotaWarmer"
@@ -5886,6 +8088,12 @@
             "state": "translated",
             "value": "QuotaWarmer Ayarları"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuotaWarmer 設定"
+          }
         }
       }
     },
@@ -5901,6 +8109,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "QuotaWarmer yakın zamanda bir kota kontrolünü tamamlayamadı — çevrimdışı ya da engellenmiş olabilir."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuotaWarmer 最近沒有完成額度檢查——可能離線或遭到封鎖。"
           }
         }
       }
@@ -5918,6 +8132,12 @@
             "state": "translated",
             "value": "QuotaWarmer henüz hazır değil. Birazdan tekrar deneyin."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuotaWarmer 尚未就緒，請稍後再試。"
+          }
         }
       }
     },
@@ -5933,6 +8153,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "QuotaWarmer menü çubuğunda çalışır ve Claude Code ile Codex’in 5 saatlik kota pencerelerini izler; böylece ne kadarının kaldığını ve ne zaman sıfırlanacağını her zaman bilirsiniz."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuotaWarmer 位在你的選單列，監看 Claude Code 與 Codex 的 5 小時額度時段，讓你隨時知道還剩多少、何時重置。"
           }
         }
       }
@@ -5950,6 +8176,12 @@
             "state": "translated",
             "value": "QuotaWarmer burada yalnızca kotanızı okur."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuotaWarmer 在這裡只會讀取你的額度。"
+          }
         }
       }
     },
@@ -5965,6 +8197,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "QuotaWarmer her kota kontrolünde bir okuma kaydeder; grafikler önümüzdeki birkaç saat içinde dolar."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuotaWarmer 每次檢查額度都會存一筆讀數；接下來幾小時圖表會逐漸補齊。"
           }
         }
       }
@@ -5982,6 +8220,12 @@
             "state": "translated",
             "value": "QuotaWarmer %@ için ısıtma komutunu gönderdi. Bir sonraki kota yenilemesi etkin 5 saatlik pencereyi doğrulayacak."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuotaWarmer 已為 %@ 送出預熱指令。下次更新額度時會確認 5 小時時段已啟動。"
+          }
         }
       }
     },
@@ -5997,6 +8241,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "QuotaWarmer, zaten ödediğiniz kapasiteyi, zaten oturum açtığınız resmi CLI üzerinden kullanır. Limitlerinizi hiçbir zaman aşmaz veya yükseltmez, kimlik bilgilerinizi hiçbir zaman paylaşmaz veya yüklemez ve İzleme veya Kapalı’da bırakılan araçlar için hiçbir şey göndermez. Sağlayıcılar API’lerini istediği zaman değiştirebilir; otomatik ısıtmaya izin verilmediği takdirde bir aracı İzleme’ye alın; QuotaWarmer kotanızı izlemeye devam eder."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuotaWarmer 使用的是你已付費的容量，透過你已登入的官方 CLI。它絕不會繞過或提高你的限制，絕不分享或上傳你的憑證，對設為「監看」或「關閉」的工具完全不送出任何內容。服務商隨時可能變更 API；若日後不允許自動預熱，將工具設為「監看」，QuotaWarmer 仍會持續追蹤你的額度。"
           }
         }
       }
@@ -6014,6 +8264,12 @@
             "state": "translated",
             "value": "QuotaWarmer — istatistikler için sol tık, menü için sağ tık"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuotaWarmer——左鍵查看統計，右鍵開啟選單"
+          }
         }
       }
     },
@@ -6029,6 +8285,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "QuotaWarmer — %@ oturumunu aç"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuotaWarmer——登入 %@"
           }
         }
       }
@@ -6046,6 +8308,12 @@
             "state": "translated",
             "value": "Hız sınırı koruması"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "速率限制保護"
+          }
         }
       }
     },
@@ -6061,6 +8329,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hız sınırı: otomatik kontroller yavaşlatıldı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "受到速率限制：自動檢查正在暫緩"
           }
         }
       }
@@ -6078,6 +8352,12 @@
             "state": "translated",
             "value": "Yeniden kontrol et"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新檢查"
+          }
         }
       }
     },
@@ -6093,6 +8373,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yerel günlükler okunuyor…"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在讀取本機記錄…"
           }
         }
       }
@@ -6110,6 +8396,12 @@
             "state": "translated",
             "value": "Bir hesap için en son oturumu (5 saat) ve haftalık kotayı okur: kullanılan ve kalan yüzde, sıfırlanma zamanı ve güncellik."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "讀取帳號最新的時段（5 小時）與每週額度：已用與剩餘百分比、重置時間與新鮮度。"
+          }
         }
       }
     },
@@ -6125,6 +8417,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Son olaylar"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近事件"
           }
         }
       }
@@ -6142,6 +8440,12 @@
             "state": "translated",
             "value": "Güncellemek için yeniden bağlan"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新連線以更新"
+          }
         }
       }
     },
@@ -6157,6 +8461,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yenile"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新整理"
           }
         }
       }
@@ -6174,6 +8484,12 @@
             "state": "translated",
             "value": "%@ kotasını şimdi yenile"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即重新整理 %@ 的額度"
+          }
         }
       }
     },
@@ -6189,6 +8505,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kotayı yenile"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新整理額度"
           }
         }
       }
@@ -6206,6 +8528,12 @@
             "state": "translated",
             "value": "Tüm hesapların kotasını şimdi yenile"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即重新整理所有帳號的額度"
+          }
         }
       }
     },
@@ -6221,6 +8549,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "${account} kotasını yenile"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新整理 ${account} 的額度"
           }
         }
       }
@@ -6238,6 +8572,12 @@
             "state": "translated",
             "value": "%@ yenilendi."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已重新整理 %@。"
+          }
         }
       }
     },
@@ -6253,6 +8593,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kotayı şimdi yeniler. Hız sınırı beklemesine uyar ve hiçbir zaman ısıtma başlatmaz."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即重新整理額度。遵守速率限制的暫緩，且絕不會開始預熱。"
           }
         }
       }
@@ -6270,6 +8616,12 @@
             "state": "translated",
             "value": "Kaldır"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除"
+          }
         }
       }
     },
@@ -6285,6 +8637,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hesabı kaldır"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除帳號"
           }
         }
       }
@@ -6302,6 +8660,12 @@
             "state": "translated",
             "value": "Yeniden adlandır"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新命名"
+          }
         }
       }
     },
@@ -6317,6 +8681,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sorun bildir"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回報問題"
           }
         }
       }
@@ -6334,6 +8704,12 @@
             "state": "translated",
             "value": "%@ ön ısıtması için ayrıldı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留給 %@ 的早晨預熱"
+          }
         }
       }
     },
@@ -6349,6 +8725,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sıfırlanma"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置"
           }
         }
       }
@@ -6366,6 +8748,12 @@
             "state": "translated",
             "value": "Sıfırlanma: %@"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 重置"
+          }
         }
       }
     },
@@ -6381,6 +8769,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ sonra sıfırlanır"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 後重置"
           }
         }
       }
@@ -6398,6 +8792,12 @@
             "state": "translated",
             "value": "Yeniden başlat"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新啟動"
+          }
         }
       }
     },
@@ -6413,6 +8813,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "QuotaWarmer’ı seçilen dilde yeniden başlat"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以選擇的語言重新啟動 QuotaWarmer"
           }
         }
       }
@@ -6430,6 +8836,12 @@
             "state": "translated",
             "value": "Uygulamak için yeniden başlat"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新啟動後套用"
+          }
         }
       }
     },
@@ -6445,6 +8857,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Otomatik ısıtmayı sürdür"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復自動預熱"
           }
         }
       }
@@ -6462,6 +8880,12 @@
             "state": "translated",
             "value": "Otomatik ısıtmaları sürdür"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復自動預熱"
+          }
         }
       }
     },
@@ -6477,6 +8901,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Otomatik ısıtmayı yeniden etkinleştirmek için menüden devam ettirin."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在選單中選擇恢復，即可重新啟用自動預熱。"
           }
         }
       }
@@ -6494,6 +8924,12 @@
             "state": "translated",
             "value": "Tüm hesaplar için otomatik ısıtmaları sürdürür."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "恢復所有帳號的自動預熱。"
+          }
         }
       }
     },
@@ -6509,6 +8945,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ sonra tükenir"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 後用完"
           }
         }
       }
@@ -6526,6 +8968,12 @@
             "state": "translated",
             "value": "%@ sonra tükenir — %@ içindeki 5 saatlik sıfırlanmadan önce. %%%lld kullanıldı."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 後用完——早於 %@ 後的 5 小時重置。已用 %lld%%。"
+          }
         }
       }
     },
@@ -6541,6 +8989,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "KURULUM GEREKLİ"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要設定"
           }
         }
       }
@@ -6558,6 +9012,12 @@
             "state": "translated",
             "value": "KISAYOLLAR"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "捷徑"
+          }
         }
       }
     },
@@ -6573,6 +9033,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ADIM %lld / %lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "步驟 %lld / %lld"
           }
         }
       }
@@ -6590,6 +9056,12 @@
             "state": "translated",
             "value": "SİSTEM"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統"
+          }
         }
       }
     },
@@ -6605,6 +9077,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cmt"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "週六"
           }
         }
       }
@@ -6622,6 +9100,12 @@
             "state": "translated",
             "value": "Kaydet"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "儲存"
+          }
         }
       }
     },
@@ -6637,6 +9121,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ için planlandı; ancak pilde ve kapak kapalıyken uyandırma atlanabilir — kapağı açtığınız anda pencereniz ısınır."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已排定於 %@，但使用電池且闔上螢幕時可能不會喚醒——打開螢幕的那一刻就會預熱你的時段。"
           }
         }
       }
@@ -6654,6 +9144,12 @@
             "state": "translated",
             "value": "%@ için planlandı; pil ve kapalı kapak uyandırmayı engelleyebilir."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已排定於 %@；使用電池或闔上螢幕可能使喚醒失效。"
+          }
         }
       }
     },
@@ -6669,6 +9165,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mac’inizi gününüz başlamadan uyandırır ve yeni bir pencere açar. Açmak, bir macOS yönetici istemi gösterir (pmset kök yetkisi gerektirir). Yalnızca Otomatik ısıtma’ya alınmış araçlar için geçerlidir."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "排定 Mac 在你一天開始前喚醒，並開啟新的時段。開啟時會出現一次 macOS 管理者提示（pmset 需要 root）。只套用於設為「自動預熱」的工具。"
           }
         }
       }
@@ -6686,6 +9188,12 @@
             "state": "translated",
             "value": "Bölüm"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "區段"
+          }
         }
       }
     },
@@ -6701,6 +9209,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ hesabına şimdi bir ısıtma mesajı gönderilsin mi? Az miktarda kota kullanır."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現在要送出預熱訊息給 %@ 嗎？這會用掉少量額度。"
           }
         }
       }
@@ -6718,6 +9232,12 @@
             "state": "translated",
             "value": "Yeni bir kota penceresini şimdi başlatmak için minimal ısıtma mesajını gönderir. Önce onay ister."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即送出最簡短的預熱訊息以開始新的額度時段。會先要求確認。"
+          }
         }
       }
     },
@@ -6733,6 +9253,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Oturum"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時段"
           }
         }
       }
@@ -6750,6 +9276,12 @@
             "state": "translated",
             "value": "Oturum kalan (%)"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時段剩餘（%）"
+          }
         }
       }
     },
@@ -6765,6 +9297,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Oturum sıfırlanma zamanı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時段重置時間"
           }
         }
       }
@@ -6782,6 +9320,12 @@
             "state": "translated",
             "value": "Oturum kullanılan (%)"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時段已用（%）"
+          }
         }
       }
     },
@@ -6797,6 +9341,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "${account} hesabını ${mode} moduna ayarla"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "將 ${account} 設為 ${mode}"
           }
         }
       }
@@ -6814,6 +9364,12 @@
             "state": "translated",
             "value": "Modu ayarla"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定模式"
+          }
         }
       }
     },
@@ -6829,6 +9385,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bir hesabı Kapalı, İzleme veya Otomatik ısıtma olarak ayarlar."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "將帳號設為關閉、監看或自動預熱。"
           }
         }
       }
@@ -6846,6 +9408,12 @@
             "state": "translated",
             "value": "Ayarlar"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定"
+          }
         }
       }
     },
@@ -6862,6 +9430,12 @@
             "state": "translated",
             "value": "Zirve kullanımı %80’e ulaşan gözlemlenen 5 saatlik pencerelerin oranı. Düşük, kotanın kullanılmadan kaldığı anlamına gelir."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在觀察到的 5 小時時段中，高峰用量達到 80% 的比例。偏低表示額度沒用完。"
+          }
         }
       }
     },
@@ -6874,6 +9448,12 @@
           }
         },
         "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shift"
+          }
+        },
+        "zh-Hant": {
           "stringUnit": {
             "state": "translated",
             "value": "Shift"
@@ -6894,6 +9474,12 @@
             "state": "translated",
             "value": "Kısayollar"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "捷徑"
+          }
         }
       }
     },
@@ -6909,6 +9495,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Göster: %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示 %@"
           }
         }
       }
@@ -6926,6 +9518,12 @@
             "state": "translated",
             "value": "%@ menü çubuğunda göster"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在選單列顯示 %@"
+          }
         }
       }
     },
@@ -6941,6 +9539,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "İstatistikleri göster"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示統計"
           }
         }
       }
@@ -6958,6 +9562,12 @@
             "state": "translated",
             "value": "Karşılama rehberini göster"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示歡迎導覽"
+          }
         }
       }
     },
@@ -6973,6 +9583,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Menü çubuğunda göster"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在選單列顯示"
           }
         }
       }
@@ -6990,6 +9606,12 @@
             "state": "translated",
             "value": "Daha fazla göster (%lld tane daha)"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示更多（還有 %lld 筆）"
+          }
         }
       }
     },
@@ -7005,6 +9627,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ kotası kalan miktar olarak gösteriliyor (%%100’den geriye sayar). Kullanılan kotayı göstermek için tıklayın."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示 %@ 剩餘額度（從 100%% 往下數）。按一下改為顯示已用額度。"
           }
         }
       }
@@ -7022,6 +9650,12 @@
             "state": "translated",
             "value": "%@ kotası kullanılan miktar olarak gösteriliyor (%%0’dan yukarı sayar). Kalan kotayı göstermek için tıklayın."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示 %@ 已用額度（從 0%% 往上數）。按一下改為顯示剩餘額度。"
+          }
         }
       }
     },
@@ -7037,6 +9671,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Menü çubuğunda gösteriliyor — gizlemek için tıklayın"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示於選單列——按一下以隱藏"
           }
         }
       }
@@ -7054,6 +9694,12 @@
             "state": "translated",
             "value": "Oturum aç"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登入"
+          }
         }
       }
     },
@@ -7069,6 +9715,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sağlayıcının CLI’si ile oturum açın, ardından Yenile’ye basın."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用服務商的 CLI 登入，再按「重新整理」。"
           }
         }
       }
@@ -7086,6 +9738,12 @@
             "state": "translated",
             "value": "Oturum açma: %@"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登入 %@"
+          }
         }
       }
     },
@@ -7101,6 +9759,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Oturum açık"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已登入"
           }
         }
       }
@@ -7118,6 +9782,12 @@
             "state": "translated",
             "value": "Tek renkli çubuklar"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "單色長條"
+          }
         }
       }
     },
@@ -7133,6 +9803,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cumartesi ve pazar günlerini atla"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "略過週六與週日"
           }
         }
       }
@@ -7150,6 +9826,12 @@
             "state": "translated",
             "value": "Rehberi atla"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "略過導覽"
+          }
         }
       }
     },
@@ -7165,6 +9847,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Anlık görüntü %lld dk eski"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快照已是 %lld 分鐘前"
           }
         }
       }
@@ -7182,6 +9870,12 @@
             "state": "translated",
             "value": "Eski"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "過時"
+          }
         }
       }
     },
@@ -7197,6 +9891,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Başlangıç"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開始"
           }
         }
       }
@@ -7214,6 +9914,12 @@
             "state": "translated",
             "value": "Oturmadan önce pencereyi başlatın"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在你坐下前先開始時段"
+          }
         }
       }
     },
@@ -7229,6 +9935,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "macOS ile başlat"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隨 macOS 啟動"
           }
         }
       }
@@ -7246,6 +9958,12 @@
             "state": "translated",
             "value": "Durum"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "狀態"
+          }
         }
       }
     },
@@ -7261,6 +9979,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu hesabı izlemeyi durdurur. Klasörü ve oturum açma bilgileri diskte kalır."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止監看此帳號。它的資料夾與登入資訊仍保留在磁碟上。"
           }
         }
       }
@@ -7278,6 +10002,12 @@
             "state": "translated",
             "value": "Başarı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "成功"
+          }
         }
       }
     },
@@ -7293,6 +10023,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Özet"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "摘要"
           }
         }
       }
@@ -7310,6 +10046,12 @@
             "state": "translated",
             "value": "Paz"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "週日"
+          }
         }
       }
     },
@@ -7325,6 +10067,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Emin misiniz?"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "確定？"
           }
         }
       }
@@ -7342,6 +10090,12 @@
             "state": "translated",
             "value": "Etkinleştirmek için Otomatik ısıtma’ya geçin."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切換為「自動預熱」以啟用。"
+          }
         }
       }
     },
@@ -7357,6 +10111,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yeni pencereleri otomatik açmak için Otomatik ısıtma’ya geçin."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切換為「自動預熱」以自動開啟新的時段。"
           }
         }
       }
@@ -7374,6 +10134,12 @@
             "state": "translated",
             "value": "Takip etmek için İzleme veya Otomatik ısıtma’ya geçin."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切換為「監看」或「自動預熱」以追蹤它。"
+          }
         }
       }
     },
@@ -7389,6 +10155,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sistem"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系統"
           }
         }
       }
@@ -7406,6 +10178,12 @@
             "state": "translated",
             "value": "Sistem, macOS dilini izler"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跟隨 macOS"
+          }
         }
       }
     },
@@ -7421,6 +10199,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Metin"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文字"
           }
         }
       }
@@ -7438,6 +10222,12 @@
             "state": "translated",
             "value": "Bu hesap artık QuotaWarmer’da değil."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這個帳號已不在 QuotaWarmer 中。"
+          }
         }
       }
     },
@@ -7453,6 +10243,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu hesabın CLI’sinin kullandığı %@. Yeni bir klasör oluşturulur; orada zaten oturum açtıysanız mevcut bir klasör seçin."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這個帳號的 CLI 所用的 %@。會建立新的資料夾；若你已在某個資料夾登入，請選擇它。"
           }
         }
       }
@@ -7470,6 +10266,12 @@
             "state": "translated",
             "value": "Mac, planlanan zamandan sonra yetişmek için çok uzun süre uykuda kaldı."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 睡眠超過排定時間太久，無法補上。"
+          }
         }
       }
     },
@@ -7485,6 +10287,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Klasör, tırnak içermeyen mutlak bir yol olmalıdır."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "資料夾必須是不含引號的絕對路徑。"
           }
         }
       }
@@ -7502,6 +10310,12 @@
             "state": "translated",
             "value": "Hesaplarınız arasında en yüksek haftalık kota kullanımı; her birinin son okumasından. Haftalık kotalar haftada bir sıfırlanır."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依各帳號最新的讀數，你所有帳號中最高的每週額度用量。每週額度每週重置一次。"
+          }
         }
       }
     },
@@ -7517,6 +10331,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Son ısıtma başarısız oldu; bu yüzden sağlayıcıyı zorlamamak için yeniden denemeler ertelenir."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上次預熱失敗，因此延後重試，以免頻繁打擾服務商。"
           }
         }
       }
@@ -7534,6 +10354,12 @@
             "state": "translated",
             "value": "Son kota kontrolü sağlıklı değildi; bu yüzden yeni bir pencere doğrulanamıyor."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最新的額度檢查不正常，因此無法確認新的時段。"
+          }
         }
       }
     },
@@ -7549,6 +10375,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sabah ön ısıtması bir sonraki pencereyi %@’de açacak."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "早晨預熱會在 %@ 開啟下一個時段。"
           }
         }
       }
@@ -7566,6 +10398,12 @@
             "state": "translated",
             "value": "Sağlayıcı, sıfırlanma zamanı olan bir 5 saatlik pencere bildirmedi."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服務商尚未回報附重置時間的 5 小時時段。"
+          }
         }
       }
     },
@@ -7581,6 +10419,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Planlanan uyandırma atlandı (pildeydi). Mac uyandığı için kota pencereniz şimdi ısıtılıyor."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "排定的喚醒被略過（使用電池中）。Mac 已喚醒，正在預熱你的額度時段。"
           }
         }
       }
@@ -7598,6 +10442,12 @@
             "state": "translated",
             "value": "Planlanan ısıtma ayarlanan saatinde çalışır."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "排定的預熱會在設定的時間執行。"
+          }
         }
       }
     },
@@ -7613,6 +10463,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Oturum açma reddedildi"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登入遭到拒絕"
           }
         }
       }
@@ -7630,6 +10486,12 @@
             "state": "translated",
             "value": "Pencere 10 dakikadan önce açıldı; bu yüzden kazanmak için geç."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時段開啟已超過 10 分鐘，來不及領取了。"
+          }
         }
       }
     },
@@ -7645,6 +10507,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Isıttığımız pencere hâlâ açık; bir sonraki ısıtma sıfırlanmayı bekler."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "我們預熱的時段仍在進行；下次預熱會等到重置。"
           }
         }
       }
@@ -7662,6 +10530,12 @@
             "state": "translated",
             "value": "Tema"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主題"
+          }
         }
       }
     },
@@ -7677,6 +10551,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu sağlayıcı izlenmiyor veya ısıtılmıyor."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這個服務未被監看或預熱。"
           }
         }
       }
@@ -7694,6 +10574,12 @@
             "state": "translated",
             "value": "Bu pencere zaten ısıtıldı; iki kez ısıtılmayacak."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這個時段已預熱過；不會重複預熱。"
+          }
         }
       }
     },
@@ -7709,6 +10595,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Per"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "週四"
           }
         }
       }
@@ -7726,6 +10618,12 @@
             "state": "translated",
             "value": "Zaman"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時間"
+          }
         }
       }
     },
@@ -7741,6 +10639,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zaman aralığı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時間範圍"
           }
         }
       }
@@ -7758,6 +10662,12 @@
             "state": "translated",
             "value": "Kotanızı okumak için QuotaWarmer, Claude Code ve Codex’in Mac’inizde zaten sakladığı oturum açma belirtecini okur (Anahtar Zinciri veya kendi kimlik dosyaları). Belirteç yalnızca sağlayıcının kendi kullanım uç noktasına gönderilir. Yenile’ye bastığınızda macOS giriş parolanızı bir kez isteyebilir; arka plan kontrolleri hiçbir zaman Anahtar Zinciri istemi göstermez."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "為了讀取你的額度，QuotaWarmer 會讀取 Claude Code 與 Codex 已存放在你 Mac 上的登入 token（鑰匙圈或它們的驗證檔）。這個 token 只會送到服務商自己的用量端點。按「重新整理」時，macOS 可能會詢問一次你的登入密碼；背景檢查絕不會跳出鑰匙圈提示。"
+          }
         }
       }
     },
@@ -7773,6 +10683,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu hesabı kendiniz kullanmak için ~/.zshrc dosyasına ekleyin:"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "若要自己使用這個帳號，請加到 ~/.zshrc："
           }
         }
       }
@@ -7790,6 +10706,12 @@
             "state": "translated",
             "value": "Bugün"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今天"
+          }
         }
       }
     },
@@ -7805,6 +10727,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bugünkü planlanan ısıtma zaten başarılı oldu."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今天排定的預熱已經成功。"
           }
         }
       }
@@ -7822,6 +10750,12 @@
             "state": "translated",
             "value": "Token"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tokens"
+          }
         }
       }
     },
@@ -7837,6 +10771,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Son 24 saatin her birindeki token’lar (yerel saatiniz); bu Mac’teki CLI’nin yerel günlüklerinden (girdi, çıktı ve önbellek), tahmini API eşdeğeri maliyetle. Başka makinelerdeki veya web’deki kullanım dahil değildir.%@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近 24 小時每小時的 tokens（當地時間），取自這台 Mac 上 CLI 的本機記錄（輸入、輸出與快取），並附估計的等值 API 費用。不含其他電腦或網頁上的用量。%@"
           }
         }
       }
@@ -7854,6 +10794,12 @@
             "state": "translated",
             "value": "Son 24 saatin her birindeki token’lar (yerel saatiniz); en yeni sağda. Koyu kareler daha fazla token anlamına gelir; toplamı görmek için kareye üzerinize gelin.%@"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近 24 小時每小時的 tokens（當地時間），最新的在右邊。顏色越深代表 tokens 越多；游標停在格子上可看總數。%@"
+          }
         }
       }
     },
@@ -7869,6 +10815,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Günlük token’lar (yerel saatiniz), %@ boyunca; bu Mac’teki CLI’nin yerel günlüklerinden (girdi, çıktı ve önbellek), tahmini API eşdeğeri maliyetle. Başka makinelerdeki veya web’deki kullanım dahil değildir.%@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@每天的 tokens（當地時間），取自這台 Mac 上 CLI 的本機記錄（輸入、輸出與快取），並附估計的等值 API 費用。不含其他電腦或網頁上的用量。%@"
           }
         }
       }
@@ -7886,6 +10838,12 @@
             "state": "translated",
             "value": "Sal"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "週二"
+          }
         }
       }
     },
@@ -7901,6 +10859,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bir saat yazın, ör. 06:00, 6:30 veya 0715, ardından Return’e basın."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "輸入時間，例如 06:00、6:30 或 0715，再按 Return。"
           }
         }
       }
@@ -7918,6 +10882,12 @@
             "state": "translated",
             "value": "Kullanılamıyor"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法使用"
+          }
         }
       }
     },
@@ -7933,6 +10903,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kullanılamıyor — zaten başka bir uygulama kullanıyor"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法使用——已被其他 app 使用"
           }
         }
       }
@@ -7950,6 +10926,12 @@
             "state": "translated",
             "value": "Güncellendi: %@"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 更新"
+          }
         }
       }
     },
@@ -7965,6 +10947,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Maliyet tahmini güncelleniyor"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在更新費用估計"
           }
         }
       }
@@ -7982,6 +10970,12 @@
             "state": "translated",
             "value": "Kota güncelleniyor"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在更新額度"
+          }
         }
       }
     },
@@ -7997,6 +10991,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Güncelleniyor..."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新中..."
           }
         }
       }
@@ -8014,6 +11014,12 @@
             "state": "translated",
             "value": "Kullanım"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用量"
+          }
         }
       }
     },
@@ -8029,6 +11035,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu düzeyde veya üstündeki kullanım panelde ve araçta kırmızı gösterilir"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用量達到或超過此值時，在面板與小工具中顯示紅色"
           }
         }
       }
@@ -8046,6 +11058,12 @@
             "state": "translated",
             "value": "Kullan"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用"
+          }
         }
       }
     },
@@ -8061,6 +11079,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Klasörü kullan"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用資料夾"
           }
         }
       }
@@ -8078,6 +11102,12 @@
             "state": "translated",
             "value": "Küçük harf, rakam, nokta ve tire kullanın."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "請使用小寫字母、數字、點與連字號。"
+          }
         }
       }
     },
@@ -8093,6 +11123,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu biriken sıfırlamayı kullan (onay ister)"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用這次累積的重置（會要求確認）"
           }
         }
       }
@@ -8110,6 +11146,12 @@
             "state": "translated",
             "value": "Kullanılan"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已用"
+          }
         }
       }
     },
@@ -8125,6 +11167,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kota uyarıları ve ısıtma onayları için kullanılır."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用於額度提醒與預熱確認。"
           }
         }
       }
@@ -8142,6 +11190,12 @@
             "state": "translated",
             "value": "Kullanılıyor…"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用中…"
+          }
         }
       }
     },
@@ -8157,6 +11211,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sürüm %@  ·  macOS 14+"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "版本 %@  ·  macOS 14+"
           }
         }
       }
@@ -8174,6 +11234,12 @@
             "state": "translated",
             "value": "HOŞ GELDİNİZ"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "歡迎"
+          }
         }
       }
     },
@@ -8189,6 +11255,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bekleyin ya da daha erken yeniden denemek için Ayarlar’da hız sınırı korumasını kapatın."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "請稍候，或在設定中關閉速率限制保護以更快重試。"
           }
         }
       }
@@ -8206,6 +11278,12 @@
             "state": "translated",
             "value": "İlk kontrol bekleniyor"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待第一次檢查"
+          }
         }
       }
     },
@@ -8221,6 +11299,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Her sabah uyandır ve ısıt"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每天早晨喚醒並預熱"
           }
         }
       }
@@ -8238,6 +11322,12 @@
             "state": "translated",
             "value": "Her sabah uyandır ve ısıt"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每天早晨喚醒並預熱"
+          }
         }
       }
     },
@@ -8253,6 +11343,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uyandırma saati"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "喚醒時間"
           }
         }
       }
@@ -8270,6 +11366,12 @@
             "state": "translated",
             "value": "Uyandırma saati"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "喚醒時間"
+          }
         }
       }
     },
@@ -8285,6 +11387,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uyuyan bir Mac’i pencerenizi başlatmak için uyandırır"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "喚醒睡眠中的 Mac 來開始你的時段"
           }
         }
       }
@@ -8302,6 +11410,12 @@
             "state": "translated",
             "value": "Isıt"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預熱"
+          }
         }
       }
     },
@@ -8317,6 +11431,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ şimdi ısıt"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即預熱 %@"
           }
         }
       }
@@ -8334,6 +11454,12 @@
             "state": "translated",
             "value": "Şimdi ısıt"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即預熱"
+          }
         }
       }
     },
@@ -8349,6 +11475,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "${account} şimdi ısıt"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即預熱 ${account}"
           }
         }
       }
@@ -8366,6 +11498,12 @@
             "state": "translated",
             "value": "Isıtma"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預熱"
+          }
         }
       }
     },
@@ -8381,6 +11519,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Isıtma maliyeti"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預熱費用"
           }
         }
       }
@@ -8398,6 +11542,12 @@
             "state": "translated",
             "value": "Isıtma başarısız: %@"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預熱失敗：%@"
+          }
         }
       }
     },
@@ -8413,6 +11563,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Isıtma modeli"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預熱模型"
           }
         }
       }
@@ -8430,6 +11586,12 @@
             "state": "translated",
             "value": "Isıtma çalışıyor"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預熱進行中"
+          }
         }
       }
     },
@@ -8445,6 +11607,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ hesabına ısıtma gönderildi."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已送出預熱給 %@。"
           }
         }
       }
@@ -8462,6 +11630,12 @@
             "state": "translated",
             "value": "Isıtmalar"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預熱"
+          }
         }
       }
     },
@@ -8477,6 +11651,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Isıtmalar zaten kullandığınız resmi CLI’lar üzerinden çalışır. İzleme için yalnızca oturum açmış olmanız yeterlidir."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預熱透過你已在使用的官方 CLI 執行。監看只需要你已登入。"
           }
         }
       }
@@ -8494,6 +11674,12 @@
             "state": "translated",
             "value": "Penceresi hiçbir zaman canlı kotada görünmeyen veya komutu başarısız olan ısıtmalar."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時段從未出現在即時額度中，或指令失敗的預熱。"
+          }
         }
       }
     },
@@ -8509,6 +11695,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Isıtıldı (%@), doğrulanmadı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已於 %@ 預熱，未驗證"
           }
         }
       }
@@ -8526,6 +11718,12 @@
             "state": "translated",
             "value": "Isıtıldı (%@), doğrulanıyor…"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已於 %@ 預熱，驗證中…"
+          }
         }
       }
     },
@@ -8541,6 +11739,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ itibarıyla ısıtıldı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "於 %@ 預熱"
           }
         }
       }
@@ -8558,6 +11762,12 @@
             "state": "translated",
             "value": "Şimdi ısıtılıyor…"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在預熱…"
+          }
         }
       }
     },
@@ -8573,6 +11783,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Isıtma, uygulama ortamında Claude/Codex ikili dosyalarını gerektirir. Kimlik bilgileri aşağıda ayrıca kontrol edilir."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預熱需要 app 環境中有 Claude／Codex 執行檔。憑證會在下方另外檢查。"
           }
         }
       }
@@ -8590,6 +11806,12 @@
             "state": "translated",
             "value": "Uyarı Eşiği"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預警值"
+          }
         }
       }
     },
@@ -8605,6 +11827,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Çar"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "週三"
           }
         }
       }
@@ -8622,6 +11850,12 @@
             "state": "translated",
             "value": "Yalnızca hafta içi"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "僅限平日"
+          }
         }
       }
     },
@@ -8637,6 +11871,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Haftalık"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每週"
           }
         }
       }
@@ -8654,6 +11894,12 @@
             "state": "translated",
             "value": "Haftalık kalan (%)"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每週剩餘（%）"
+          }
         }
       }
     },
@@ -8669,6 +11915,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Haftalık sıfırlanma zamanı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每週重置時間"
           }
         }
       }
@@ -8686,6 +11938,12 @@
             "state": "translated",
             "value": "Haftalık kullanım"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每週用量"
+          }
         }
       }
     },
@@ -8701,6 +11959,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Haftalık kullanılan (%)"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每週已用（%）"
           }
         }
       }
@@ -8718,6 +11982,12 @@
             "state": "translated",
             "value": "Kullanılan haftalık kota"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每週額度已用"
+          }
         }
       }
     },
@@ -8733,6 +12003,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kullanılan haftalık"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每週已用"
           }
         }
       }
@@ -8750,6 +12026,12 @@
             "state": "translated",
             "value": "Haftalık limitteki haftalar"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "達到每週上限的週數"
+          }
         }
       }
     },
@@ -8765,6 +12047,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hoş geldiniz"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "歡迎"
           }
         }
       }
@@ -8782,6 +12070,12 @@
             "state": "translated",
             "value": "Karşılama rehberi"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "歡迎導覽"
+          }
         }
       }
     },
@@ -8797,6 +12091,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "QuotaWarmer ne yapar"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuotaWarmer 做什麼"
           }
         }
       }
@@ -8814,6 +12114,12 @@
             "state": "translated",
             "value": "QuotaWarmer’ın sizin için neler yaptığı; kendi olay günlüğünden, kota geçmişinizden ve bu Mac’teki CLI’nin yerel günlüklerinden."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuotaWarmer 為你做了什麼，依據它自己的事件記錄、你的額度紀錄，以及這台 Mac 上 CLI 的本機記錄。"
+          }
         }
       }
     },
@@ -8829,6 +12135,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Asla yapmadıkları"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它絕不做的事"
           }
         }
       }
@@ -8846,6 +12158,12 @@
             "state": "translated",
             "value": "Pencere etkinleştirildi"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時段已啟動"
+          }
         }
       }
     },
@@ -8861,6 +12179,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pencere yakında sona eriyor"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時段即將結束"
           }
         }
       }
@@ -8878,6 +12202,12 @@
             "state": "translated",
             "value": "Pencere zaten çalışıyor"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時段已在進行"
+          }
         }
       }
     },
@@ -8893,6 +12223,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ itibarıyla pencere kazanıldı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "於 %@ 領取時段"
           }
         }
       }
@@ -8910,6 +12246,12 @@
             "state": "translated",
             "value": "Pencere kullanımda (%%%lld kaldı)"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時段使用中（剩餘 %lld%%）"
+          }
         }
       }
     },
@@ -8925,6 +12267,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pencereler"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時段"
           }
         }
       }
@@ -8942,6 +12290,12 @@
             "state": "translated",
             "value": "Kazanılan pencereler"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已領取的時段"
+          }
         }
       }
     },
@@ -8957,6 +12311,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pencereler ≥ %80 kullanıldı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已用 ≥ 80% 的時段"
           }
         }
       }
@@ -8974,6 +12334,12 @@
             "state": "translated",
             "value": "Kullanımı %%95 veya üzerine ulaşan pencereler%@ — pencere sıfırlanmadan önce tükendiniz ya da tükenmek üzereydiniz."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已用 95%% 以上的時段%@——你在時段重置前已用完或幾乎用完。"
+          }
         }
       }
     },
@@ -8989,6 +12355,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "İş"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "工作"
           }
         }
       }
@@ -9006,6 +12378,12 @@
             "state": "translated",
             "value": "Dün"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "昨天"
+          }
         }
       }
     },
@@ -9021,6 +12399,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zaten ödediğiniz kapasiteyi, zaten kullandığınız resmi CLI üzerinden kullanıyorsunuz. Sağlayıcılar API’lerini istediği zaman değiştirebilir; otomatik ısıtmaya izin verilmediğinde herhangi bir aracı İzleme’ye alın; QuotaWarmer kotanızı izlemeye devam eder."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你使用的是自己已付費的容量，透過你已在使用的官方 CLI。服務商隨時可能變更 API；若日後不允許自動預熱，把任何工具切換為「監看」，QuotaWarmer 仍會持續追蹤你的額度。"
           }
         }
       }
@@ -9038,6 +12422,12 @@
             "state": "translated",
             "value": "Mac uyandığı için kota pencereniz şimdi ısıtılıyor."
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 已喚醒，正在預熱你的額度時段。"
+          }
         }
       }
     },
@@ -9053,6 +12443,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tipik haftanız: satırlar hafta içi günleri, sütunlar 00’dan 23’e saatleri gösterir (yerel saatiniz); her kare, son 30 gün boyunca o güne ve saate ait toplamı verir — CLI’yi genellikle ne zaman kullandığınızı gösterir. Koyu kareler daha fazla token anlamına gelir; toplamı görmek için kareye üzerinize gelin.%@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你平常的一週：每一列是星期幾，每一欄是 00 到 23 時（當地時間），每個格子加總最近 30 天中該星期幾、該小時的用量——顯示你通常何時使用 CLI。顏色越深代表 tokens 越多；游標停在格子上可看總數。%@"
           }
         }
       }
@@ -9070,6 +12466,12 @@
             "state": "translated",
             "value": "hepsi sağlıklı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部正常"
+          }
         }
       }
     },
@@ -9085,6 +12487,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "tüm zamanlar"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部期間"
           }
         }
       }
@@ -9102,6 +12510,12 @@
             "state": "translated",
             "value": "kimlik doğrulama hatası"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "驗證失敗"
+          }
         }
       }
     },
@@ -9117,6 +12531,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "kullanılabilir"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用"
           }
         }
       }
@@ -9134,6 +12554,12 @@
             "state": "translated",
             "value": "tempo gerisinde"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "低於預期速度"
+          }
         }
       }
     },
@@ -9149,6 +12575,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "gün"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "天"
           }
         }
       }
@@ -9166,6 +12598,12 @@
             "state": "translated",
             "value": "süresi doldu"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已過期"
+          }
         }
       }
     },
@@ -9181,6 +12619,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ sonra sona erer"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 後到期"
           }
         }
       }
@@ -9198,6 +12642,12 @@
             "state": "translated",
             "value": "başarısız"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "失敗"
+          }
         }
       }
     },
@@ -9213,6 +12663,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "güncel"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新鮮"
           }
         }
       }
@@ -9230,6 +12686,12 @@
             "state": "translated",
             "value": "sağlıklı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正常"
+          }
         }
       }
     },
@@ -9245,6 +12707,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "kur →"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安裝 →"
           }
         }
       }
@@ -9262,6 +12730,12 @@
             "state": "translated",
             "value": "az önce"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剛剛"
+          }
         }
       }
     },
@@ -9277,6 +12751,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "son 24 saat"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近 24 小時"
           }
         }
       }
@@ -9294,6 +12774,12 @@
             "state": "translated",
             "value": "son 30 gün"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近 30 天"
+          }
         }
       }
     },
@@ -9309,6 +12795,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "son 7 gün"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近 7 天"
           }
         }
       }
@@ -9326,6 +12818,12 @@
             "state": "translated",
             "value": "kaldı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "剩餘"
+          }
         }
       }
     },
@@ -9341,6 +12839,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "eksik"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "缺少"
           }
         }
       }
@@ -9358,6 +12862,12 @@
             "state": "translated",
             "value": "izleniyor"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "監看中"
+          }
         }
       }
     },
@@ -9373,6 +12883,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "dikkat gerekiyor"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要處理"
           }
         }
       }
@@ -9390,6 +12906,12 @@
             "state": "translated",
             "value": "canlı kota yok"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有即時額度"
+          }
         }
       }
     },
@@ -9405,6 +12927,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "canlı değil"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "非即時"
           }
         }
       }
@@ -9422,6 +12950,12 @@
             "state": "translated",
             "value": "şimdi"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現在"
+          }
         }
       }
     },
@@ -9437,6 +12971,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "kapalı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "關閉"
           }
         }
       }
@@ -9454,6 +12994,12 @@
             "state": "translated",
             "value": "tempoda"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "速度正常"
+          }
         }
       }
     },
@@ -9469,6 +13015,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "duraklatıldı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已暫停"
           }
         }
       }
@@ -9486,6 +13038,12 @@
             "state": "translated",
             "value": "en yüksek %%%lld"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高峰 %lld%%"
+          }
         }
       }
     },
@@ -9501,6 +13059,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "hız sınırında"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "受速率限制"
           }
         }
       }
@@ -9518,6 +13082,12 @@
             "state": "translated",
             "value": "%@ sonra sıfırlanır"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 後重置"
+          }
         }
       }
     },
@@ -9533,6 +13103,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "azalıyor"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即將不足"
           }
         }
       }
@@ -9550,6 +13126,12 @@
             "state": "translated",
             "value": "%@ itibarıyla"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自 %@"
+          }
         }
       }
     },
@@ -9565,6 +13147,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "eski"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "過時"
           }
         }
       }
@@ -9582,6 +13170,12 @@
             "state": "translated",
             "value": "kullanılamıyor"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無法使用"
+          }
         }
       }
     },
@@ -9597,6 +13191,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "bilinmiyor"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未知"
           }
         }
       }
@@ -9614,6 +13214,12 @@
             "state": "translated",
             "value": "güncelleme var"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有可用更新"
+          }
         }
       }
     },
@@ -9629,6 +13235,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "kullanıldı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已用"
           }
         }
       }
@@ -9646,6 +13258,12 @@
             "state": "translated",
             "value": "çok düşük"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "非常低"
+          }
         }
       }
     },
@@ -9661,6 +13279,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "bekleniyor"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待中"
           }
         }
       }
@@ -9678,6 +13302,12 @@
             "state": "translated",
             "value": "ısıtıldı"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已預熱"
+          }
         }
       }
     },
@@ -9693,6 +13323,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "ısınıyor"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預熱中"
           }
         }
       }
@@ -9710,6 +13346,12 @@
             "state": "translated",
             "value": "hafta"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "週"
+          }
         }
       }
     },
@@ -9722,6 +13364,12 @@
           }
         },
         "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "~/.%@-work"
+          }
+        },
+        "zh-Hant": {
           "stringUnit": {
             "state": "translated",
             "value": "~/.%@-work"
@@ -9742,6 +13390,12 @@
             "state": "translated",
             "value": "~/.claude · varsayılan"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "~/.claude · 預設"
+          }
         }
       }
     },
@@ -9758,6 +13412,12 @@
             "state": "translated",
             "value": "~/.codex · varsayılan"
           }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "~/.codex · 預設"
+          }
         }
       }
     },
@@ -9773,6 +13433,12 @@
           "stringUnit": {
             "state": "translated",
             "value": "≥%%%lld"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "≥%lld%%"
           }
         }
       }

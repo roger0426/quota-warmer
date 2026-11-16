@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Fail if the String Catalog is missing or has an unfinished Turkish translation.
+"""Fail if the String Catalog is missing or has an unfinished translation
+(Turkish and Traditional Chinese).
 
 Checks every key in Sources/QuotaWarmer/Resources/Localizable.xcstrings:
-  - a `tr` localization exists, with state "translated" and a non-empty value;
-  - the `tr` value uses the same format placeholders (%@, %lld, ...) in the
+  - each target localization (`tr`, `zh-Hant`) exists, with state "translated" and a non-empty value;
+  - its value uses the same format placeholders (%@, %lld, ...) in the
     same order as the English key, so interpolation still fills every slot.
 
 Run after `scripts/sync-localizations.py` (see CLAUDE.md, "Localization").
@@ -17,7 +18,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CATALOG = os.path.join(HERE, "..", "Sources", "QuotaWarmer", "Resources", "Localizable.xcstrings")
-TARGET = "tr"
+TARGETS = ("tr", "zh-Hant")
 
 # `%%` is a literal percent sign, not a placeholder; everything else is.
 PLACEHOLDER = re.compile(r"%%|%(?:\d+\$)?l*[dfu@]")
@@ -40,18 +41,19 @@ def main():
     for key, entry in sorted(strings.items()):
         if entry.get("shouldTranslate") is False:
             continue
-        unit = entry.get("localizations", {}).get(TARGET, {}).get("stringUnit")
-        if unit is None:
-            problems.append("missing %s: %r" % (TARGET, key))
-            continue
-        state = unit.get("state")
-        value = unit.get("value", "")
-        if state != "translated":
-            problems.append("state %r (want 'translated'): %r" % (state, key))
-        if not value.strip() and key.strip():
-            problems.append("empty %s value: %r" % (TARGET, key))
-        if placeholders(key) != placeholders(value):
-            problems.append("placeholder mismatch %r -> %r" % (key, value))
+        for target in TARGETS:
+            unit = entry.get("localizations", {}).get(target, {}).get("stringUnit")
+            if unit is None:
+                problems.append("missing %s: %r" % (target, key))
+                continue
+            state = unit.get("state")
+            value = unit.get("value", "")
+            if state != "translated":
+                problems.append("%s state %r (want 'translated'): %r" % (target, state, key))
+            if not value.strip() and key.strip():
+                problems.append("empty %s value: %r" % (target, key))
+            if placeholders(key) != placeholders(value):
+                problems.append("%s placeholder mismatch %r -> %r" % (target, key, value))
 
     if problems:
         for line in problems:
@@ -59,7 +61,7 @@ def main():
         print("FAIL: %d problem(s) across %d keys" % (len(problems), len(strings)))
         return 1
 
-    print("OK: %d keys, all with a translated %s value and matching placeholders" % (len(strings), TARGET))
+    print("OK: %d keys, all with translated %s values and matching placeholders" % (len(strings), ", ".join(TARGETS)))
     return 0
 
 

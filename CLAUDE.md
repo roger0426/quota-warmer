@@ -91,13 +91,14 @@ The subagents preload their matching skills through Claude Code's `skills:` fron
 
 ## Localization and accessibility
 
-UI copy is English (source) plus Turkish, in `Sources/QuotaWarmer/Resources/Localizable.xcstrings`.
+UI copy is English (source) plus Turkish and Traditional Chinese (`zh-Hant`), in `Sources/QuotaWarmer/Resources/Localizable.xcstrings`.
 
 - SwiftUI literals (`Text("…")`, `Button("…")`, `.help("…")`) localize automatically. Helpers that receive copy must take `LocalizedStringKey` (or `LocalizedStringResource`), not `String`, or the literal is shown untranslated.
 - Strings built in Models or services use `String(localized:)`, with interpolation, never concatenation. Pass `locale:` only when the text must stay English (the event log does this).
 - Not localized, on purpose: log/diagnostic lines, UserDefaults keys, URL scheme tokens, event-log JSON, `status.json` fields, and brand names.
-- Workflow: add the string in code, run a clean `xcodebuild … -derivedDataPath /tmp/dd-<name> clean build`, then `python3 scripts/sync-localizations.py /tmp/dd-<name>` to add the key, add its Turkish value, and run `python3 scripts/check-localizations.py`. CI runs the checker before `swift test`.
+- Workflow: add the string in code, run a clean `xcodebuild … -derivedDataPath /tmp/dd-<name> clean build`, then `python3 scripts/sync-localizations.py /tmp/dd-<name>` to add the key, add its Turkish and Traditional Chinese values, and run `python3 scripts/check-localizations.py`. CI runs the checker before `swift test`.
 - Turkish terms: warm-up → "ısıtma", quota → "kota", window → "pencere", reset → "sıfırlanma". Percent goes before the number (`%46 kaldı`); durations use `dk`, `sa`, `g`, `sn`.
+- Traditional Chinese terms (Taiwan usage): warm-up → 「預熱」, quota → 「額度」, window → 「時段」, reset → 「重置」, account → 「帳號」, menu bar → 「選單列」, widget → 「小工具」, Monitor → 「監看」, Auto-warm → 「自動預熱」. Placeholders keep the English order (the checker compares them). Compact durations keep `d`/`h`/`m`/`s`.
 - Accessibility: every icon-only control has a label (`.accessibilityLabel`, plus `.help` where useful). Status is never color-only: pair dots and bars with a word or symbol. Keep `DS.C` tokens at WCAG AA (4.5:1 text, 3:1 UI); check against both themes when changing a color. Respect `accessibilityReduceMotion` for animation.
 
 ## Release

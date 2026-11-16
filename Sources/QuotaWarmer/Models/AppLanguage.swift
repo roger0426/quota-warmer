@@ -11,6 +11,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
     case system
     case english = "en"
     case turkish = "tr"
+    case traditionalChinese = "zh-Hant"
 
     static let defaultsKey = "AppleLanguages"
 
@@ -23,6 +24,7 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         case .system:  return String(localized: "System")
         case .english: return "English"
         case .turkish: return "Türkçe"
+        case .traditionalChinese: return "繁體中文"
         }
     }
 
@@ -34,8 +36,14 @@ enum AppLanguage: String, CaseIterable, Identifiable {
               let first = (defaults.persistentDomain(forName: domain)?[defaultsKey] as? [String])?.first
         else { return .system }
         // "tr", "tr-TR" and "tr_TR" all mean Turkish.
-        let code = first.split(whereSeparator: { $0 == "-" || $0 == "_" }).first.map(String.init) ?? first
-        return AppLanguage(rawValue: code.lowercased()) ?? .system
+        let parts = first.split(whereSeparator: { $0 == "-" || $0 == "_" }).map { $0.lowercased() }
+        let code = parts.first ?? first.lowercased()
+        if code == "zh" {
+            // Only Traditional Chinese is bundled: zh-Hant, zh-TW, zh-HK, zh-MO.
+            let traditional = parts.dropFirst().contains { ["hant", "tw", "hk", "mo"].contains($0) }
+            return traditional ? .traditionalChinese : .system
+        }
+        return AppLanguage(rawValue: code) ?? .system
     }
 
     /// Writes the choice; it applies from the next launch.
