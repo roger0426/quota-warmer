@@ -142,31 +142,122 @@ private let weeklyDuration: TimeInterval = 7 * 86400
 
 // MARK: - Views
 
-/// Ring sizes for a gauge drawn in a `size` × `size` square. The rings are
-/// kept thin, close to the Batteries widget's proportions.
+/// Sizes for a gauge drawn in a `size` × `size` square.
 struct GaugeMetrics {
     let line: CGFloat
-    let outer: CGFloat
-    let inner: CGFloat
+    let diameter: CGFloat
     let glyph: CGFloat
 
     init(size: CGFloat) {
-        line = max(2.5, size * 0.075)
-        let gap = line * 0.55
+        line = max(3, size * 0.09)
         // Leave room for the time knob, which is slightly wider than the ring.
-        outer = size - line * 1.2
-        inner = outer - 2 * (line + gap)
-        glyph = max(8, inner - line * 3.2)
+        diameter = size - line * 1.2
+        glyph = max(10, diameter - line * 3.2)
     }
 }
 
-/// Battery-style gauge for one account: the outer ring is the session (5h)
-/// window, the inner ring the weekly window, both as quota used. A white dot
-/// on each ring marks how far through the window the clock is, so a fill that
-/// runs ahead of its dot means quota is being used faster than time.
+/// One arc of the split ring: the clockwise range `low…high` in screen angles
+/// (degrees, clockwise from 3 o'clock), cut into `segments` equal pieces, and
+/// filled from its left end, which is `low` or `high` depending on the arc.
+struct RingArc {
+    let low: Double
+    let high: Double
+    let segments: Int
+    /// The fill starts at `low` and runs clockwise; otherwise it starts at
+    /// `high` and runs anticlockwise.
+    let fillsClockwise: Bool
+    /// Angle between neighbouring segments.
+    let segmentGap: Double
+
+    var length: Double { high - low }
+
+    /// Angle `fraction` (0…1) of the way along the arc from its left end.
+    func angle(at fraction: Double) -> Double {
+        fillsClockwise ? low + length * fraction : high - length * fraction
+    }
+
+    /// The segments as clockwise `(start, end)` ranges, clipped to `range`.
+    func pieces(within range: ClosedRange<Double>? = nil) -> [(Double, Double)] {
+        let count = max(segments, 1)
+        let piece = (length - segmentGap * Double(count - 1)) / Double(count)
+        return (0..<count).compactMap { index in
+            let start = low + Double(index) * (piece + segmentGap)
+            let end = start + piece
+            let clippedStart = max(start, range?.lowerBound ?? start)
+            let clippedEnd = min(end, range?.upperBound ?? end)
+            return clippedEnd > clippedStart ? (clippedStart, clippedEnd) : nil
+        }
+    }
+
+    /// The part of the arc a `fraction` (0…1) fill covers, as a clockwise range.
+    func filledRange(_ fraction: Double) -> ClosedRange<Double> {
+        let fill = length * fraction
+        return fillsClockwise ? low...(low + fill) : (high - fill)...high
+    }
+}
+
+/// Where the two arcs of the split ring sit. The weekly arc is centred on
+/// 12 o'clock and spans `topSpan` in 7 segments, one per day; the session arc
+/// takes the rest of the circle in 5 segments, one per hour. The segment count
+/// is what tells the two apart, so it still reads when the system drains the
+/// colour (tinted, clear or vibrant widgets). Both fill from their left end
+/// towards the right: the weekly arc clockwise over the top, the session arc
+/// anticlockwise round the bottom.
+struct SplitRing {
+    /// Degrees of the circle given to the weekly arc.
+    static let defaultTopSpan: Double = 120
+
+    let weekly: RingArc
+    let session: RingArc
+
+    init(topSpan: Double, line: CGFloat, diameter: CGFloat) {
+        let radius = Double(diameter) / 2
+        let degrees = { (length: Double) in length / radius * 180 / .pi }
+        // Between the arcs: two cap radii plus a little air. Between the
+        // segments of one arc: a bit less, so the arcs still read as two.
+        let gap = degrees(Double(line) * 1.9)
+        let segmentGap = degrees(Double(line) * 1.35)
+        let leftSplit = 270 - topSpan / 2
+        weekly = RingArc(
+            low: leftSplit + gap / 2, high: leftSplit + topSpan - gap / 2,
+            segments: 7, fillsClockwise: true, segmentGap: segmentGap
+        )
+        session = RingArc(
+            low: leftSplit + topSpan + gap / 2, high: leftSplit + 360 - gap / 2,
+            segments: 5, fillsClockwise: false, segmentGap: segmentGap
+        )
+    }
+}
+
+/// Clockwise pieces of a circle, stroked with round caps.
+struct ArcPieces: View {
+    let pieces: [(Double, Double)]
+    let line: CGFloat
+
+    var body: some View {
+        ZStack {
+            ForEach(pieces.indices, id: \.self) { index in
+                let (start, end) = pieces[index]
+                Circle()
+                    .trim(from: 0, to: (end - start) / 360)
+                    .stroke(style: StrokeStyle(lineWidth: line, lineCap: .round))
+                    .rotationEffect(.degrees(start))
+            }
+        }
+    }
+}
+
+/// Gauge for one account: a single ring split in two. The short arc over the
+/// top is the weekly window (7 day segments), the long arc round the bottom the
+/// session (5h) window (5 hour segments), both as quota used and both filling
+/// left to right. A white dot on each arc marks how far through the window the
+/// clock is, so a fill that runs ahead of its dot means quota is being used
+/// faster than time.
 struct QuotaGauge: View {
     let provider: WidgetProvider
     let now: Date
+    var topSpan: Double = SplitRing.defaultTopSpan
+    @Environment(\.colorScheme) private var colorScheme
 
     private var session: RingValue { RingValue(window: provider.session, duration: sessionDuration, now: now) }
     private var weekly: RingValue { RingValue(window: provider.weekly, duration: weeklyDuration, now: now) }
@@ -174,57 +265,83 @@ struct QuotaGauge: View {
     var body: some View {
         GeometryReader { geo in
             let metrics = GaugeMetrics(size: min(geo.size.width, geo.size.height))
+            let split = SplitRing(topSpan: topSpan, line: metrics.line, diameter: metrics.diameter)
             ZStack {
-                ring(session, diameter: metrics.outer, line: metrics.line)
-                ring(weekly, diameter: metrics.inner, line: metrics.line)
+                SplitRingTracks(split: split, line: metrics.line, opacity: 0.13)
+                arc(weekly, on: split.weekly, metrics: metrics)
+                arc(session, on: split.session, metrics: metrics)
                 glyph
                     .frame(width: metrics.glyph, height: metrics.glyph)
             }
+            .frame(width: metrics.diameter, height: metrics.diameter)
             .frame(width: geo.size.width, height: geo.size.height)
         }
         .aspectRatio(1, contentMode: .fit)
     }
 
-    private func ring(_ value: RingValue, diameter: CGFloat, line: CGFloat) -> some View {
-        ZStack {
-            Circle().stroke(Color.primary.opacity(0.13), lineWidth: line)
+    /// The used fill and the time knob of one arc.
+    private func arc(_ value: RingValue, on arc: RingArc, metrics: GaugeMetrics) -> some View {
+        let radius = metrics.diameter / 2
+        let line = metrics.line
+        return ZStack {
             if let used = value.used, used > 0 {
-                Circle()
-                    .trim(from: 0, to: CGFloat(used) / 100)
-                    .stroke(value.color, style: StrokeStyle(lineWidth: line, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
+                ArcPieces(pieces: arc.pieces(within: arc.filledRange(Double(used) / 100)), line: line)
+                    .foregroundStyle(value.color)
+                    // In tinted / clear widgets the fill takes the accent tint
+                    // and the tracks stay in the primary group.
+                    .widgetAccentable()
             }
             if let elapsed = value.elapsed {
+                let angle = arc.angle(at: elapsed) * .pi / 180
                 // A knob a little wider than the ring, with a dark rim so it
-                // reads on the track and on a green or red fill alike.
+                // reads on the track and on a green or red fill alike. On a
+                // light background the white knob needs a heavier rim.
+                let light = colorScheme == .light
                 Circle()
                     .fill(Color.white)
-                    .overlay(Circle().stroke(Color.black.opacity(0.55), lineWidth: max(0.75, line * 0.14)))
+                    .overlay(Circle().stroke(
+                        Color.black.opacity(light ? 0.85 : 0.55),
+                        lineWidth: light ? max(1.2, line * 0.26) : max(0.75, line * 0.14)
+                    ))
                     .frame(width: line * 1.05, height: line * 1.05)
-                    .offset(y: -diameter / 2)
-                    .rotationEffect(.degrees(360 * elapsed))
+                    .offset(x: radius * cos(angle), y: radius * sin(angle))
             }
         }
-        .frame(width: diameter, height: diameter)
+        .frame(width: metrics.diameter, height: metrics.diameter)
     }
 
-    /// The provider glyph with the account's initial, as in the app's sidebar.
+    /// The provider glyph, with the account's initial in its centre.
     private var glyph: some View {
         Image(provider.tool == "claude" ? "ClaudeCode" : "Codex")
             .resizable()
             .renderingMode(.template)
             .scaledToFit()
             .foregroundStyle(.primary)
-            .overlay(alignment: .bottomTrailing) {
+            .overlay {
                 if let badge = provider.badge {
                     Text(badge)
-                        .font(.system(size: 8, weight: .heavy, design: .rounded))
+                        .font(.system(size: 9, weight: .heavy, design: .rounded))
                         .foregroundStyle(.background)
-                        .frame(minWidth: 11, minHeight: 11)
+                        .frame(minWidth: 13, minHeight: 13)
                         .background(Color.primary, in: Circle())
-                        .offset(x: 5, y: 4)
+                        .overlay(Circle().stroke(.background, lineWidth: 1.5))
                 }
             }
+    }
+}
+
+/// The empty, segmented tracks of a split ring.
+struct SplitRingTracks: View {
+    let split: SplitRing
+    let line: CGFloat
+    let opacity: Double
+
+    var body: some View {
+        ZStack {
+            ArcPieces(pieces: split.weekly.pieces(), line: line)
+            ArcPieces(pieces: split.session.pieces(), line: line)
+        }
+        .foregroundStyle(Color.primary.opacity(opacity))
     }
 }
 
@@ -262,15 +379,17 @@ struct QuotaCell: View {
 
 /// Empty slot: the two tracks only, as the Batteries widget draws an unused ring.
 struct EmptyGauge: View {
+    var topSpan: Double = SplitRing.defaultTopSpan
+
     var body: some View {
         GeometryReader { geo in
             let metrics = GaugeMetrics(size: min(geo.size.width, geo.size.height))
-            ZStack {
-                Circle().stroke(Color.primary.opacity(0.08), lineWidth: metrics.line)
-                    .frame(width: metrics.outer, height: metrics.outer)
-                Circle().stroke(Color.primary.opacity(0.08), lineWidth: metrics.line)
-                    .frame(width: metrics.inner, height: metrics.inner)
-            }
+            SplitRingTracks(
+                split: SplitRing(topSpan: topSpan, line: metrics.line, diameter: metrics.diameter),
+                line: metrics.line,
+                opacity: 0.08
+            )
+            .frame(width: metrics.diameter, height: metrics.diameter)
             .frame(width: geo.size.width, height: geo.size.height)
         }
         .aspectRatio(1, contentMode: .fit)
@@ -330,7 +449,7 @@ struct QuotaWarmerWidget: Widget {
             QuotaWidgetView(entry: entry)
         }
         .configurationDisplayName("Quota")
-        .description("Quota used per account: session on the outer ring, week on the inner ring. The white dot is the time elapsed.")
+        .description("Quota used per account: week on the top arc (7 days), session on the bottom arc (5 hours), both filling left to right. The white dot is the time elapsed.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
