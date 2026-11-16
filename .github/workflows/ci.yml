@@ -84,7 +84,15 @@ jobs:
           set -euo pipefail
           APP_PATH=$(find /tmp/QuotaWarmerCIReleaseDerivedData -name "${APP_NAME}.app" -maxdepth 8 | head -1)
           test -d "${APP_PATH}"
-          codesign --force --deep --sign - "${APP_PATH}"
+          # Inside out, never --deep: a deep re-sign would drop the widget's
+          # sandbox entitlements, and macOS does not load an unsandboxed widget.
+          APPEX="${APP_PATH}/Contents/PlugIns/QuotaWarmerWidget.appex"
+          test -d "${APPEX}"
+          codesign --force --sign - \
+            --entitlements Sources/QuotaWarmerWidget/QuotaWarmerWidget.entitlements "${APPEX}"
+          codesign --force --sign - "${APP_PATH}"
+          codesign -d --entitlements - "${APPEX}" > /tmp/widget-entitlements.txt 2>/dev/null
+          grep -q "com.apple.security.app-sandbox" /tmp/widget-entitlements.txt
           codesign --verify --deep --strict "${APP_PATH}"
           ditto -c -k --keepParent "${APP_PATH}" "${APP_NAME}.zip"
           shasum -a 256 "${APP_NAME}.zip"

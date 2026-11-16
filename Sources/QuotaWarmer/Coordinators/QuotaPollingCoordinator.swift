@@ -73,7 +73,9 @@ final class QuotaPollingCoordinator {
                 snapshot: state.quotaSnapshot
             )
         }
-        QuotaStatusExport.write(QuotaStatusExport.make(entries))
+        let file = QuotaStatusExport.make(entries)
+        QuotaStatusExport.write(file)
+        QuotaWidgetReload.reloadIfChanged(file)
     }
 
     // MARK: - Refresh entry points

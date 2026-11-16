@@ -72,6 +72,9 @@ struct HistoryTabView: View {
             .padding(.horizontal, DS.Page.side)
             .padding(.top, DS.Page.top)
             .padding(.bottom, DS.Page.bottom)
+            // History shows every chart at once: the panel grows to its
+            // content, and scrolls only when the screen is too short.
+            .reportsPanelHeight()
         }
         .background(DS.C.bg)
         .task(id: loadKey) {

@@ -13,6 +13,9 @@ targets:
     deploymentTarget: "14.0"
     sources:
       - path: Sources/QuotaWarmer
+    dependencies:
+      # Desktop / Notification Centre widget; embedded in Contents/PlugIns.
+      - target: QuotaWarmerWidget
     info:
       path: Sources/QuotaWarmer/Info.plist
       properties:
@@ -45,3 +48,37 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         LOCALIZATION_PREFERS_STRING_CATALOGS: "YES"
         SWIFT_EMIT_LOC_STRINGS: "YES"
+
+  # Sandboxed WidgetKit extension. It only reads the status.json the app
+  # writes (see Sources/QuotaWarmerWidget/QuotaWarmerWidget.entitlements).
+  QuotaWarmerWidget:
+    type: app-extension
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Sources/QuotaWarmerWidget
+        excludes:
+          - "*.entitlements"
+      # Provider glyphs shown inside the rings.
+      - path: Sources/QuotaWarmer/Assets.xcassets
+    info:
+      path: Sources/QuotaWarmerWidget/Info.plist
+      properties:
+        CFBundleDisplayName: QuotaWarmer
+        CFBundleName: QuotaWarmerWidget
+        CFBundleShortVersionString: "1.4.4"
+        CFBundleVersion: "1"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.quotawarmer.app.widget
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGNING_REQUIRED: "NO"
+        CODE_SIGNING_ALLOWED: "YES"
+        CODE_SIGN_ENTITLEMENTS: Sources/QuotaWarmerWidget/QuotaWarmerWidget.entitlements
+        ENABLE_HARDENED_RUNTIME: "YES"
+        ENABLE_APP_SANDBOX: "YES"
+        SWIFT_VERSION: "5.9"
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        SKIP_INSTALL: "YES"

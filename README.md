@@ -38,6 +38,7 @@ By default it only **monitors**: it watches live quota snapshots and shows each 
 
 - **Manual controls**: refresh quota or warm a provider directly from the popover; collapse either provider card.
 - **Right-click menu**: jump to stats or settings, set the diagnostics level, or quit.
+- **Desktop widget**: battery-style rings for each account's session quota (small) or session and weekly quota (medium). The widget is sandboxed and only reads the `status.json` the app writes; add it from the desktop's Edit Widgets… gallery after the app has run once from `/Applications`.
 - **History, notifications and updates**: recent checks, warm-ups and failures in Settings; optional reminders before a window resets and when a window is claimed; in-app update checks.
 - **Launch at login**: runs quietly as a menu bar utility.
 - **Statusline**: show live quota in Claude Code's status line, tmux or starship (see [Statusline](#statusline)).

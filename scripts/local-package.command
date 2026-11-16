@@ -59,7 +59,13 @@ SIGN_IDENTITY="${QW_SIGN_IDENTITY:-$(security find-identity -v -p codesigning 2>
   | grep -o '"Apple Development: [^"]*"' | head -1 | tr -d '"')}"
 if [ -n "$SIGN_IDENTITY" ]; then
   echo "Signing with stable identity: $SIGN_IDENTITY"
-  codesign --force --deep --options runtime --sign "$SIGN_IDENTITY" "$APP_DEST"
+  # Inside out, not --deep: the widget keeps its sandbox entitlements.
+  WIDGET="$APP_DEST/Contents/PlugIns/QuotaWarmerWidget.appex"
+  if [ -d "$WIDGET" ]; then
+    codesign --force --options runtime --sign "$SIGN_IDENTITY" \
+      --entitlements "$(dirname "$0")/../Sources/QuotaWarmerWidget/QuotaWarmerWidget.entitlements" "$WIDGET"
+  fi
+  codesign --force --options runtime --sign "$SIGN_IDENTITY" "$APP_DEST"
 else
   echo "WARNING: no Apple Development identity found; leaving ad-hoc signature."
   echo "         The Keychain prompt will keep reappearing after each rebuild."
