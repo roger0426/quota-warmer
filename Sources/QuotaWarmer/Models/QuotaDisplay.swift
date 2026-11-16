@@ -60,6 +60,33 @@ enum QuotaDisplay {
     /// Settings → "Colorful Quota Bars". On (default): bars are blue, or red
     /// from the warning threshold up. Off: the original single-color (ink) bars.
     static let colorfulBarsKey = AppSettings.Key.colorfulQuotaBars
+    static let menuBarStyleKey = AppSettings.Key.menuBarStyle
+
+    /// Menu-bar look per account.
+    enum MenuBarStyle: String, CaseIterable {
+        /// Logo plus two small bars (5-hour, weekly), filled with what is used.
+        case gauge
+        /// Logo plus percent and countdown text.
+        case text
+
+        static func stored(defaults: UserDefaults = .standard) -> MenuBarStyle {
+            defaults.string(forKey: menuBarStyleKey).flatMap(MenuBarStyle.init(rawValue:)) ?? .gauge
+        }
+
+        var label: String {
+            switch self {
+            case .gauge: return String(localized: "Bars")
+            case .text:  return String(localized: "Text")
+            }
+        }
+    }
+
+    /// Fill (0…1 of quota used) for a menu-bar gauge bar; nil draws an empty
+    /// track (no reading, or a window still settling).
+    static func gaugeUsedFraction(remainingFraction: Double?, settling: Bool) -> Double? {
+        guard let remainingFraction, !settling else { return nil }
+        return Double(usedPercent(remainingFraction: remainingFraction)) / 100
+    }
 
     /// Severity to color a row with, or nil for the plain single-color style.
     /// A row with no data, or one still settling after a rollover, stays in the

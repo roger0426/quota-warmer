@@ -58,9 +58,14 @@ struct AppSettings: @unchecked Sendable {
         // Appearance
         static let colorfulQuotaBars = "colorfulQuotaBars"
         static let usageWarningPercent = "usageWarningPercent"
+        /// Menu-bar item per account: "gauge" (logo + 5-hour and weekly
+        /// bars, default) or "text" (logo + percent and countdown).
+        static let menuBarStyle = "menuBarStyle"
         static let appearanceMode = "appearanceMode"
         static let historyRange = "historyRange"
         static let historyProvider = "historyProvider"
+        /// Time range of the usage bars in the hover detail window.
+        static let detailHistoryRange = "detailHistoryRange"
         /// Selected page of the standalone Settings window.
         static let settingsWindowPane = "settingsWindowPane"
 

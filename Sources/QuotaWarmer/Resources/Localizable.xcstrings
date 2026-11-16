@@ -993,6 +993,38 @@
         }
       }
     },
+    "1 Day": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 Day"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 Gün"
+          }
+        }
+      }
+    },
+    "1 Hour": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 Hour"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 Saat"
+          }
+        }
+      }
+    },
     "10m": {
       "localizations": {
         "en": {
@@ -1005,6 +1037,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "10 dk"
+          }
+        }
+      }
+    },
+    "12 Hours": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "12 Hours"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "12 Saat"
+          }
+        }
+      }
+    },
+    "14 Days": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "14 Days"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "14 Gün"
           }
         }
       }
@@ -1037,6 +1101,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "24sa"
+          }
+        }
+      }
+    },
+    "28 Days": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "28 Days"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "28 Gün"
+          }
+        }
+      }
+    },
+    "3 Days": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 Days"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 Gün"
+          }
+        }
+      }
+    },
+    "3 Hours": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 Hours"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3 Saat"
           }
         }
       }
@@ -1101,6 +1213,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "30 dk"
+          }
+        }
+      }
+    },
+    "5-hour and weekly bars, red from the warning level": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5-hour and weekly bars, red from the warning level"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "5 saatlik ve haftalık çubuklar, uyarı eşiğinden itibaren kırmızı"
           }
         }
       }
@@ -1197,6 +1325,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "5 dk"
+          }
+        }
+      }
+    },
+    "6 Hours": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "6 Hours"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "6 Saat"
+          }
+        }
+      }
+    },
+    "7 Days": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 Days"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 Gün"
           }
         }
       }
@@ -1965,6 +2125,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Biriken sıfırlamalar"
+          }
+        }
+      }
+    },
+    "Bars": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bars"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çubuklar"
           }
         }
       }
@@ -3761,22 +3937,6 @@
         }
       }
     },
-    "Last 24 Hours": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Last 24 Hours"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Son 24 Saat"
-          }
-        }
-      }
-    },
     "Last 30 Days": {
       "localizations": {
         "en": {
@@ -4109,6 +4269,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Elle yenileme"
+          }
+        }
+      }
+    },
+    "Menu Bar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menu Bar"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menü Çubuğu"
           }
         }
       }
@@ -5309,6 +5485,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "5 saatlik pencere başına zirve"
+          }
+        }
+      }
+    },
+    "Percent and time to reset": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Percent and time to reset"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yüzde ve sıfırlanmaya kalan süre"
           }
         }
       }
@@ -7217,6 +7409,22 @@
         }
       }
     },
+    "Text": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metin"
+          }
+        }
+      }
+    },
     "That account is no longer in QuotaWarmer.": {
       "localizations": {
         "en": {
@@ -7521,6 +7729,22 @@
         }
       }
     },
+    "Time range": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time range"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zaman aralığı"
+          }
+        }
+      }
+    },
     "To read your quota, QuotaWarmer reads the sign-in token Claude Code and Codex already store on your Mac (Keychain or their auth files). The token is only sent to the provider's own usage endpoint. macOS may ask once for your login password when you press Refresh; background checks never show a Keychain prompt.": {
       "localizations": {
         "en": {
@@ -7773,6 +7997,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Güncelleniyor..."
+          }
+        }
+      }
+    },
+    "Usage": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usage"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kullanım"
           }
         }
       }

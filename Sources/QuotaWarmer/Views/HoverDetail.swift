@@ -6,9 +6,10 @@ import AppKit
 // (ring gauges, the last 24 hours, update / warm-up times).
 //
 // It is its own borderless window rather than an in-panel overlay, so it is
-// never clipped by the panel's rounded shape. It never becomes key (and
-// ignores the mouse), so showing it can't trigger the panel's
-// close-on-resign-key.
+// never clipped by the panel's rounded shape. It never becomes key, so
+// showing or clicking it can't trigger the panel's close-on-resign-key.
+// Like iStat Menus, the cursor can move from the card into the window (for
+// its range menu): it stays open while either is hovered or a menu is open.
 
 @MainActor
 final class HoverDetailPresenter {
@@ -19,22 +20,29 @@ final class HoverDetailPresenter {
     /// Identifies which hover source owns the window, so a late "hide" from a
     /// card the cursor already left can't close the next card's window.
     private(set) var ownerID: String?
+    /// Transparent margin around the menu-bar panel's rounded body (see
+    /// `MenuContent`'s outer padding).
+    static let panelInset: CGFloat = 2
 
     func show(_ content: AnyView, ownerID: String, anchor: NSRect, beside host: NSWindow) {
         let panel = window ?? makeWindow()
         window = panel
         self.ownerID = ownerID
-        hosting?.rootView = content
+        cardHovered = true
+        observeMenus()
+        hosting?.rootView = AnyView(content.onHover { [weak self] in self?.detailHover($0) })
         guard let hosting else { return }
         let size = hosting.fittingSize
         panel.setContentSize(size)
 
         let hostFrame = host.frame
         let visible = (host.screen ?? NSScreen.main)?.visibleFrame ?? hostFrame
-        // Prefer the left side (the panel usually sits near the right end of
-        // the menu bar); fall back to the right when there is no room.
-        var x = hostFrame.minX - size.width - 8
-        if x < visible.minX + 4 { x = hostFrame.maxX + 8 }
+        // Snug against the panel, like iStat Menus sub-menus. The panel's
+        // visible edge is `panelInset` inside its window. Prefer the left side
+        // (the panel usually sits near the right end of the menu bar); fall
+        // back to the right when there is no room.
+        var x = hostFrame.minX + Self.panelInset - size.width
+        if x < visible.minX + 4 { x = hostFrame.maxX - Self.panelInset }
         var y = anchor.maxY - size.height
         y = min(max(y, visible.minY + 4), visible.maxY - size.height - 4)
         panel.setFrameOrigin(NSPoint(x: x, y: y))
@@ -44,7 +52,57 @@ final class HoverDetailPresenter {
     func hide(ownerID: String? = nil) {
         if let ownerID, ownerID != self.ownerID { return }
         self.ownerID = nil
+        cardHovered = false
+        detailHovered = false
         window?.orderOut(nil)
+    }
+
+    // MARK: Hover hand-off between the card and the window
+
+    private var cardHovered = false
+    private var detailHovered = false
+    private var menuOpen = false
+    private var observers: [NSObjectProtocol] = []
+    /// Time to cross the gap from the card to the window.
+    private static let leaveGrace: TimeInterval = 0.2
+
+    /// The owning card was entered or left.
+    func cardHover(_ inside: Bool, ownerID: String) {
+        guard ownerID == self.ownerID else { return }
+        cardHovered = inside
+        if !inside { scheduleHideCheck() }
+    }
+
+    /// The detail window itself was entered or left.
+    func detailHover(_ inside: Bool) {
+        detailHovered = inside
+        if !inside { scheduleHideCheck() }
+    }
+
+    private func scheduleHideCheck() {
+        let owner = ownerID
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.leaveGrace) { [weak self] in
+            guard let self, owner != nil, owner == self.ownerID,
+                  !self.cardHovered, !self.detailHovered, !self.menuOpen else { return }
+            self.hide()
+        }
+    }
+
+    private func observeMenus() {
+        guard observers.isEmpty else { return }
+        let center = NotificationCenter.default
+        observers.append(center.addObserver(forName: NSMenu.didBeginTrackingNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.menuOpen = true }
+        })
+        observers.append(center.addObserver(forName: NSMenu.didEndTrackingNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                self.menuOpen = false
+                // The cursor may have left while the menu was open.
+                self.detailHovered = self.window.map { NSMouseInRect(NSEvent.mouseLocation, $0.frame, false) } ?? false
+                self.scheduleHideCheck()
+            }
+        })
     }
 
     private func makeWindow() -> NSPanel {
@@ -60,7 +118,8 @@ final class HoverDetailPresenter {
         panel.backgroundColor = .clear
         panel.hasShadow = true
         panel.level = .popUpMenu
-        panel.ignoresMouseEvents = true
+        panel.ignoresMouseEvents = false
+        panel.animationBehavior = .none
         panel.hidesOnDeactivate = false
         panel.collectionBehavior = [.transient, .ignoresCycle]
         self.hosting = hosting
@@ -101,7 +160,8 @@ private struct HoverDetailModifier<Detail: View>: ViewModifier {
                         HoverDetailPresenter.shared.show(AnyView(detail()), ownerID: id, anchor: rect, beside: window)
                     }
                 } else {
-                    HoverDetailPresenter.shared.hide(ownerID: id)
+                    // Stays open if the cursor moves on into the window.
+                    HoverDetailPresenter.shared.cardHover(false, ownerID: id)
                 }
             }
             .onDisappear { HoverDetailPresenter.shared.hide(ownerID: id) }
@@ -123,7 +183,10 @@ struct ProviderDetailView: View {
     @ObservedObject var state: ToolState
     @AppStorage(QuotaDisplay.colorfulBarsKey) private var colorfulBars = true
     @AppStorage(QuotaUsageLevel.warningPercentKey) private var warningPercent = QuotaUsageLevel.defaultWarningPercent
+    @AppStorage(AppSettings.Key.detailHistoryRange) private var rangeRaw = DetailHistoryRange.day.rawValue
     @State private var samples: [QuotaSample] = []
+
+    private var range: DetailHistoryRange { DetailHistoryRange(rawValue: rangeRaw) ?? .day }
 
     private static let width: CGFloat = 292
 
@@ -141,8 +204,8 @@ struct ProviderDetailView: View {
             RoundedRectangle(cornerRadius: DS.R.xl, style: .continuous)
                 .strokeBorder(DS.C.border, lineWidth: 0.5)
         )
-        .task(id: tool.storageKey) {
-            samples = await UsageHistoryStore.shared.samples(for: tool, since: Date().addingTimeInterval(-24 * 3600))
+        .task(id: "\(tool.storageKey)|\(rangeRaw)") {
+            samples = await UsageHistoryStore.shared.samples(for: tool, since: Date().addingTimeInterval(-range.seconds))
         }
     }
 
@@ -218,13 +281,16 @@ struct ProviderDetailView: View {
         return String(localized: "Resets \(date.formatted(style))")
     }
 
-    // MARK: Last 24 hours
+    // MARK: Usage over a chosen range
 
     private var historySection: some View {
-        let buckets = HourBucket.make(samples, hours: 24, now: Date())
+        let buckets = HourBucket.make(samples, span: range.seconds, count: range.bucketCount, now: Date())
         let peak = buckets.compactMap(\.session).max()
         return VStack(alignment: .leading, spacing: 6) {
-            DetailSectionTitle(title: "Last 24 Hours", value: peak.map { String(localized: "peak \(Int(($0 * 100).rounded()))%") })
+            HStack {
+                DetailSectionTitle(title: "Usage", value: peak.map { String(localized: "peak \(Int(($0 * 100).rounded()))%") })
+                rangeMenu
+            }
             HStack(alignment: .bottom, spacing: 2) {
                 ForEach(buckets) { bucket in
                     ZStack(alignment: .bottom) {
@@ -255,6 +321,26 @@ struct ProviderDetailView: View {
                 Text("now").font(.system(size: 9)).foregroundStyle(DS.C.textMuted)
             }
         }
+    }
+
+    /// iStat-style range pop-up: the current range, a menu of the others.
+    private var rangeMenu: some View {
+        Menu {
+            Picker(selection: $rangeRaw) {
+                ForEach(DetailHistoryRange.allCases) { option in
+                    Text(option.label).tag(option.rawValue)
+                }
+            } label: { EmptyView() }
+            .pickerStyle(.inline)
+        } label: {
+            Text(range.label)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(DS.C.text)
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.visible)
+        .fixedSize()
+        .accessibilityLabel(Text("Time range"))
     }
 
     private var clampedWarning: Int { QuotaUsageLevel.clampedWarningPercent(warningPercent) }
@@ -344,21 +430,64 @@ struct RingGauge<Label: View>: View {
     }
 }
 
-/// Highest session / weekly used fraction seen in each hour.
+/// Time ranges for the detail window's usage bars, like iStat Menus' graph
+/// range menu. Quota is read every few minutes, so nothing shorter than an
+/// hour.
+enum DetailHistoryRange: String, CaseIterable, Identifiable {
+    case hour1 = "1h", hours3 = "3h", hours6 = "6h", hours12 = "12h"
+    case day = "1d", days3 = "3d", days7 = "7d", days14 = "14d", days28 = "28d"
+
+    var id: String { rawValue }
+
+    var seconds: TimeInterval {
+        switch self {
+        case .hour1:   return 3600
+        case .hours3:  return 3 * 3600
+        case .hours6:  return 6 * 3600
+        case .hours12: return 12 * 3600
+        case .day:     return 86400
+        case .days3:   return 3 * 86400
+        case .days7:   return 7 * 86400
+        case .days14:  return 14 * 86400
+        case .days28:  return 28 * 86400
+        }
+    }
+
+    /// Bars across the chart: one per 5-minute reading for short ranges,
+    /// at most 48 so each stays wide enough to see.
+    var bucketCount: Int { min(48, max(12, Int(seconds / 300))) }
+
+    var label: String {
+        switch self {
+        case .hour1:   return String(localized: "1 Hour")
+        case .hours3:  return String(localized: "3 Hours")
+        case .hours6:  return String(localized: "6 Hours")
+        case .hours12: return String(localized: "12 Hours")
+        case .day:     return String(localized: "1 Day")
+        case .days3:   return String(localized: "3 Days")
+        case .days7:   return String(localized: "7 Days")
+        case .days14:  return String(localized: "14 Days")
+        case .days28:  return String(localized: "28 Days")
+        }
+    }
+}
+
+/// Highest session / weekly used fraction seen in each slice of a range.
 struct HourBucket: Identifiable {
     let id: Int
     let session: Double?
     let weekly: Double?
 
-    static func make(_ samples: [QuotaSample], hours: Int, now: Date) -> [HourBucket] {
-        let start = now.addingTimeInterval(-Double(hours) * 3600)
-        var session = [Double?](repeating: nil, count: hours)
-        var weekly = [Double?](repeating: nil, count: hours)
+    static func make(_ samples: [QuotaSample], span: TimeInterval, count: Int, now: Date) -> [HourBucket] {
+        let start = now.addingTimeInterval(-span)
+        let width = span / Double(count)
+        var session = [Double?](repeating: nil, count: count)
+        var weekly = [Double?](repeating: nil, count: count)
         for sample in samples where sample.t >= start && sample.t <= now {
-            let index = min(hours - 1, Int(sample.t.timeIntervalSince(start) / 3600))
+            let index = min(count - 1, Int(sample.t.timeIntervalSince(start) / width))
             if let s = sample.s { session[index] = max(session[index] ?? 0, s) }
             if let w = sample.w { weekly[index] = max(weekly[index] ?? 0, w) }
         }
-        return (0..<hours).map { HourBucket(id: $0, session: session[$0], weekly: weekly[$0]) }
+        return (0..<count).map { HourBucket(id: $0, session: session[$0], weekly: weekly[$0]) }
     }
 }

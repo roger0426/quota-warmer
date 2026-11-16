@@ -30,6 +30,7 @@ struct SettingsTabView: View {
     @AppStorage("morningPrewarmWeekdaysOnly") private var morningWeekdaysOnly: Bool = true
     @AppStorage(QuotaDisplay.colorfulBarsKey) private var colorfulBars: Bool = true
     @AppStorage(QuotaUsageLevel.warningPercentKey) private var warningPercent: Int = QuotaUsageLevel.defaultWarningPercent
+    @AppStorage(QuotaDisplay.menuBarStyleKey) private var menuBarStyleRaw = QuotaDisplay.MenuBarStyle.gauge.rawValue
     @State private var language = AppLanguage.stored()
     @AppStorage(AppearanceMode.defaultsKey) private var appearanceRaw = AppearanceMode.system.rawValue
 
@@ -106,6 +107,15 @@ struct SettingsTabView: View {
                                 .help("Restart QuotaWarmer in the chosen language")
                             }
                         }
+                    }
+
+                    Divider().background(DS.C.border).padding(.leading, 36)
+
+                    row(icon: "menubar.rectangle", title: "Menu Bar",
+                        subtitle: menuBarStyleRaw == QuotaDisplay.MenuBarStyle.text.rawValue
+                            ? "Percent and time to reset"
+                            : "5-hour and weekly bars, red from the warning level") {
+                        menuBarStylePicker
                     }
 
                     Divider().background(DS.C.border).padding(.leading, 36)
@@ -626,6 +636,18 @@ struct SettingsTabView: View {
             )
         ) { AppearanceMode.stored().apply() }
         .accessibilityLabel(Text("Theme"))
+    }
+
+    private var menuBarStylePicker: some View {
+        let styles = QuotaDisplay.MenuBarStyle.allCases
+        return segmentedPicker(
+            options: styles.enumerated().map { (label: $1.label, value: $0) },
+            selected: Binding(
+                get: { styles.firstIndex { $0.rawValue == menuBarStyleRaw } ?? 0 },
+                set: { menuBarStyleRaw = styles[$0].rawValue }
+            )
+        )
+        .accessibilityLabel(Text("Menu Bar"))
     }
 
     private var languagePicker: some View {

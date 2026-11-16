@@ -62,6 +62,10 @@ enum DS {
         /// Outline that keeps the white knob / time-marker dot visible on a
         /// light background or a pale track (light theme), and separated from
         /// the fill in dark theme.
+        /// Hover hint bubble: an opaque raised fill, a step off the panel
+        /// tint so the hint never blends into the background.
+        static let hintFill    = Color(light: 0xFFFFFF, dark: 0x3A3E47)
+        static let hintBorder  = Color(light: 0x000000, dark: 0xFFFFFF, lightAlpha: 0.18, darkAlpha: 0.16)
         static let knobStroke  = Color(light: 0x0F172A, dark: 0x000000, lightAlpha: 0.55, darkAlpha: 0.45)
 
         // Borders
@@ -70,9 +74,13 @@ enum DS {
         static let borderFocus = Color(light: 0x000000, dark: 0xFFFFFF, lightAlpha: 0.16, darkAlpha: 0.22)
 
         // Text
-        static let text        = Color(light: 0x0F172A, dark: 0xF1F3F6)   // titles
-        static let textSub     = Color(light: 0x475569, dark: 0xB6BCC6)   // body
-        static let textMuted   = Color(light: 0x66707F, dark: 0x9298A3)   // meta (WCAG AA 4.5:1)
+        // iStat Menus–style: text is white (black in light) for contrast;
+        // secondary information is set apart by a smaller size or lighter
+        // weight, not by grey. Only `textMuted` keeps a slight dim, for
+        // footnotes and placeholders.
+        static let text        = Color(light: 0x0F172A, dark: 0xF5F6F8)   // titles and values
+        static let textSub     = Color(light: 0x0F172A, dark: 0xF5F6F8)   // body: same ink as text
+        static let textMuted   = Color(light: 0x2B3443, dark: 0xD6DAE0)   // meta: barely dimmed
 
         // Status — used as text and as dots. Every value is >= 4.5:1 on the
         // card surfaces in its theme (WCAG AA text); status is also conveyed by

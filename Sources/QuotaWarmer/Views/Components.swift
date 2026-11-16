@@ -544,7 +544,7 @@ struct IconButton: View {
     /// ago"), so the user can see it's fresh before clicking. When set, the
     /// bubble replaces the slow system tooltip.
     var hint: String? = nil
-    /// The bubble sits above the button, right-aligned with it. Controls at
+    /// The bubble sits well above the button, right-aligned with it. Controls at
     /// the top edge of the panel put it to the button's left instead, so it
     /// neither leaves the panel nor hides under the cards below.
     var hintBeside: Bool = false
@@ -587,7 +587,7 @@ struct IconButton: View {
             if showHint, let hint {
                 HoverHintBubble(text: hint)
                     .fixedSize()
-                    .alignmentGuide(.top) { $0[.bottom] + 5 }
+                    .alignmentGuide(.top) { $0[.bottom] + 10 }
                     .alignmentGuide(.trailing) { hintBeside ? $0[.trailing] + size + 6 : $0[.trailing] }
                     .allowsHitTesting(false)
                     .transition(.opacity)
@@ -600,7 +600,7 @@ struct IconButton: View {
     }
 }
 
-/// Small dark bubble used for instant hover details (iStat Menus style).
+/// Small raised bubble used for instant hover details (iStat Menus style).
 /// Callers that place it over later siblings must raise their own `zIndex`.
 struct HoverHintBubble: View {
     let text: String
@@ -613,9 +613,9 @@ struct HoverHintBubble: View {
             .multilineTextAlignment(.leading)
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: DS.R.md, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: DS.R.md, style: .continuous).stroke(DS.C.border, lineWidth: 0.5))
-        .shadow(color: .black.opacity(0.18), radius: 6, y: 2)
+        .background(DS.C.hintFill, in: RoundedRectangle(cornerRadius: DS.R.md, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: DS.R.md, style: .continuous).stroke(DS.C.hintBorder, lineWidth: 0.5))
+        .shadow(color: .black.opacity(0.28), radius: 6, y: 2)
     }
 }
 

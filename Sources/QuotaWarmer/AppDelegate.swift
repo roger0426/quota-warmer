@@ -138,6 +138,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         created.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         created.hidesOnDeactivate = false
         created.delegate = self
+        // No system window animation: the panel opens with a short fade of
+        // its own (see `showPanel`) and closes at once, like iStat Menus.
+        created.animationBehavior = .none
         panel = created
         // Follow the content height (resets gained/used, tab switches) while open,
         // keeping the top edge pinned under the menu bar item.
@@ -176,7 +179,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         appState.isPanelVisible = true
         // Countdowns were not ticking while hidden; refresh before showing.
         appState.objectWillChange.send()
-        panel.makeKeyAndOrderFront(nil)
+        if NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
+            panel.alphaValue = 1
+            panel.makeKeyAndOrderFront(nil)
+        } else {
+            panel.alphaValue = 0
+            panel.makeKeyAndOrderFront(nil)
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.08
+                panel.animator().alphaValue = 1
+            }
+        }
         // The native shadow is traced from the content's alpha; recompute it so
         // it follows the rounded panel instead of a stale rectangular outline.
         panel.invalidateShadow()

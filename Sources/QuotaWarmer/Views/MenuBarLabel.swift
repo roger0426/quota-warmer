@@ -20,12 +20,12 @@ enum MenuBarStatus {
         let items = composeItems(appState)
         guard !items.isEmpty else { return "fallback|\(isHealthy(appState))" }
         return items.map { item in
-            "\(item.assetName)|\(item.text)|\(item.dotColor)|\(item.dimmed)"
+            "\(item.assetName)|\(item.text)|\(item.badge ?? "-")|\(item.dimmed)|\(item.gauge.map(\.key) ?? "-")"
         }.joined(separator: "||")
     }
 
     /// Spoken summary for the status item: the drawn image has no accessibility
-    /// of its own, and the status dots are color-only without these words.
+    /// of its own.
     static func accessibilityLabel(for appState: AppState) -> String {
         let items = composeItems(appState)
         guard !items.isEmpty else {
@@ -51,7 +51,10 @@ enum MenuBarStatus {
     }
 
     private static func composeItems(_ appState: AppState) -> [MenuBarComposer.Item] {
-        visibleTools(appState).map { tool in
+        let style = QuotaDisplay.MenuBarStyle.stored()
+        let warningPercent = QuotaUsageLevel.storedWarningPercent()
+        let colorful = UserDefaults.standard.object(forKey: QuotaDisplay.colorfulBarsKey) as? Bool ?? true
+        return visibleTools(appState).map { tool in
             let st = appState.state(for: tool)
             // Dim only when data is expired or unhealthy — stale (5–30min) is
             // recent enough with a 5-minute refresh interval and should not dim.
@@ -74,11 +77,24 @@ enum MenuBarStatus {
                 mode: st.displayMode
             )
 
+            // Gauge style: two bars instead of text, so a tight account
+            // stands out at a glance; the panel has the numbers.
+            let gauge: MenuBarComposer.Gauge? = style == .gauge ? MenuBarComposer.Gauge(
+                session: QuotaDisplay.gaugeUsedFraction(remainingFraction: st.primaryMetric?.remainingFraction,
+                                                        settling: st.sessionSettling),
+                weekly: QuotaDisplay.gaugeUsedFraction(remainingFraction: st.weeklyMetric?.remainingFraction,
+                                                       settling: false),
+                warningPercent: warningPercent,
+                colorful: colorful
+            ) : nil
+
             return MenuBarComposer.Item(
                 assetName: tool.kind.glyphAssetName,
-                dotColor: nsStatusColor(for: st, appState: appState),
-                // An added account is told apart from the default by its initial.
-                text: tool.badge.map { "\($0) \(text)" } ?? text,
+                // An added account is told apart from the default by its
+                // initial, in the logo's corner.
+                badge: tool.badge,
+                text: gauge == nil ? text : "",
+                gauge: gauge,
                 spoken: "\(tool.shortName) \(text), \(spokenStatus(st, appState: appState))",
                 // Neutral menu-bar-white text (the colored status dot conveys
                 // state), not a saturated color.
@@ -88,7 +104,8 @@ enum MenuBarStatus {
         }
     }
 
-    /// Words for the state the dot color shows (same branches as `nsStatusColor`).
+    /// Words for the account's state (the menu bar draws no status dot;
+    /// dimming shows stale or failing data).
     private static func spokenStatus(_ state: ToolState, appState: AppState) -> String {
         if appState.globalPassive { return String(localized: "paused") }
         if !state.isMonitored { return String(localized: "off") }
@@ -99,17 +116,6 @@ enum MenuBarStatus {
             return String(localized: "needs attention")
         }
         return String(localized: "stale")
-    }
-
-    private static func nsStatusColor(for state: ToolState, appState: AppState) -> NSColor {
-        // Off / globally-paused tools get a neutral gray dot so they no longer
-        // look like an error (which is red).
-        if appState.globalPassive || !state.isMonitored { return .systemGray }
-        if state.sourceHealth == .healthy && state.freshness == .fresh {
-            return state.mode == .monitor ? .systemBlue : .systemGreen
-        }
-        if state.sourceHealth == .authFailure || state.sourceHealth == .unavailable { return .systemRed }
-        return .systemYellow
     }
 
     /// Shown when no tool is pinned to the menu bar: a flame glyph plus an
@@ -136,33 +142,54 @@ enum MenuBarStatus {
     }
 }
 
-/// Draws one or more provider glyphs (white, with a colored status dot) plus
+/// Draws one or more provider glyphs (white, with the account initial) plus
 /// their quota text into a single NSImage for use as the menu-bar label.
 private enum MenuBarComposer {
     struct Item {
         let assetName: String
-        let dotColor: NSColor
+        /// Account initial at the logo's bottom-right; nil for the default account.
+        let badge: String?
         let text: String
+        /// Bars style; nil draws the text style.
+        let gauge: Gauge?
         /// Words for VoiceOver, e.g. "Claude 46% left, healthy".
         let spoken: String
         let textColor: NSColor
         let dimmed: Bool
     }
 
+    /// Two vertical bars after the logo: 5-hour, then weekly, filled from
+    /// the bottom with the share used. Blue, red from the warning level.
+    struct Gauge {
+        let session: Double?
+        let weekly: Double?
+        let warningPercent: Int
+        let colorful: Bool
+
+        var key: String {
+            "\(session.map { "\(Int(($0 * 100).rounded()))" } ?? "-")/\(weekly.map { "\(Int(($0 * 100).rounded()))" } ?? "-")/\(warningPercent)/\(colorful)"
+        }
+    }
+
+    private static let barWidth: CGFloat = 4
+    private static let barHeight: CGFloat = 14
+    private static let barGap: CGFloat = 2
+    /// Logo + both bars.
+    private static let gaugeWidth: CGFloat = 3 + barWidth + barGap + barWidth
+
     private static let font = NSFont.monospacedDigitSystemFont(ofSize: 11, weight: .semibold)
     private static let height: CGFloat = 18
     private static let glyph: CGFloat = 15
     private static let glyphGap: CGFloat = 3
-    private static let itemGap: CGFloat = 13
-    /// Thin vertical line centered in the gap between two pinned tools.
-    private static let separatorWidth: CGFloat = 1
-    private static let separatorHeight: CGFloat = 12
+    /// Space between accounts; the bars already end each one, so no divider.
+    private static let itemGap: CGFloat = 8
 
     static func image(for items: [Item]) -> NSImage {
         var widths: [CGFloat] = []
         var total: CGFloat = 0
         for (index, item) in items.enumerated() {
             var w = glyph
+            if item.gauge != nil { w += gaugeWidth }
             let tw = textWidth(item.text)
             if tw > 0 { w += glyphGap + tw }
             widths.append(w)
@@ -177,23 +204,11 @@ private enum MenuBarComposer {
             for (index, item) in items.enumerated() {
                 draw(item, at: x)
                 x += widths[index] + itemGap
-                if index < items.count - 1 { drawSeparator(centeredAt: x - itemGap / 2) }
             }
             return true
         }
         image.isTemplate = false
         return image
-    }
-
-    private static func drawSeparator(centeredAt midX: CGFloat) {
-        let rect = NSRect(
-            x: (midX - separatorWidth / 2).rounded(),
-            y: (height - separatorHeight) / 2,
-            width: separatorWidth,
-            height: separatorHeight
-        )
-        NSColor.white.withAlphaComponent(0.35).setFill()
-        rect.fill()
     }
 
     private static func textWidth(_ text: String) -> CGFloat {
@@ -219,15 +234,31 @@ private enum MenuBarComposer {
             logoRect.fill(using: .sourceAtop)
         }
 
-        // Status dot at the glyph's bottom-right corner.
-        let dot: CGFloat = 5.5
-        let dotRect = NSRect(x: logoRect.maxX - dot + 1, y: logoRect.minY - 0.5, width: dot, height: dot)
-        item.dotColor.withAlphaComponent(alpha).setFill()
-        NSBezierPath(ovalIn: dotRect).fill()
-        NSColor.controlBackgroundColor.withAlphaComponent(0.9 * alpha).setStroke()
-        let ring = NSBezierPath(ovalIn: dotRect.insetBy(dx: -0.5, dy: -0.5))
-        ring.lineWidth = 0.75
-        ring.stroke()
+        // Account initial at the glyph's bottom-right corner: a white disc
+        // with the letter cut out in black.
+        if let badge = item.badge {
+            let size: CGFloat = 8.5
+            let rect = NSRect(x: logoRect.maxX - size + 1.5, y: logoRect.minY - 1, width: size, height: size)
+            NSColor.white.withAlphaComponent(alpha).setFill()
+            NSBezierPath(ovalIn: rect).fill()
+            let attrs: [NSAttributedString.Key: Any] = [
+                .font: NSFont.systemFont(ofSize: 6.5, weight: .heavy),
+                .foregroundColor: NSColor.black.withAlphaComponent(alpha)
+            ]
+            let letter = badge as NSString
+            let letterSize = letter.size(withAttributes: attrs)
+            letter.draw(at: NSPoint(x: rect.midX - letterSize.width / 2, y: rect.midY - letterSize.height / 2), withAttributes: attrs)
+        }
+
+        var textX = logoRect.maxX + glyphGap
+        if let gauge = item.gauge {
+            var x = logoRect.maxX + 3
+            for used in [gauge.session, gauge.weekly] {
+                drawBar(used: used, gauge: gauge, x: x, alpha: alpha)
+                x += barWidth + barGap
+            }
+            textX = logoRect.maxX + gaugeWidth + glyphGap
+        }
 
         guard !item.text.isEmpty else { return }
         let attrs: [NSAttributedString.Key: Any] = [
@@ -237,8 +268,32 @@ private enum MenuBarComposer {
         let textSize = (item.text as NSString).size(withAttributes: attrs)
         let textY = (height - textSize.height) / 2
         (item.text as NSString).draw(
-            at: NSPoint(x: logoRect.maxX + glyphGap, y: textY),
+            at: NSPoint(x: textX, y: textY),
             withAttributes: attrs
         )
+    }
+
+    private static func drawBar(used: Double?, gauge: Gauge, x: CGFloat, alpha: CGFloat) {
+        let track = NSRect(x: x, y: (height - barHeight) / 2, width: barWidth, height: barHeight)
+        let radius: CGFloat = 1.5
+        NSColor.white.withAlphaComponent(0.28 * alpha).setFill()
+        NSBezierPath(roundedRect: track, xRadius: radius, yRadius: radius).fill()
+        guard let used, used > 0 else { return }
+        let percent = Int((used * 100).rounded())
+        let color: NSColor
+        if !gauge.colorful {
+            color = .white
+        } else if percent >= QuotaUsageLevel.clampedWarningPercent(gauge.warningPercent) {
+            color = NSColor(calibratedRed: 0.94, green: 0.31, blue: 0.43, alpha: 1)   // DS usageRed (dark)
+        } else {
+            color = NSColor(calibratedRed: 0.29, green: 0.55, blue: 0.94, alpha: 1)   // DS usageBlue (dark)
+        }
+        // At least a sliver, so 1–5% still reads as "some used".
+        let fill = NSRect(x: x, y: track.minY, width: barWidth, height: max(1.5, barHeight * min(used, 1)))
+        NSGraphicsContext.saveGraphicsState()
+        NSBezierPath(roundedRect: track, xRadius: radius, yRadius: radius).addClip()
+        color.withAlphaComponent(alpha).setFill()
+        fill.fill()
+        NSGraphicsContext.restoreGraphicsState()
     }
 }

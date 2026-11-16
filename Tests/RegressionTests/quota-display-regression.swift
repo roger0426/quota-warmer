@@ -24,6 +24,7 @@ struct QuotaDisplayRegression {
         testTimeInput()
         testColorfulSetting()
         testWarningSetting()
+        testMenuBarGauge()
         testQuotaAlerts()
         testAutoWarmExplanation()
         testOnboardingFlow()
@@ -154,6 +155,20 @@ struct QuotaDisplayRegression {
         expect(QuotaUsageLevel.storedWarningPercent(defaults: defaults), 50, "stored warning level is clamped")
         expect(QuotaDisplay.colorLevel(remainingFraction: 0.3, hasMetric: true, settling: false, colorful: true, warningPercent: 70),
                .critical, "colorLevel passes the warning level through")
+    }
+
+    static func testMenuBarGauge() {
+        let suite = "quota-menubar-test-\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suite) else { fail("no test defaults"); return }
+        defer { defaults.removePersistentDomain(forName: suite) }
+        expect(QuotaDisplay.MenuBarStyle.stored(defaults: defaults), .gauge, "menu bar defaults to bars")
+        defaults.set("text", forKey: QuotaDisplay.menuBarStyleKey)
+        expect(QuotaDisplay.MenuBarStyle.stored(defaults: defaults), .text, "text style is read")
+        defaults.set("bogus", forKey: QuotaDisplay.menuBarStyleKey)
+        expect(QuotaDisplay.MenuBarStyle.stored(defaults: defaults), .gauge, "unknown style falls back to bars")
+        expect(QuotaDisplay.gaugeUsedFraction(remainingFraction: nil, settling: false), nil, "no reading draws an empty bar")
+        expect(QuotaDisplay.gaugeUsedFraction(remainingFraction: 0.3, settling: true), nil, "a settling window draws an empty bar")
+        expect(QuotaDisplay.gaugeUsedFraction(remainingFraction: 0.201, settling: false), 0.8, "bar fill follows the shown used percent")
     }
 
     // MARK: - Bar geometry
