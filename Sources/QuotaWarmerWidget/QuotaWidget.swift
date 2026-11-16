@@ -228,7 +228,9 @@ struct RingMetrics {
         diameter = size - line
         innerLine = max(2, line * 0.45)
         innerDiameter = diameter - line - innerLine * 1.6
-        glyph = max(10, (innerDiameter - innerLine) * 0.46)
+        // Logo fills the inner ring like the device icon in the Batteries
+        // widget, leaving room for the corner badge.
+        glyph = max(12, (innerDiameter - innerLine) * 0.62)
     }
 }
 
@@ -295,7 +297,7 @@ struct QuotaRing: View {
     private func glyph(size: CGFloat) -> some View {
         let status = provider.statusColor(at: now)
         let badge = provider.badge
-        let diameter = size * (badge == nil ? 0.37 : 0.53)
+        let diameter = size * (badge == nil ? 0.33 : 0.48)
         let gap = max(1, size * 0.067)
         let center = CGPoint(x: size * 0.87, y: size * 0.83)
         return ZStack(alignment: .topLeading) {
