@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 // Reusable UI primitives shared across the in-app screens. Tuned to the
@@ -268,10 +269,13 @@ struct QuotaWindowRow: View {
     var displayMode: QuotaDisplayMode = .remaining
     /// A just-opened window whose number hasn't settled: keep the neutral blue.
     var settling: Bool = false
+    /// iStat-style overview row: label | slim bar | value on one line, the reset
+    /// and pace meta under the bar. Takes precedence over `compact`.
+    var inline: Bool = false
 
     var body: some View {
         Group {
-            if compact { compactBody } else { fullBody }
+            if inline { inlineBody } else if compact { compactBody } else { fullBody }
         }
         // Color is never the only signal: the row reads as one element with the
         // status in words, the percent, and the reset/pace line.
@@ -330,6 +334,47 @@ struct QuotaWindowRow: View {
             track: trackColor,
             thumbFraction: QuotaDisplay.thumbFraction(timeLeftFraction: pace.timeLeftFraction, mode: displayMode)
         )
+    }
+
+    private static let inlineLabelWidth: CGFloat = 52
+    private static let inlineValueWidth: CGFloat = 62
+    private static let inlineGap: CGFloat = 8
+
+    private var inlineBody: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: Self.inlineGap) {
+                Text(title)
+                    .font(.system(size: 11.5, weight: .semibold))
+                    .foregroundStyle(DS.C.text)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                    .frame(width: Self.inlineLabelWidth, alignment: .leading)
+                bar(height: 6)
+                Text(leftText)
+                    .font(.system(size: 11.5, weight: .semibold))
+                    // Not live: the value is muted instead of a separate status dot.
+                    .foregroundStyle(statusColor != nil ? DS.C.textMuted : percentTextColor)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .frame(width: Self.inlineValueWidth, alignment: .trailing)
+            }
+            HStack(spacing: 6) {
+                Text(pace.resetText)
+                    .foregroundStyle(DS.C.textMuted)
+                Spacer(minLength: 6)
+                if let shortPercent = pace.shortPercent {
+                    Text([ String(localized: "\(shortPercent)% short"), pace.runsOutText ]
+                        .compactMap { $0 }
+                        .joined(separator: " · "))
+                        .foregroundStyle(DS.C.textSub)
+                }
+            }
+            .font(.system(size: 10, weight: .medium))
+            .monospacedDigit()
+            .lineLimit(1)
+            .padding(.leading, Self.inlineLabelWidth + Self.inlineGap)
+        }
     }
 
     private var compactBody: some View {
@@ -530,35 +575,58 @@ struct PanelHeader<Trailing: View>: View {
     }
 }
 
-/// Remaining ⇄ used toggle for one tool's quota display: an icon-only capsule
-/// (↓% = counting down what's left, ↑% = counting up what's used) styled like
-/// the compact mode capsule next to it. The tooltip spells the mode out.
-struct QuotaDisplayModeToggle: View {
-    let mode: QuotaDisplayMode
-    let toolName: String
-    let onToggle: () -> Void
-    @AppStorage(QuotaDisplay.colorfulBarsKey) private var colorfulBars = true
+// MARK: - iStat Menus–style primitives
+
+// iStat Menus–style primitives: the vibrant translucent panel backdrop and the
+// small uppercase section title.
+
+/// The panel's backdrop: the same translucent material macOS menus and
+/// iStat Menus dropdowns use. Always `.active`, because the panel is a
+/// non-activating window and would otherwise render the flat inactive look.
+struct VibrancyBackground: NSViewRepresentable {
+    var material: NSVisualEffectView.Material = .popover
+    /// The material is an AppKit view, so it rounds its own corners rather
+    /// than relying on the SwiftUI clip shape around it.
+    var cornerRadius: CGFloat = DS.R.xl
+
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = material
+        view.blendingMode = .behindWindow
+        view.state = .active
+        view.isEmphasized = true
+        view.wantsLayer = true
+        view.layer?.cornerRadius = cornerRadius
+        view.layer?.cornerCurve = .continuous
+        view.layer?.masksToBounds = true
+        return view
+    }
+
+    func updateNSView(_ view: NSVisualEffectView, context: Context) {
+        view.material = material
+    }
+}
+
+/// Small uppercase section heading with an optional glyph, iStat-style.
+struct StatSectionTitle: View {
+    let title: String
+    var glyph: String? = nil
 
     var body: some View {
-        Button(action: onToggle) {
-            HStack(spacing: 1) {
-                Image(systemName: mode == .remaining ? "arrow.down" : "arrow.up")
-                    .font(.system(size: 10, weight: .bold))
-                Image(systemName: "percent")
-                    .font(.system(size: 10.5, weight: .bold))
+        HStack(spacing: 6) {
+            if let glyph {
+                Image(glyph)
+                    .resizable()
+                    .renderingMode(.template)
+                    .scaledToFit()
+                    .frame(width: 13, height: 13)
+                    .foregroundStyle(DS.C.text)
             }
-            .foregroundStyle(colorfulBars ? DS.C.usageBlue : DS.C.textSub)
-            .frame(width: 34, height: 26)
-            .background(DS.C.surface, in: Capsule())
-            .overlay(Capsule().stroke(DS.C.border, lineWidth: 1))
-            .contentShape(Capsule())
+            Text(verbatim: title)
+                .font(.system(size: 11, weight: .bold))
+                .tracking(0.6)
+                .textCase(.uppercase)
+                .foregroundStyle(DS.C.text)
         }
-        .buttonStyle(PressableButtonStyle())
-        .help(mode == .remaining
-              ? String(localized: "Showing \(toolName) quota left (counts down from 100%). Click to show quota used.")
-              : String(localized: "Showing \(toolName) quota used (counts up from 0%). Click to show quota left."))
-        .accessibilityLabel(Text(mode == .remaining
-              ? String(localized: "\(toolName) quota shown as percent left. Activate to show percent used.")
-              : String(localized: "\(toolName) quota shown as percent used. Activate to show percent left.")))
     }
 }

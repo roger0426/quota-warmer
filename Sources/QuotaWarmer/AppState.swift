@@ -290,8 +290,12 @@ final class AppState: ObservableObject, CoordinatorHost {
     /// Natural height of the visible tab's content (0 when the tab doesn't report one).
     @Published var panelContentHeight: CGFloat = 0
 
-    static func panelHeight(forMeasured measured: CGFloat) -> CGFloat {
-        min(max(measured, DS.totalHeight), maxPanelHeight)
+    /// `fitsContent`: the overview sizes the panel to its own content (no
+    /// empty space under the cards); every other tab keeps `DS.totalHeight`
+    /// as a floor so Settings / History don't jump between short and tall.
+    static func panelHeight(forMeasured measured: CGFloat, fitsContent: Bool = false) -> CGFloat {
+        let floor = fitsContent && measured > 0 ? 0 : DS.totalHeight
+        return min(max(measured, floor), maxPanelHeight)
     }
 
     /// Tallest unscaled panel that still fits under the menu bar on the

@@ -76,7 +76,6 @@ struct HistoryTabView: View {
             // content, and scrolls only when the screen is too short.
             .reportsPanelHeight()
         }
-        .background(DS.C.bg)
         .task(id: loadKey) {
             let since = Date().addingTimeInterval(-range.interval)
             var loadedSamples: [String: [QuotaSample]] = [:]
@@ -149,7 +148,7 @@ struct HistoryTabView: View {
             }
             .padding(.horizontal, 10)
             .frame(height: 26)
-            .foregroundStyle(selected ? DS.C.bg : DS.C.textSub)
+            .foregroundStyle(selected ? DS.C.onInk : DS.C.textSub)
             .background(selected ? color : DS.C.surfaceHigh, in: Capsule())
             .overlay(Capsule().stroke(selected ? .clear : DS.C.border, lineWidth: 1))
         }

@@ -38,7 +38,6 @@ struct WelcomeGuideView: View {
             Divider().background(DS.C.border)
             footer
         }
-        .background(DS.C.bg)
         .task { await runCheck() }
         .task { await refreshNotificationStatus() }
     }
@@ -87,7 +86,7 @@ struct WelcomeGuideView: View {
                 .font(.system(size: 11, weight: .medium))
                 .padding(.horizontal, 14).padding(.vertical, 5)
                 .background(prominent ? DS.C.ink : DS.C.surface, in: RoundedRectangle(cornerRadius: DS.R.sm))
-                .foregroundStyle(prominent ? DS.C.bg : DS.C.text)
+                .foregroundStyle(prominent ? DS.C.onInk : DS.C.text)
                 .overlay(RoundedRectangle(cornerRadius: DS.R.sm).stroke(DS.C.border, lineWidth: 1))
         }
         .buttonStyle(PressableButtonStyle())

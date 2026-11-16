@@ -28,6 +28,7 @@ struct SettingsTabView: View {
     @AppStorage("morningPrewarmWeekdaysOnly") private var morningWeekdaysOnly: Bool = true
     @AppStorage(QuotaDisplay.colorfulBarsKey) private var colorfulBars: Bool = true
     @State private var language = AppLanguage.stored()
+    @AppStorage(AppearanceMode.defaultsKey) private var appearanceRaw = AppearanceMode.system.rawValue
 
     private let refreshOptions: [(label: String, value: Int)] = [
         (String(localized: "5m"), 300), (String(localized: "10m"), 600),
@@ -78,6 +79,13 @@ struct SettingsTabView: View {
                 }
 
                 group("DISPLAY") {
+                    row(icon: "circle.lefthalf.filled", title: "Theme",
+                        subtitle: "System follows macOS") {
+                        themePicker
+                    }
+
+                    Divider().background(DS.C.border).padding(.leading, 36)
+
                     row(icon: "globe", title: "Language",
                         subtitle: language == AppLanguage.atLaunch ? "System follows macOS" : "Restart to apply") {
                         HStack(spacing: 6) {
@@ -91,7 +99,7 @@ struct SettingsTabView: View {
                                         .padding(.horizontal, 9)
                                         .frame(height: 22)
                                         .background(DS.C.ink, in: Capsule())
-                                        .foregroundStyle(DS.C.bg)
+                                        .foregroundStyle(DS.C.onInk)
                                 }
                                 .buttonStyle(PressableButtonStyle())
                                 .help("Restart QuotaWarmer in the chosen language")
@@ -337,7 +345,6 @@ struct SettingsTabView: View {
             }
             .padding(.bottom, DS.Page.bottom)
         }
-        .background(DS.C.bg)
     }
 
     private var appVersion: String {
@@ -581,6 +588,18 @@ struct SettingsTabView: View {
         .disabled(!enabled)
         .help("Click to change the threshold")
         .accessibilityLabel(Text("Alert at \(value.wrappedValue) percent used. Activate to change."))
+    }
+
+    /// System / Light / Dark. Applied immediately, app-wide.
+    private var themePicker: some View {
+        segmentedPicker(
+            options: AppearanceMode.allCases.enumerated().map { (label: $1.label, value: $0) },
+            selected: Binding(
+                get: { AppearanceMode.allCases.firstIndex { $0.rawValue == appearanceRaw } ?? 0 },
+                set: { appearanceRaw = AppearanceMode.allCases[$0].rawValue }
+            )
+        ) { AppearanceMode.stored().apply() }
+        .accessibilityLabel(Text("Theme"))
     }
 
     private var languagePicker: some View {

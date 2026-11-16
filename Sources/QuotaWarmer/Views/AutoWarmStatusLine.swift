@@ -6,6 +6,8 @@ import SwiftUI
 struct AutoWarmStatusLine: View {
     @ObservedObject var toolState: ToolState
     var now: Date = Date()
+    /// Hide the line unless its tone is `.attention` (the overview's compact cards).
+    var attentionOnly: Bool = false
     @State private var showDetail = false
 
     private var explanation: AutoWarmExplanation? {
@@ -20,7 +22,9 @@ struct AutoWarmStatusLine: View {
             ),
             now: now
         )
-        return toolState.mode == .off ? nil : e
+        guard toolState.mode != .off else { return nil }
+        if attentionOnly && e.tone != .attention { return nil }
+        return e
     }
 
     var body: some View {

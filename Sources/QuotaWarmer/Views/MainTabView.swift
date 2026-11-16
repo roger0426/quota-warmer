@@ -8,19 +8,26 @@ struct MainTabView: View {
     @State private var collapsedTools: Set<ProviderID> = []
 
     var body: some View {
-        // Fixed, non-scrolling overview — only Settings scrolls.
-        VStack(alignment: .leading, spacing: DS.Page.spacing) {
-            PanelHeader(title: "QuotaWarmer") { automationControl }
-            if let warning = appState.watcherStatusText { watcherWarning(warning) }
-            if !outcomeTools.isEmpty { statusCard }
-            providerList
+        // Fixed, non-scrolling overview — only Settings scrolls. The panel
+        // fits this content's height (see `AppState.panelHeight`).
+        VStack(spacing: 0) {
+            // Missing-CLI banner (moved here with the per-account tabs gone).
+            if appState.showOnboarding {
+                OnboardingView()
+                    .transition(.opacity)
+            }
+            VStack(alignment: .leading, spacing: DS.Page.spacing) {
+                PanelHeader(title: "QuotaWarmer") { automationControl }
+                if let warning = appState.watcherStatusText { watcherWarning(warning) }
+                if !outcomeTools.isEmpty { statusCard }
+                providerList
+            }
+            .padding(.horizontal, DS.Page.side)
+            .padding(.top, DS.Page.top)
+            .padding(.bottom, DS.Page.bottom)
         }
-        .padding(.horizontal, DS.Page.side)
-        .padding(.top, DS.Page.top)
-        .padding(.bottom, DS.Page.bottom)
         .reportsPanelHeight()
         .frame(maxHeight: .infinity, alignment: .top)
-        .background(DS.C.bg)
     }
 
     /// Shown only when no quota check has succeeded recently (moved here from
@@ -62,13 +69,14 @@ struct MainTabView: View {
             }
             .opacity(fetching ? 0.4 : 1)
             .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: fetching)
-            StatusBadge(text: paused ? "Paused" : "Active", color: stateColor)
-
+            // One control for the global state: a green pause while warm-ups
+            // run, a red play while they are paused. The icon shape (and the
+            // help / accessibility text) carries the state, not just the color.
             IconButton(
                 systemName: paused ? "play.fill" : "pause.fill",
                 help: helpText,
-                tint: paused ? DS.C.green : DS.C.red,
-                border: (paused ? DS.C.green : DS.C.red).opacity(0.30),
+                tint: stateColor,
+                border: stateColor.opacity(0.30),
                 size: 26
             ) { appState.globalPassive.toggle() }
         }
@@ -89,17 +97,16 @@ struct MainTabView: View {
         let state = appState.state(for: tool)
         let collapsed = collapsedTools.contains(tool)
         return VStack(alignment: .leading, spacing: collapsed ? 0 : 10) {
-            // Tool name on the left, the same mode / refresh / pin controls on
-            // the right (where the reference shows the plan badge).
-            HStack(spacing: 8) {
+            // iStat-style section title (glyph + uppercase name) on the left, the
+            // same mode / refresh / pin controls on the right.
+            HStack(spacing: 6) {
                 Button(action: { toggleCollapsed(tool) }) {
-                    HStack(spacing: 6) {
-                        Text(tool.shortName)
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(DS.C.text)
-                        Image(systemName: collapsed ? "chevron.down" : "chevron.up")
-                            .font(.system(size: 10, weight: .semibold))
+                    HStack(spacing: 5) {
+                        StatSectionTitle(title: tool.shortName, glyph: tool.kind.glyphAssetName)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 8.5, weight: .bold))
                             .foregroundStyle(DS.C.textMuted)
+                            .rotationEffect(.degrees(collapsed ? 0 : 90))
                     }
                     // The label's natural bounds are just the glyphs — pad the
                     // hit area out to a comfortably tappable rectangle instead
@@ -113,9 +120,16 @@ struct MainTabView: View {
                 Spacer(minLength: 6)
                 ToolModeMenu(mode: state.mode, compact: true) { appState.setMode($0, for: tool) }
                     .fixedSize()
-                QuotaDisplayModeToggle(mode: state.displayMode, toolName: tool.shortName) {
-                    appState.toggleDisplayMode(for: tool)
-                }
+                // Warm this account now. Percent direction and the menu-bar
+                // pin moved to Settings → Accounts.
+                IconButton(
+                    systemName: "bolt.fill",
+                    help: "Warm \(tool.shortName) now",
+                    tint: DS.C.accent(tool),
+                    size: 26,
+                    isDisabled: state.isWarming
+                ) { appState.activate(tool) }
+                .opacity(state.isWarming ? 0.4 : 1)
                 IconButton(
                     systemName: state.isFetchingQuota ? "hourglass" : state.quotaBackoffActive ? "clock.arrow.circlepath" : "arrow.clockwise",
                     help: "Refresh \(tool.shortName) quota now",
@@ -126,7 +140,6 @@ struct MainTabView: View {
                     // to retry. `refreshQuotaManually` forces through it.
                     isDisabled: state.isFetchingQuota
                 ) { Task { await appState.refreshQuotaManually(for: tool) } }
-                menuBarPin(tool, state)
             }
 
             if !collapsed {
@@ -140,9 +153,6 @@ struct MainTabView: View {
                 windowRow(state, title: String(localized: "Session"), name: String(localized: "\(tool.shortName) 5-hour window"), metric: state.primaryMetric,
                           resetAt: state.resetAt, windowDuration: tool.windowDuration,
                           settling: state.sessionSettling)
-                Rectangle()
-                    .fill(DS.C.borderSoft)
-                    .frame(height: 1)
                 windowRow(state, title: String(localized: "Weekly"), name: String(localized: "\(tool.shortName) weekly window"), metric: state.weeklyMetric,
                           resetAt: state.weeklyMetric?.resetAt, windowDuration: tool.weeklyWindowDuration)
                 if let credits = state.quotaSnapshot?.resetCredits, !credits.isEmpty {
@@ -152,12 +162,14 @@ struct MainTabView: View {
                     ResetCreditsRow(credits: credits, now: Date()) { await appState.useResetCredit($0, for: tool) }
                 }
                 if state.mode == .autoWarm {
-                    AutoWarmStatusLine(toolState: state)
+                    // Only when something needs the user; the routine
+                    // "waiting for the next window" line is left out.
+                    AutoWarmStatusLine(toolState: state, attentionOnly: true)
                 }
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, collapsed ? 6 : 10)
+        .padding(.horizontal, 10)
+        .padding(.vertical, collapsed ? 5 : 10)
     }
 
     private func toggleCollapsed(_ tool: ProviderID) {
@@ -198,7 +210,8 @@ struct MainTabView: View {
             statusColor: ToolStatusCopy.rowStatusColor(for: state, hasMetric: metric != nil),
             compact: true,
             displayMode: state.displayMode,
-            settling: settlingActive
+            settling: settlingActive,
+            inline: true
         )
     }
 
@@ -210,20 +223,6 @@ struct MainTabView: View {
         ToolStatusCopy.providerIssue(for: state)
     }
 
-    /// Minimal pin toggle: shows/hides this tool's quota in the menu bar,
-    /// independent of whether warmup is active.
-    private func menuBarPin(_ tool: ProviderID, _ state: ToolState) -> some View {
-        Button(action: { appState.setMenuBarVisible(tool, !state.menuBarVisible) }) {
-            Image(systemName: "menubar.rectangle")
-                .font(.system(size: 11.5, weight: .semibold))
-                .foregroundStyle(state.menuBarVisible ? DS.C.accent(tool) : DS.C.textMuted)
-                .opacity(state.menuBarVisible ? 1.0 : 0.45)
-        }
-        .buttonStyle(PressableButtonStyle())
-        .help(state.menuBarVisible ? "Showing in menu bar — click to hide" : "Hidden from menu bar — click to show")
-        .accessibilityLabel(Text(state.menuBarVisible ? "Hide \(tool.shortName) from menu bar" : "Show \(tool.shortName) in menu bar"))
-    }
-
     // MARK: - Last warm-up status card ("did it actually work?")
 
     private var outcomeTools: [ProviderID] {
@@ -231,9 +230,13 @@ struct MainTabView: View {
         // visible in each provider row (its colored dot + status text), so the
         // Auto-warm state no longer adds a card here — that previously made the
         // panel grow/shrink on every mode toggle and jolt the scroll position.
+        // A confirmed warm-up is routine (the bars already show the open
+        // window), so the card appears only while one is pending or needs action.
         appState.providers.filter { tool in
-            if case .none = appState.state(for: tool).lastWarmupOutcome { return false }
-            return true
+            switch appState.state(for: tool).lastWarmupOutcome {
+            case .none, .confirmed: return false
+            case .pending, .unverified, .failed: return true
+            }
         }
     }
 

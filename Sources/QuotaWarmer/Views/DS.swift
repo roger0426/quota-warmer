@@ -36,20 +36,24 @@ extension Color {
     }
 }
 
-/// Design tokens. Tuned to the OpenUsage visual language: a white content
-/// surface, a narrow off-white sidebar, hairline borders, navy-near-black
-/// titles, slate body text and muted meta text. Every token has a dark twin
-/// (neutral graphite surfaces, soft light text) so the panel reads the same in
-/// both themes.
+/// Design tokens. Tuned to the iStat Menus dropdown language: the panel is a
+/// vibrant translucent material (see `VibrancyBackground`), surfaces are faint
+/// tints over it rather than opaque cards, borders are hairlines, and text
+/// uses system-like label / secondary / tertiary greys. Every token has a dark
+/// twin so both themes read the same.
 enum DS {
     enum C {
-        // Surfaces
-        static let bg          = Color(light: 0xFFFFFF, dark: 0x1C1D21)   // window + content base
-        static let sidebar     = Color(light: 0xF8FAFC, dark: 0x16171A)   // narrow left rail
-        static let surface     = Color(light: 0xFFFFFF, dark: 0x25262B)   // cards
-        static let surfaceHigh = Color(light: 0xF1F5F9, dark: 0x2F3036)   // quiet button / segmented fill
-        static let track       = Color(light: 0xE9EDF2, dark: 0x34363D)   // progress track (no data)
+        // Surfaces — tints laid over the vibrant panel material.
+        static let bg          = Color(light: 0xF5F5F7, dark: 0x1E1F23, lightAlpha: 0.55, darkAlpha: 0.55)   // content base
+        static let sidebar     = Color(light: 0x000000, dark: 0x000000, lightAlpha: 0.035, darkAlpha: 0.22)  // narrow left rail
+        static let surface     = Color(light: 0xFFFFFF, dark: 0xFFFFFF, lightAlpha: 0.62, darkAlpha: 0.055)  // grouped sections
+        static let surfaceHigh = Color(light: 0x000000, dark: 0xFFFFFF, lightAlpha: 0.055, darkAlpha: 0.09)  // quiet button / segmented fill
+        static let track       = Color(light: 0x000000, dark: 0xFFFFFF, lightAlpha: 0.09, darkAlpha: 0.11)   // gauge track (no data)
         static let ink         = Color(light: 0x0F172A, dark: 0xF1F3F6)   // selected indicator
+        /// Opaque text on an `ink` fill (selected chips, prominent buttons).
+        static let onInk       = Color(light: 0xFFFFFF, dark: 0x1C1D21)
+        /// Selected rail slot / segmented choice.
+        static let selection   = Color(light: 0x000000, dark: 0xFFFFFF, lightAlpha: 0.09, darkAlpha: 0.13)
         /// Label on a filled accent/danger surface (Warm, prominent buttons).
         /// White reads only 2.9:1 on the muted dark accents, so dark text is used there.
         static let onAccent    = Color(light: 0xFFFFFF, dark: 0x101216)
@@ -57,8 +61,8 @@ enum DS {
         static let knob        = Color(light: 0xFFFFFF, dark: 0xE8EAEE)
 
         // Borders
-        static let border      = Color(light: 0xE5E7EB, dark: 0x3A3C43)   // hairline card / divider border
-        static let borderSoft  = Color(light: 0xEEF1F5, dark: 0x2F3137)   // very subtle inner divider
+        static let border      = Color(light: 0x000000, dark: 0xFFFFFF, lightAlpha: 0.11, darkAlpha: 0.11)   // hairline section / divider border
+        static let borderSoft  = Color(light: 0x000000, dark: 0xFFFFFF, lightAlpha: 0.06, darkAlpha: 0.06)   // very subtle inner divider
         static let borderFocus = Color(light: 0x000000, dark: 0xFFFFFF, lightAlpha: 0.16, darkAlpha: 0.22)
 
         // Text
@@ -129,10 +133,10 @@ enum DS {
 
     // MARK: - Radii
     enum R {
-        static let sm: CGFloat = 7    // badges / small chips
-        static let md: CGFloat = 10   // buttons / inputs
-        static let lg: CGFloat = 14   // cards
-        static let xl: CGFloat = 18   // outer panel
+        static let sm: CGFloat = 5    // badges / small chips / graph wells
+        static let md: CGFloat = 7    // buttons / inputs
+        static let lg: CGFloat = 9    // grouped sections
+        static let xl: CGFloat = 12   // outer panel
     }
 
     // MARK: - Layout
@@ -159,7 +163,7 @@ enum DS {
         static let bottom: CGFloat = 10       // content bottom inset
         static let spacing: CGFloat = 10      // gap between header / cards
         static let headerHeight: CGFloat = 28
-        static let titleSize: CGFloat = 18
+        static let titleSize: CGFloat = 15
         static let cardPadding: CGFloat = 12  // inner padding of content cards
     }
 
@@ -172,7 +176,7 @@ enum DS {
 // MARK: - View modifiers
 
 extension View {
-    /// Standard white card with a hairline border.
+    /// Grouped section: a faint tint over the panel material with a hairline border.
     func dsCard(radius: CGFloat = DS.R.lg) -> some View {
         self
             .background(DS.C.surface, in: RoundedRectangle(cornerRadius: radius, style: .continuous))

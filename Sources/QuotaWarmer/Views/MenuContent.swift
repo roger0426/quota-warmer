@@ -31,21 +31,19 @@ extension AppearanceMode {
 
 enum AppTab: Hashable {
     case main
-    case tool(ProviderID)
     case history
     case settings
 }
 
 struct MenuContent: View {
     @EnvironmentObject var appState: AppState
-    @AppStorage(AppearanceMode.defaultsKey) private var appearanceRaw = AppearanceMode.system.rawValue
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private var appearance: AppearanceMode { AppearanceMode(rawValue: appearanceRaw) ?? .system }
-
-    /// One height for every tab (`DS.totalHeight`); taller only when the
-    /// overview or a tool tab reports content that would not fit.
-    private var panelHeight: CGFloat { AppState.panelHeight(forMeasured: appState.panelContentHeight) }
+    /// The overview fits its content; other tabs share `DS.totalHeight` as a
+    /// floor and grow only when their content would not fit.
+    private var panelHeight: CGFloat {
+        let overview = appState.selectedTab == .main && !appState.showWelcomeGuide
+        return AppState.panelHeight(forMeasured: appState.panelContentHeight, fitsContent: overview)
+    }
 
     var body: some View {
         panel
@@ -59,7 +57,7 @@ struct MenuContent: View {
             .clipShape(RoundedRectangle(cornerRadius: DS.R.xl, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: DS.R.xl, style: .continuous)
-                    .stroke(DS.C.border, lineWidth: 1)
+                    .strokeBorder(DS.C.border, lineWidth: 0.5)
             )
             .padding(2)
             .background(WindowTransparencyConfigurator())
@@ -71,10 +69,12 @@ struct MenuContent: View {
             sidebar
             Rectangle()
                 .fill(DS.C.border)
-                .frame(width: 1)
+                .frame(width: 0.5)
             mainContent
         }
+        // iStat Menus–style: the translucent menu material, lightly tinted.
         .background(DS.C.bg)
+        .background(VibrancyBackground(material: .popover))
     }
 
     // MARK: - Sidebar
@@ -89,14 +89,6 @@ struct MenuContent: View {
                     .foregroundStyle(appState.selectedTab == .main ? DS.C.ink : DS.C.textSub)
             }
 
-            ForEach(appState.providers) { tool in
-                SidebarToolItem(
-                    tool: tool,
-                    toolState: appState.state(for: tool),
-                    isSelected: appState.selectedTab == .tool(tool)
-                ) { appState.selectedTab = .tool(tool) }
-            }
-
             Spacer()
 
             SidebarSlot(isSelected: appState.selectedTab == .history, help: "History", shortcut: "2") {
@@ -107,18 +99,6 @@ struct MenuContent: View {
                     .foregroundStyle(appState.selectedTab == .history ? DS.C.ink : DS.C.textSub)
             }
 
-            // Theme: System → Light → Dark. The icon shows the current theme.
-            SidebarSlot(isSelected: false, help: "Theme: \(appearance.label) — click for \(appearance.next.label)") {
-                let next = appearance.next
-                appearanceRaw = next.rawValue
-                next.apply()
-            } icon: {
-                Image(systemName: appearance.symbolName)
-                    .font(.system(size: 15, weight: .regular))
-                    .foregroundStyle(DS.C.textSub)
-                    .contentTransition(reduceMotion ? .identity : .symbolEffect(.replace))
-            }
-
             SidebarSlot(isSelected: appState.selectedTab == .settings, help: "Settings", shortcut: "3") {
                 appState.selectedTab = .settings
             } icon: {
@@ -127,8 +107,8 @@ struct MenuContent: View {
                     .foregroundStyle(appState.selectedTab == .settings ? DS.C.ink : DS.C.textSub)
             }
         }
-        .padding(.top, 14)
-        .padding(.bottom, 14)
+        .padding(.top, 10)
+        .padding(.bottom, 10)
         .frame(width: DS.sidebarWidth)
         .background(DS.C.sidebar)
         // Opening the panel puts keyboard focus on the first slot (Home); the
@@ -157,29 +137,6 @@ struct MenuContent: View {
             MainTabView()
                 .frame(width: DS.contentWidth)
                 .frame(maxHeight: .infinity)
-        case .tool(let id) where appState.toolStates[id] != nil:
-            VStack(spacing: 0) {
-                if appState.showOnboarding {
-                    OnboardingView()
-                        .transition(.opacity)
-                }
-                ToolTabView(
-                    toolState: appState.state(for: id),
-                    onSetMode: { appState.setMode($0, for: id) },
-                    onActivate: { appState.activate(id) },
-                    onRefresh: { Task { await appState.refreshQuotaManually(for: id) } }
-                )
-                .frame(width: DS.contentWidth)
-                .frame(maxHeight: .infinity)
-                .id(id)
-            }
-            .frame(width: DS.contentWidth)
-            .frame(maxHeight: .infinity)
-        case .tool:
-            // The account behind this tab was removed.
-            MainTabView()
-                .frame(width: DS.contentWidth)
-                .frame(maxHeight: .infinity)
         case .history:
             HistoryTabView()
                 .frame(width: DS.contentWidth)
@@ -194,9 +151,9 @@ struct MenuContent: View {
 
 // MARK: - Sidebar items
 
-/// One icon slot in the narrow left rail. Selected state is shown with a soft
-/// rounded highlight (OpenUsage-style) rather than a colored bar; hover gives a
-/// faint highlight. Holds any icon (SF Symbol or template provider glyph).
+/// One icon slot in the narrow left rail. Selected state is a soft filled
+/// rounded highlight, like the selected pane in iStat Menus; hover gives a
+/// fainter one. Holds any icon (SF Symbol or template provider glyph).
 struct SidebarSlot<Icon: View>: View {
     let isSelected: Bool
     let help: LocalizedStringKey
@@ -210,14 +167,10 @@ struct SidebarSlot<Icon: View>: View {
     var body: some View {
         Button(action: action) {
             icon()
-                .frame(width: 38, height: 32)
+                .frame(width: 36, height: 30)
                 .background(
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    RoundedRectangle(cornerRadius: DS.R.md, style: .continuous)
                         .fill(highlight)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
-                        .stroke(isSelected ? DS.C.border : Color.clear, lineWidth: 1)
                 )
                 .frame(width: DS.sidebarWidth, height: 36)
         }
@@ -229,36 +182,9 @@ struct SidebarSlot<Icon: View>: View {
     }
 
     private var highlight: Color {
-        if isSelected { return DS.C.surface }
+        if isSelected { return DS.C.selection }
         if hovering { return DS.C.surfaceHigh }
         return .clear
-    }
-}
-
-/// Provider glyph slot in the sidebar. Observes the tool so the icon dims when
-/// the tool isn't being monitored. Keeps the Claude/Codex glyphs untouched.
-struct SidebarToolItem: View {
-    let tool: ProviderID
-    @ObservedObject var toolState: ToolState
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        SidebarSlot(isSelected: isSelected, help: LocalizedStringKey(tool.shortName), action: action) {
-            Image(tool.kind.glyphAssetName)
-                .resizable()
-                .renderingMode(.template)
-                .scaledToFit()
-                .frame(width: 19, height: 19)
-                .foregroundStyle(isSelected ? DS.C.ink : DS.C.text)
-                .opacity(toolState.isMonitored || toolState.isWarming || isSelected ? 1.0 : 0.55)
-                .overlay(alignment: .bottomTrailing) {
-                    if let badge = tool.badge {
-                        AccountBadge(text: badge, color: DS.C.accent(tool.kind))
-                            .offset(x: 6, y: 5)
-                    }
-                }
-        }
     }
 }
 

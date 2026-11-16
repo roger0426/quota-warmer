@@ -1,7 +1,7 @@
 import Foundation
 
 /// The panel's color theme. `.system` follows macOS (and switches live when
-/// the system does); `.light` / `.dark` pin it. Cycled by the sidebar button.
+/// the system does); `.light` / `.dark` pin it. Picked in Settings → Display.
 enum AppearanceMode: String, CaseIterable {
     case system
     case light
@@ -9,7 +9,7 @@ enum AppearanceMode: String, CaseIterable {
 
     static let defaultsKey = AppSettings.Key.appearanceMode
 
-    /// Sidebar button order: System → Light → Dark → System.
+    /// Cycle order: System → Light → Dark → System.
     var next: AppearanceMode {
         switch self {
         case .system: return .light

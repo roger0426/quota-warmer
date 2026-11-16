@@ -190,7 +190,10 @@ private struct DefaultAccountRow: View {
                     }
                 }
             }
-            if !removed { WarmupModelControl(tool: .default(kind)) }
+            if !removed {
+                WarmupModelControl(tool: .default(kind))
+                AccountDisplayControls(tool: .default(kind), toolState: appState.state(for: .default(kind)))
+            }
         }
         .padding(.horizontal, DS.Space.md)
         .padding(.vertical, DS.Space.sm - 1)
@@ -299,6 +302,70 @@ private struct WarmupModelControl: View {
     }
 }
 
+/// How one account shows on the overview and in the menu bar: percent left
+/// or used, and whether its quota is pinned to the menu bar. Moved here from
+/// the overview header so that header keeps only mode / warm / refresh.
+private struct AccountDisplayControls: View {
+    @EnvironmentObject var appState: AppState
+    let tool: ProviderID
+    @ObservedObject var toolState: ToolState
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Spacer().frame(width: 28)
+                Text("Percent shown")
+                    .font(.system(size: 10.5, weight: .medium))
+                    .foregroundStyle(DS.C.textSub)
+                Spacer(minLength: 4)
+                HStack(spacing: 2) {
+                    option("Left", selected: toolState.displayMode == .remaining)
+                    option("Used", selected: toolState.displayMode == .used)
+                }
+                .padding(2)
+                .background(DS.C.surfaceHigh, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(Text("Percent shown"))
+            }
+            HStack(spacing: 6) {
+                Spacer().frame(width: 28)
+                Text("Show in menu bar")
+                    .font(.system(size: 10.5, weight: .medium))
+                    .foregroundStyle(DS.C.textSub)
+                Spacer(minLength: 4)
+                Toggle(isOn: Binding(
+                    get: { toolState.menuBarVisible },
+                    set: { appState.setMenuBarVisible(tool, $0) }
+                )) { Text("Show in menu bar") }
+                .labelsHidden()
+                .toggleStyle(.switch).scaleEffect(0.65).tint(DS.C.green)
+                .frame(height: 18)
+            }
+        }
+    }
+
+    private func option(_ label: LocalizedStringKey, selected: Bool) -> some View {
+        Button(action: { if !selected { appState.toggleDisplayMode(for: tool) } }) {
+            Text(label)
+                .font(.system(size: 9, weight: .semibold))
+                .lineLimit(1)
+                .fixedSize()
+                .padding(.horizontal, 6).padding(.vertical, 3)
+                .background(
+                    selected ? DS.C.surface : Color.clear,
+                    in: RoundedRectangle(cornerRadius: 6, style: .continuous)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .stroke(selected ? DS.C.border : Color.clear, lineWidth: 1)
+                )
+                .foregroundStyle(selected ? DS.C.text : DS.C.textMuted)
+        }
+        .buttonStyle(PressableButtonStyle())
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
 /// One added account: name, folder, sign-in state and actions.
 private struct AccountRow: View {
     @EnvironmentObject var appState: AppState
@@ -370,6 +437,7 @@ private struct AccountRow: View {
                 }
             }
             WarmupModelControl(tool: tool)
+            AccountDisplayControls(tool: tool, toolState: toolState)
         }
         .padding(.horizontal, DS.Space.md)
         .padding(.vertical, DS.Space.sm)

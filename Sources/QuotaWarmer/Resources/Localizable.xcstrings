@@ -3777,6 +3777,22 @@
         }
       }
     },
+    "Left": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Left"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kalan"
+          }
+        }
+      }
+    },
     "Light": {
       "localizations": {
         "en": {
@@ -5069,6 +5085,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "5 saatlik pencere başına zirve"
+          }
+        }
+      }
+    },
+    "Percent shown": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Percent shown"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gösterilen yüzde"
           }
         }
       }
@@ -6417,6 +6449,22 @@
         }
       }
     },
+    "Show in menu bar": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show in menu bar"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menü çubuğunda göster"
+          }
+        }
+      }
+    },
     "Show more (%lld more)": {
       "localizations": {
         "en": {
@@ -7057,18 +7105,18 @@
         }
       }
     },
-    "Theme: %@ — click for %@": {
+    "Theme": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Theme: %@ — click for %@"
+            "value": "Theme"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tema: %@ — %@ için tıklayın"
+            "value": "Tema"
           }
         }
       }
@@ -7437,6 +7485,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu biriken sıfırlamayı kullan (onay ister)"
+          }
+        }
+      }
+    },
+    "Used": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Used"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kullanılan"
           }
         }
       }

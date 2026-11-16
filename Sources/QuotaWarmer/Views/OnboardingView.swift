@@ -67,7 +67,6 @@ struct OnboardingView: View {
             }
             .padding(.horizontal, DS.Space.md).padding(.vertical, 8)
         }
-        .background(DS.C.bg)
         .task { await runCheck() }
     }
 
