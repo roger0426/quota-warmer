@@ -3249,18 +3249,18 @@
         }
       }
     },
-    "History is kept in ~/Library/Application Support/QuotaWarmer/events.jsonl and mirrored to ~/Library/Logs/QuotaWarmer/diagnostics.log. Tokens and authorization headers are redacted and are never written to history or warmup logs.": {
+    "History is kept in ~/Library/Application Support/io.github.roger0426.quotawarmer/events.jsonl and mirrored to ~/Library/Logs/io.github.roger0426.quotawarmer/diagnostics.log. Tokens and authorization headers are redacted and are never written to history or warmup logs.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "History is kept in ~/Library/Application Support/QuotaWarmer/events.jsonl and mirrored to ~/Library/Logs/QuotaWarmer/diagnostics.log. Tokens and authorization headers are redacted and are never written to history or warmup logs."
+            "value": "History is kept in ~/Library/Application Support/io.github.roger0426.quotawarmer/events.jsonl and mirrored to ~/Library/Logs/io.github.roger0426.quotawarmer/diagnostics.log. Tokens and authorization headers are redacted and are never written to history or warmup logs."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Geçmiş ~/Library/Application Support/QuotaWarmer/events.jsonl dosyasında tutulur ve ~/Library/Logs/QuotaWarmer/diagnostics.log dosyasına yansıtılır. Token’lar ve yetkilendirme başlıkları gizlenir; geçmişe veya ısıtma günlüklerine hiçbir zaman yazılmaz."
+            "value": "Geçmiş ~/Library/Application Support/io.github.roger0426.quotawarmer/events.jsonl dosyasında tutulur ve ~/Library/Logs/io.github.roger0426.quotawarmer/diagnostics.log dosyasına yansıtılır. Token’lar ve yetkilendirme başlıkları gizlenir; geçmişe veya ısıtma günlüklerine hiçbir zaman yazılmaz."
           }
         }
       }

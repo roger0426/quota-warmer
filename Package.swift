@@ -15,6 +15,7 @@ let package = Package(
             name: "QuotaWarmerCore",
             path: "Sources/QuotaWarmer",
             sources: [
+                "Models/AppIdentity.swift",
                 "Models/AppLanguage.swift",
                 "Models/AppSettings.swift",
                 "Models/AppearanceMode.swift",
@@ -23,6 +24,7 @@ let package = Package(
                 "Models/EventLog.swift",
                 "Models/ImpactReport.swift",
                 "Models/IntegrationCommand.swift",
+                "Models/LegacyDataMigration.swift",
                 "Models/OnboardingFlow.swift",
                 "Models/ProviderAccount.swift",
                 "Models/QuotaAlerts.swift",

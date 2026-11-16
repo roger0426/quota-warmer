@@ -6,7 +6,7 @@
 	<true/>
 	<key>com.apple.security.temporary-exception.files.home-relative-path.read-only</key>
 	<array>
-		<string>/Library/Application Support/QuotaWarmer/</string>
+		<string>/Library/Application Support/io.github.roger0426.quotawarmer/</string>
 	</array>
 </dict>
 </plist>

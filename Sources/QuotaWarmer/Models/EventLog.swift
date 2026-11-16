@@ -175,9 +175,7 @@ final class EventLogStore: @unchecked Sendable {
         if let directory {
             self.directory = directory
         } else {
-            let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-                ?? FileManager.default.temporaryDirectory
-            self.directory = support.appendingPathComponent("QuotaWarmer", isDirectory: true)
+            self.directory = AppIdentity.supportDirectory
         }
     }
 

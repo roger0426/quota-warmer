@@ -231,12 +231,11 @@ final class ModelCatalogStore: @unchecked Sendable {
     static func resourceName(for tool: ToolID) -> String { "\(tool.rawValue)-models" }
 
     static func defaultRemoteURL(for tool: ToolID) -> URL {
-        URL(string: "https://raw.githubusercontent.com/bcanozgur/quota-warmer/main/Sources/QuotaWarmer/Resources/\(resourceName(for: tool)).json")!
+        URL(string: "https://raw.githubusercontent.com/roger0426/quota-warmer/main/Sources/QuotaWarmer/Resources/\(resourceName(for: tool)).json")!
     }
 
     static func defaultCacheURL(for tool: ToolID) -> URL? {
-        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
-            .appendingPathComponent("QuotaWarmer", isDirectory: true)
+        AppIdentity.supportDirectory
             .appendingPathComponent("\(resourceName(for: tool)).json")
     }
 

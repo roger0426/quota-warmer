@@ -9,7 +9,7 @@ import SwiftUI
 /// right-click (or control-click) shows the actions menu.
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    let appState = AppState()
+    let appState: AppState
 
     private var statusItem: NSStatusItem!
     private var panel: NSPanel?
@@ -18,6 +18,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var lastCloseAt: Date = .distantPast
 
     override init() {
+        // Before AppState reads any setting: bring over upstream's settings and data once.
+        LegacyDataMigration.runAtLaunch()
+        appState = AppState()
         super.init()
         IntegrationBridge.appState = appState
     }

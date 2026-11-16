@@ -35,6 +35,7 @@ struct AccountsHistoryRegression {
         await testEventLog()
         testImpactReport()
         testDiagnosticRotation()
+        testLegacyMigration()
 
         if failures.isEmpty {
             print("Accounts & history regressions passed (\(checks) checks)")
@@ -800,6 +801,44 @@ struct AccountsHistoryRegression {
     }
 
     // MARK: - Harness
+
+    // MARK: - Fork identity and migration from upstream
+
+    static func testLegacyMigration() {
+        expect(AppIdentity.bundleID, "io.github.roger0426.quotawarmer", "fork bundle id")
+        expect(AppIdentity.legacyBundleID, "com.quotawarmer.app", "upstream bundle id")
+        expect(AppIdentity.supportDirectory.lastPathComponent, "io.github.roger0426.quotawarmer", "support folder name")
+        expect(AppIdentity.logsDirectory.lastPathComponent, "io.github.roger0426.quotawarmer", "logs folder name")
+        expect(QuotaStatusExport.defaultURL.deletingLastPathComponent().lastPathComponent,
+               "io.github.roger0426.quotawarmer", "status.json lives in the fork folder")
+
+        let suite = "accounts-history-regression-migration"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let legacy: [String: Any] = ["refreshInterval": 120, "toolMode.claude": "autoWarm", "NSWindow Frame x": "1 2 3 4"]
+
+        expect(LegacyDataMigration.copySettings(from: nil, into: defaults, currentKeys: []), 0, "no upstream settings")
+        expect(LegacyDataMigration.copySettings(from: legacy, into: defaults, currentKeys: ["refreshInterval"]), 0,
+               "fork settings already present: nothing copied")
+        expect(LegacyDataMigration.copySettings(from: legacy, into: defaults, currentKeys: ["NSStatusItem Visible"]), 2,
+               "only system keys present: app keys copied, system keys skipped")
+        expect(defaults.integer(forKey: "refreshInterval"), 120, "copied value")
+        expect(defaults.object(forKey: "NSWindow Frame x") == nil, true, "system key not copied")
+
+        let fm = FileManager.default
+        let root = fm.temporaryDirectory.appendingPathComponent("qw-migration-\(UUID().uuidString)", isDirectory: true)
+        defer { try? fm.removeItem(at: root) }
+        let old = root.appendingPathComponent("QuotaWarmer", isDirectory: true)
+        let new = root.appendingPathComponent("io.github.roger0426.quotawarmer", isDirectory: true)
+        expect(LegacyDataMigration.copyFolder(from: old, to: new), false, "no upstream folder")
+        try? fm.createDirectory(at: old.appendingPathComponent("history"), withIntermediateDirectories: true)
+        try? Data("{}\n".utf8).write(to: old.appendingPathComponent("events.jsonl"))
+        expect(LegacyDataMigration.copyFolder(from: old, to: new), true, "upstream folder copied")
+        check(fm.fileExists(atPath: new.appendingPathComponent("events.jsonl").path), "events.jsonl copied")
+        check(fm.fileExists(atPath: old.appendingPathComponent("events.jsonl").path), "upstream folder left in place")
+        expect(LegacyDataMigration.copyFolder(from: old, to: new), false, "second run does nothing")
+    }
 
     static func check(_ condition: Bool, _ message: String) {
         checks += 1

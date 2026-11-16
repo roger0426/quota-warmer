@@ -2,7 +2,7 @@ import SwiftUI
 import WidgetKit
 
 // The widget is a separate, sandboxed process. It shows what the app last
-// wrote to `~/Library/Application Support/QuotaWarmer/status.json` (see
+// wrote to `~/Library/Application Support/io.github.roger0426.quotawarmer/status.json` (see
 // `QuotaStatusFile` in the app) and does nothing else: no network, no
 // credentials, no CLI. Its only entitlement beyond the sandbox is read-only
 // access to that folder.
@@ -46,7 +46,7 @@ enum WidgetStatusReader {
             home = NSHomeDirectory()
         }
         return URL(fileURLWithPath: home)
-            .appendingPathComponent("Library/Application Support/QuotaWarmer/status.json")
+            .appendingPathComponent("Library/Application Support/io.github.roger0426.quotawarmer/status.json")
     }
 
     static func read() -> [WidgetProvider] {
@@ -323,7 +323,7 @@ struct QuotaWidgetView: View {
 
 @main
 struct QuotaWarmerWidget: Widget {
-    static let kind = "com.quotawarmer.app.widget.quota"
+    static let kind = "io.github.roger0426.quotawarmer.widget.quota"
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: Self.kind, provider: QuotaTimelineProvider()) { entry in

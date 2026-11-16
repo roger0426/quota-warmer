@@ -4,7 +4,7 @@
 #
 #   Claude 58% left · 2h13m | Codex 82% used · 4h01m
 #
-# Reads ~/Library/Application Support/QuotaWarmer/status.json, which the app
+# Reads ~/Library/Application Support/io.github.roger0426.quotawarmer/status.json, which the app
 # rewrites after every successful quota fetch. Data older than 5 minutes is
 # marked "(stale 12m)". Always exits 0 so a missing file never breaks a prompt.
 #
@@ -88,7 +88,7 @@ function run(argv) {
     else if (arg === "--stale-after") opts.staleAfter = Number(argv[++i]) || 300;
   }
   if (!opts.file) {
-    opts.file = $.NSHomeDirectory().js + "/Library/Application Support/QuotaWarmer/status.json";
+    opts.file = $.NSHomeDirectory().js + "/Library/Application Support/io.github.roger0426.quotawarmer/status.json";
   }
 
   var raw = $.NSString.stringWithContentsOfFileEncodingError(opts.file, $.NSUTF8StringEncoding, null);

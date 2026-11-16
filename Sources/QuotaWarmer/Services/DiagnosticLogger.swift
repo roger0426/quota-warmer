@@ -23,12 +23,8 @@ enum DebugLevel: Int, CaseIterable {
 }
 
 enum DiagnosticLogger {
-    /// `~/Library/Logs/QuotaWarmer/` — per-user, not world-readable, survives reboot.
-    static let directory: URL = {
-        let library = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first
-            ?? FileManager.default.temporaryDirectory
-        return library.appendingPathComponent("Logs/QuotaWarmer", isDirectory: true)
-    }()
+    /// `~/Library/Logs/io.github.roger0426.quotawarmer/` — per-user, not world-readable, survives reboot.
+    static let directory: URL = AppIdentity.logsDirectory
     static let fileURL = directory.appendingPathComponent("diagnostics.log")
     private static let writeLock = NSLock()
     /// Only read and written while holding `writeLock`.

@@ -315,7 +315,7 @@ enum UsageHistory {
 }
 
 /// Persists `QuotaSample`s as one JSON-lines file per account under
-/// `~/Library/Application Support/QuotaWarmer/history/`. Appends are cheap;
+/// `~/Library/Application Support/io.github.roger0426.quotawarmer/history/`. Appends are cheap;
 /// old lines are pruned once per launch per account, on first read.
 final class UsageHistoryStore: @unchecked Sendable {
     static let shared = UsageHistoryStore()
@@ -338,9 +338,7 @@ final class UsageHistoryStore: @unchecked Sendable {
         if let directory {
             self.directory = directory
         } else {
-            let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-                ?? FileManager.default.temporaryDirectory
-            self.directory = support.appendingPathComponent("QuotaWarmer/history", isDirectory: true)
+            self.directory = AppIdentity.supportDirectory.appendingPathComponent("history", isDirectory: true)
         }
     }
 

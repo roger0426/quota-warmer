@@ -262,7 +262,7 @@ struct SettingsTabView: View {
                     Divider().background(DS.C.border).padding(.leading, 36)
                     infoRow(
                         title: "Logs",
-                        detail: "History is kept in ~/Library/Application Support/QuotaWarmer/events.jsonl and mirrored to ~/Library/Logs/QuotaWarmer/diagnostics.log. Tokens and authorization headers are redacted and are never written to history or warmup logs."
+                        detail: "History is kept in ~/Library/Application Support/io.github.roger0426.quotawarmer/events.jsonl and mirrored to ~/Library/Logs/io.github.roger0426.quotawarmer/diagnostics.log. Tokens and authorization headers are redacted and are never written to history or warmup logs."
                     )
                 }
 

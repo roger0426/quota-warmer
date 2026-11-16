@@ -1,7 +1,7 @@
 import Foundation
 
 /// The live quota as a file other tools can read:
-/// `~/Library/Application Support/QuotaWarmer/status.json`, rewritten after
+/// `~/Library/Application Support/io.github.roger0426.quotawarmer/status.json`, rewritten after
 /// every successful quota fetch. `scripts/quotawarmer-statusline.sh` turns it
 /// into a one-line status for Claude Code, tmux or starship.
 ///
@@ -114,9 +114,7 @@ enum QuotaStatusExport {
     }
 
     static var defaultURL: URL {
-        let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-            ?? FileManager.default.temporaryDirectory
-        return support.appendingPathComponent("QuotaWarmer/status.json")
+        AppIdentity.supportDirectory.appendingPathComponent("status.json")
     }
 
     private static let queue = DispatchQueue(label: "com.quotawarmer.status-export", qos: .utility)

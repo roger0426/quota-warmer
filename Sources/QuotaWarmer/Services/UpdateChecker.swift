@@ -10,7 +10,7 @@ actor UpdateChecker {
     /// not a source of updates and the app makes no request to GitHub.
     static let isEnabled = false
 
-    private let apiURL = URL(string: "https://api.github.com/repos/bcanozgur/quota-warmer/releases/latest")!
+    private let apiURL = URL(string: "https://api.github.com/repos/roger0426/quota-warmer/releases/latest")!
 
     func checkForUpdate() async -> ReleaseInfo? {
         guard Self.isEnabled else { return nil }
