@@ -1217,6 +1217,22 @@
         }
       }
     },
+    "<%lld%%": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "<%lld%%"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "<%%%lld"
+          }
+        }
+      }
+    },
     "A fresh window was detected and the warm-up was sent.": {
       "localizations": {
         "en": {
@@ -1361,6 +1377,22 @@
         }
       }
     },
+    "About": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hakkında"
+          }
+        }
+      }
+    },
     "About %@": {
       "localizations": {
         "en": {
@@ -1405,6 +1437,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hesap"
+          }
+        }
+      }
+    },
+    "Accounts": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accounts"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hesaplar"
           }
         }
       }
@@ -1517,6 +1565,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kullanım %lld%% olduğunda uyar. Değiştirmek için etkinleştirin."
+          }
+        }
+      }
+    },
+    "Alerts": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerts"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uyarılar"
           }
         }
       }
@@ -1761,22 +1825,6 @@
         }
       }
     },
-    "Auto-warm on — the next fresh window will be claimed automatically.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Auto-warm on — the next fresh window will be claimed automatically."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Otomatik ısıtma açık — bir sonraki yeni pencere otomatik olarak kazanılacak."
-          }
-        }
-      }
-    },
     "Auto-warm only acts on a reading from the last 5 minutes.": {
       "localizations": {
         "en": {
@@ -1953,18 +2001,18 @@
         }
       }
     },
-    "Blue → orange at 50% → red at 80% used": {
+    "Blue, then red from the warning level": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Blue → orange at 50% → red at 80% used"
+            "value": "Blue, then red from the warning level"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mavi → %50’de turuncu → %80 kullanımda kırmızı"
+            "value": "Mavi, uyarı eşiğinden itibaren kırmızı"
           }
         }
       }
@@ -2157,6 +2205,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kontrol ediliyor"
+          }
+        }
+      }
+    },
+    "Checking now…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking now…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şimdi kontrol ediliyor…"
           }
         }
       }
@@ -2897,6 +2961,22 @@
         }
       }
     },
+    "Event History": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Event History"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Olay Geçmişi"
+          }
+        }
+      }
+    },
     "Expand %@ section": {
       "localizations": {
         "en": {
@@ -3021,6 +3101,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cum"
+          }
+        }
+      }
+    },
+    "General": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "General"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genel"
           }
         }
       }
@@ -3489,6 +3585,22 @@
         }
       }
     },
+    "Issue": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Issue"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sorun"
+          }
+        }
+      }
+    },
     "It never bypasses or raises your limits, never shares or uploads your credentials, and never sends anything for tools left on Monitor or Off.": {
       "localizations": {
         "en": {
@@ -3649,6 +3761,22 @@
         }
       }
     },
+    "Last 24 Hours": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last 24 Hours"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Son 24 Saat"
+          }
+        }
+      }
+    },
     "Last 30 Days": {
       "localizations": {
         "en": {
@@ -3709,6 +3837,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bağlam için son kota gösteriliyor."
+          }
+        }
+      }
+    },
+    "Last warm-up failed %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last warm-up failed %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Son ısıtma başarısız: %@"
+          }
+        }
+      }
+    },
+    "Last warmed %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last warmed %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Son ısıtma %@"
+          }
+        }
+      }
+    },
+    "Last warmed %@, window confirmed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last warmed %@, window confirmed"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Son ısıtma %@, pencere doğrulandı"
           }
         }
       }
@@ -4177,6 +4353,22 @@
         }
       }
     },
+    "Morning Pre-warm": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Morning Pre-warm"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sabah Ön Isıtması"
+          }
+        }
+      }
+    },
     "Morning Pre-warm — Caught Up": {
       "localizations": {
         "en": {
@@ -4529,18 +4721,18 @@
         }
       }
     },
-    "No warm-up yet.": {
+    "No warm-up since launch": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No warm-up yet."
+            "value": "No warm-up since launch"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Henüz ısıtma yok."
+            "value": "Açılıştan beri ısıtma yok"
           }
         }
       }
@@ -4625,6 +4817,22 @@
         }
       }
     },
+    "Not started": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not started"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başlamadı"
+          }
+        }
+      }
+    },
     "Not started yet": {
       "localizations": {
         "en": {
@@ -4637,6 +4845,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Henüz başlamadı"
+          }
+        }
+      }
+    },
+    "Not updated yet": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not updated yet"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Henüz güncellenmedi"
           }
         }
       }
@@ -5169,6 +5393,22 @@
         }
       }
     },
+    "Privacy": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gizlilik"
+          }
+        }
+      }
+    },
     "Problems": {
       "localizations": {
         "en": {
@@ -5277,6 +5517,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kota yenileme aralığı"
+          }
+        }
+      }
+    },
+    "Quota check": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quota check"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kota kontrolü"
           }
         }
       }
@@ -5421,6 +5677,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "QuotaWarmer"
+          }
+        }
+      }
+    },
+    "QuotaWarmer Settings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuotaWarmer Settings"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QuotaWarmer Ayarları"
           }
         }
       }
@@ -5581,6 +5853,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hız sınırı koruması"
+          }
+        }
+      }
+    },
+    "Rate-limited: automatic checks are backing off": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rate-limited: automatic checks are backing off"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hız sınırı: otomatik kontroller yavaşlatıldı"
           }
         }
       }
@@ -5869,6 +6157,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sıfırlanma"
+          }
+        }
+      }
+    },
+    "Resets %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resets %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sıfırlanma: %@"
           }
         }
       }
@@ -6385,6 +6689,22 @@
         }
       }
     },
+    "Shortcuts": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortcuts"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kısayollar"
+          }
+        }
+      }
+    },
     "Show %@": {
       "localizations": {
         "en": {
@@ -6717,6 +7037,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "macOS ile başlat"
+          }
+        }
+      }
+    },
+    "Status": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Durum"
           }
         }
       }
@@ -7377,6 +7713,22 @@
         }
       }
     },
+    "Updated %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updated %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Güncellendi: %@"
+          }
+        }
+      }
+    },
     "Updating cost estimate": {
       "localizations": {
         "en": {
@@ -7421,6 +7773,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Güncelleniyor..."
+          }
+        }
+      }
+    },
+    "Usage at or above this shows red, in the panel and the widget": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usage at or above this shows red, in the panel and the widget"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu düzeyde veya üstündeki kullanım panelde ve araçta kırmızı gösterilir"
           }
         }
       }
@@ -7745,6 +8113,22 @@
         }
       }
     },
+    "Warm-up": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warm-up"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isıtma"
+          }
+        }
+      }
+    },
     "Warm-up cost": {
       "localizations": {
         "en": {
@@ -7825,22 +8209,6 @@
         }
       }
     },
-    "Warm-up sent — verifying the window opened…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Warm-up sent — verifying the window opened…"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Isıtma gönderildi — pencerenin açıldığı doğrulanıyor…"
-          }
-        }
-      }
-    },
     "Warm-ups": {
       "localizations": {
         "en": {
@@ -7889,6 +8257,38 @@
         }
       }
     },
+    "Warmed %@, not verified": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warmed %@, not verified"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isıtıldı (%@), doğrulanmadı"
+          }
+        }
+      }
+    },
+    "Warmed %@, verifying…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warmed %@, verifying…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isıtıldı (%@), doğrulanıyor…"
+          }
+        }
+      }
+    },
     "Warmed at %@": {
       "localizations": {
         "en": {
@@ -7905,6 +8305,22 @@
         }
       }
     },
+    "Warming up now…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warming up now…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şimdi ısıtılıyor…"
+          }
+        }
+      }
+    },
     "Warmup needs Claude/Codex binaries in the app environment. Credentials are checked separately below.": {
       "localizations": {
         "en": {
@@ -7917,6 +8333,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Isıtma, uygulama ortamında Claude/Codex ikili dosyalarını gerektirir. Kimlik bilgileri aşağıda ayrıca kontrol edilir."
+          }
+        }
+      }
+    },
+    "Warning At": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warning At"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uyarı Eşiği"
           }
         }
       }
@@ -8045,6 +8477,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kullanılan haftalık kota"
+          }
+        }
+      }
+    },
+    "Weekly used": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weekly used"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kullanılan haftalık"
           }
         }
       }
@@ -8561,6 +9009,22 @@
         }
       }
     },
+    "just now": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "just now"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "az önce"
+          }
+        }
+      }
+    },
     "last 24 hours": {
       "localizations": {
         "en": {
@@ -8605,6 +9069,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "son 7 gün"
+          }
+        }
+      }
+    },
+    "left": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "left"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kaldı"
           }
         }
       }
@@ -8689,6 +9169,22 @@
         }
       }
     },
+    "now": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "now"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "şimdi"
+          }
+        }
+      }
+    },
     "off": {
       "localizations": {
         "en": {
@@ -8733,6 +9229,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "duraklatıldı"
+          }
+        }
+      }
+    },
+    "peak %lld%%": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "peak %lld%%"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "en yüksek %%%lld"
           }
         }
       }
@@ -8865,6 +9377,22 @@
         }
       }
     },
+    "used": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "used"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kullanıldı"
+          }
+        }
+      }
+    },
     "very low": {
       "localizations": {
         "en": {
@@ -8989,6 +9517,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "~/.codex · varsayılan"
+          }
+        }
+      }
+    },
+    "≥%lld%%": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "≥%lld%%"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "≥%%%lld"
           }
         }
       }

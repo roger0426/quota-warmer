@@ -22,46 +22,53 @@ enum QuotaDisplayMode: String, CaseIterable {
     static func defaultsKey(storageKey: String) -> String { AppSettings.Key.quotaDisplayMode(storageKey) }
 }
 
-/// Claude-style severity of a quota window, driven by how much has been used.
+/// iStat-style severity of a quota window, driven by how much has been used:
+/// blue below the user's warning threshold, red at or above it.
 /// Independent of the display mode, so flipping the mode never recolors a bar.
 enum QuotaUsageLevel: Equatable {
     case normal     // blue
-    case warning    // orange
     case critical   // red
 
-    /// Whole used-percent thresholds (Int, so 0.7 * 100 float error can't
-    /// push exactly 50% into the wrong band).
-    static let warningUsedPercent = 50
-    static let criticalUsedPercent = 80
+    /// Settings → Display → "Warning at". Whole used-percents (Int, so float
+    /// error can't push exactly 80% into the wrong band).
+    static let warningPercentKey = AppSettings.Key.usageWarningPercent
+    static let defaultWarningPercent = 80
+    static let warningPercentRange = 50...95
+    static let warningPercentStep = 5
 
-    init(remainingFraction: Double) {
+    /// The stored threshold, clamped to the allowed range.
+    static func storedWarningPercent(defaults: UserDefaults = .standard) -> Int {
+        guard defaults.object(forKey: warningPercentKey) != nil else { return defaultWarningPercent }
+        return clampedWarningPercent(defaults.integer(forKey: warningPercentKey))
+    }
+
+    static func clampedWarningPercent(_ value: Int) -> Int {
+        min(max(value, warningPercentRange.lowerBound), warningPercentRange.upperBound)
+    }
+
+    init(remainingFraction: Double, warningPercent: Int = QuotaUsageLevel.defaultWarningPercent) {
         // Compare on whole percents so the color always agrees with the number
-        // shown next to the bar (50% used is orange, 49% is still blue).
+        // shown next to the bar (80% used is red, 79% is still blue).
         let usedPercent = QuotaDisplay.usedPercent(remainingFraction: remainingFraction)
-        if usedPercent >= Self.criticalUsedPercent {
-            self = .critical
-        } else if usedPercent >= Self.warningUsedPercent {
-            self = .warning
-        } else {
-            self = .normal
-        }
+        self = usedPercent >= Self.clampedWarningPercent(warningPercent) ? .critical : .normal
     }
 }
 
 /// Pure presentation math for quota bars and the menu-bar label, kept free of
 /// SwiftUI/AppKit so the regression script can exercise it directly.
 enum QuotaDisplay {
-    /// Settings → "Colorful Quota Bars". On (default): bars are blue / orange /
-    /// red by usage. Off: the original single-color (ink) bars.
+    /// Settings → "Colorful Quota Bars". On (default): bars are blue, or red
+    /// from the warning threshold up. Off: the original single-color (ink) bars.
     static let colorfulBarsKey = AppSettings.Key.colorfulQuotaBars
 
     /// Severity to color a row with, or nil for the plain single-color style.
     /// A row with no data, or one still settling after a rollover, stays in the
     /// calm `.normal` band rather than flashing a warning color.
-    static func colorLevel(remainingFraction: Double, hasMetric: Bool, settling: Bool, colorful: Bool) -> QuotaUsageLevel? {
+    static func colorLevel(remainingFraction: Double, hasMetric: Bool, settling: Bool, colorful: Bool,
+                           warningPercent: Int = QuotaUsageLevel.defaultWarningPercent) -> QuotaUsageLevel? {
         guard colorful else { return nil }
         guard hasMetric, !settling else { return .normal }
-        return QuotaUsageLevel(remainingFraction: remainingFraction)
+        return QuotaUsageLevel(remainingFraction: remainingFraction, warningPercent: warningPercent)
     }
 
     /// Whole percent left. Truncates (0.999 → 99%) so a window is never shown

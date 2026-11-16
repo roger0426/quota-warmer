@@ -307,6 +307,12 @@ final class AppState: ObservableObject, CoordinatorHost {
     }
     /// Menu-bar refresh for the 1 s tick while the panel is closed.
     var onUITick: (() -> Void)?
+    /// Set by AppDelegate: opens (or focuses) the standalone Settings window.
+    var onOpenSettings: (() -> Void)?
+
+    func openSettings() { onOpenSettings?() }
+    /// Set by AppDelegate: shows the menu-bar panel (e.g. for the welcome guide).
+    var onShowPanel: (() -> Void)?
 
     // MARK: - Onboarding
 

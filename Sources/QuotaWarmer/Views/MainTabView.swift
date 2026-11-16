@@ -19,8 +19,8 @@ struct MainTabView: View {
             VStack(alignment: .leading, spacing: DS.Page.spacing) {
                 PanelHeader(title: "QuotaWarmer") { automationControl }
                 if let warning = appState.watcherStatusText { watcherWarning(warning) }
-                if !outcomeTools.isEmpty { statusCard }
                 providerList
+                    .zIndex(2)   // a card's hover bubble draws over the header above it
             }
             .padding(.horizontal, DS.Page.side)
             .padding(.top, DS.Page.top)
@@ -57,7 +57,11 @@ struct MainTabView: View {
                 help: "Refresh every account's quota now",
                 size: 26,
                 isDisabled: fetching,
-                shortcut: "r"
+                shortcut: "r",
+                hint: appState.providers.map { tool in
+                    "\(tool.displayName): \(ToolStatusCopy.refreshHint(for: appState.state(for: tool)))"
+                }.joined(separator: "\n"),
+                hintBeside: true
             ) {
                 Task {
                     await withTaskGroup(of: Void.self) { group in
@@ -86,9 +90,16 @@ struct MainTabView: View {
     /// One card per provider, so each reads as its own panel.
     private var providerList: some View {
         VStack(spacing: DS.Page.spacing) {
-            ForEach(appState.providers) { tool in
+            ForEach(Array(appState.providers.enumerated()), id: \.element) { index, tool in
                 providerRow(tool)
                     .dsCard()
+                    // iStat-style detail window beside the panel on hover.
+                    .hoverDetail(id: "provider-\(tool.storageKey)", delay: 0.6) {
+                        ProviderDetailView(tool: tool, state: appState.state(for: tool))
+                    }
+                    // Hover bubbles open upward, so later cards stack above
+                    // earlier ones and a bubble isn't hidden by the card above.
+                    .zIndex(Double(index))
             }
         }
     }
@@ -125,22 +136,26 @@ struct MainTabView: View {
                 IconButton(
                     systemName: "bolt.fill",
                     help: "Warm \(tool.shortName) now",
-                    tint: DS.C.accent(tool),
-                    size: 26,
-                    isDisabled: state.isWarming
+                    // Same plain glyph colour for every provider (white in dark).
+                    tint: DS.C.text,
+                    size: 22,
+                    isDisabled: state.isWarming,
+                    hint: ToolStatusCopy.warmHint(for: state)
                 ) { appState.activate(tool) }
                 .opacity(state.isWarming ? 0.4 : 1)
                 IconButton(
                     systemName: state.isFetchingQuota ? "hourglass" : state.quotaBackoffActive ? "clock.arrow.circlepath" : "arrow.clockwise",
                     help: "Refresh \(tool.shortName) quota now",
-                    size: 26,
+                    size: 22,
                     // Only an in-flight fetch disables Refresh. Disabling it
                     // during a rate-limit backoff made the control dead for the
                     // whole retry window — which is exactly when the user wants
                     // to retry. `refreshQuotaManually` forces through it.
-                    isDisabled: state.isFetchingQuota
+                    isDisabled: state.isFetchingQuota,
+                    hint: ToolStatusCopy.refreshHint(for: state)
                 ) { Task { await appState.refreshQuotaManually(for: tool) } }
             }
+            .zIndex(1)   // hover bubbles draw over this card's rows
 
             if !collapsed {
                 if let issue = providerIssue(state) {
@@ -221,101 +236,6 @@ struct MainTabView: View {
 
     private func providerIssue(_ state: ToolState) -> String? {
         ToolStatusCopy.providerIssue(for: state)
-    }
-
-    // MARK: - Last warm-up status card ("did it actually work?")
-
-    private var outcomeTools: [ProviderID] {
-        // Only show a row once an actual warm-up outcome exists. Mode is already
-        // visible in each provider row (its colored dot + status text), so the
-        // Auto-warm state no longer adds a card here — that previously made the
-        // panel grow/shrink on every mode toggle and jolt the scroll position.
-        // A confirmed warm-up is routine (the bars already show the open
-        // window), so the card appears only while one is pending or needs action.
-        appState.providers.filter { tool in
-            switch appState.state(for: tool).lastWarmupOutcome {
-            case .none, .confirmed: return false
-            case .pending, .unverified, .failed: return true
-            }
-        }
-    }
-
-    private var statusCard: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            ForEach(outcomeTools) { tool in
-                outcomeRow(tool)
-            }
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .dsCard()
-    }
-
-    private func outcomeRow(_ tool: ProviderID) -> some View {
-        let state = appState.state(for: tool)
-        let info = outcomeInfo(state.lastWarmupOutcome, mode: state.mode)
-        return HStack(alignment: .center, spacing: 7) {
-            StatusDot(color: info.color, size: 7)
-            // One line per tool keeps the overview inside the fixed panel height.
-            Text(tool.shortName)
-                .font(.system(size: 11.5, weight: .bold))
-                .foregroundStyle(DS.C.text)
-            Text(info.message)
-                .font(.system(size: 10.5, weight: .medium))
-                .foregroundStyle(DS.C.textSub)
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .help(info.message)
-            Spacer(minLength: 6)
-            if info.showWarm {
-                Button(action: { appState.activate(tool) }) {
-                    Text("Warm")
-                        .font(.system(size: 10.5, weight: .semibold))
-                        .padding(.horizontal, 12)
-                        .frame(height: 24)
-                        .background(DS.C.accent(tool), in: Capsule())
-                        .foregroundStyle(DS.C.onAccent)
-                }
-                .buttonStyle(PressableButtonStyle())
-                .disabled(state.isWarming)
-                .accessibilityLabel(Text("Warm \(tool.shortName) now"))
-            }
-        }
-    }
-
-    private func outcomeInfo(_ outcome: WarmupOutcome, mode: ToolMode) -> (color: Color, message: String, showWarm: Bool) {
-        switch outcome {
-        case .none:
-            if mode == .autoWarm {
-                return (DS.C.green, String(localized: "Auto-warm on — the next fresh window will be claimed automatically."), false)
-            }
-            return (DS.C.textMuted, String(localized: "No warm-up yet."), false)
-        case .pending:
-            return (DS.C.yellow, String(localized: "Warm-up sent — verifying the window opened…"), false)
-        case .confirmed(let at, let resetAt):
-            var message = String(localized: "Window claimed at \(shortClock(at))")
-            if let resetAt, resetAt > Date() {
-                let remaining = quotaDurationText(Int(resetAt.timeIntervalSinceNow))
-                message += " · " + String(localized: "resets in \(remaining)")
-            }
-            return (DS.C.green, message, false)
-        case .unverified(let sentAt, _):
-            return (
-                DS.C.yellow,
-                String(localized: "Command sent at \(shortClock(sentAt)), but live quota did not confirm that the window opened."),
-                true
-            )
-        case .failed(_, let reason):
-            return (DS.C.red, String(localized: "Warm-up failed: \(reason)"), true)
-        }
-    }
-
-    private func shortClock(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .none
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
     }
 }
 

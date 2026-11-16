@@ -13,6 +13,9 @@ struct QuotaStatusFile: Codable, Equatable {
 
     let schemaVersion: Int
     let generatedAt: Date
+    /// Settings → "Warning at": used-percent from which quota shows red.
+    /// Optional so files written before it existed still decode.
+    var warningPercent: Int? = nil
     let providers: [QuotaStatusProvider]
 }
 
@@ -60,10 +63,12 @@ enum QuotaStatusExport {
         let snapshot: QuotaSnapshot?
     }
 
-    static func make(_ entries: [Entry], now: Date = Date()) -> QuotaStatusFile {
+    static func make(_ entries: [Entry], now: Date = Date(),
+                     warningPercent: Int = QuotaUsageLevel.defaultWarningPercent) -> QuotaStatusFile {
         QuotaStatusFile(
             schemaVersion: QuotaStatusFile.schemaVersion,
             generatedAt: now,
+            warningPercent: QuotaUsageLevel.clampedWarningPercent(warningPercent),
             providers: entries.map { provider($0, now: now) }
         )
     }

@@ -13,6 +13,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private var statusItem: NSStatusItem!
     private var panel: NSPanel?
+    private lazy var settingsWindow = SettingsWindowController(appState: appState)
     private var heightObserver: AnyCancellable?
     private var cancellables = Set<AnyCancellable>()
     private var lastCloseAt: Date = .distantPast
@@ -48,6 +49,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .sink { [weak self] in self?.refreshButtonImage() }
             .store(in: &cancellables)
         appState.onUITick = { [weak self] in self?.refreshButtonImage() }
+        appState.onOpenSettings = { [weak self] in self?.showSettingsWindow() }
+        appState.onShowPanel = { [weak self] in self?.showPanelIfHidden() }
 
         GlobalHotKey.shared.onPress = { [weak self] in self?.togglePanelFromHotKey() }
         GlobalHotKey.shared.reload()
@@ -58,6 +61,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// `quotawarmer://` links (see `IntegrationURLHandler`: read/open/refresh only).
     func application(_ application: NSApplication, open urls: [URL]) {
         IntegrationURLHandler.handle(urls, appState: appState) { [weak self] tab in
+            if tab == .settings {
+                self?.showSettingsWindow()
+                return
+            }
             if let tab { self?.appState.selectedTab = tab }
             self?.showPanelIfHidden()
         }
@@ -159,7 +166,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let size = panel.frame.size
         let buttonRect = buttonWindow.convertToScreen(button.convert(button.bounds, to: nil))
-        var origin = NSPoint(x: buttonRect.midX - size.width / 2, y: buttonRect.minY - size.height - 2)
+        // Left edges line up with the menu-bar item, like iStat Menus dropdowns.
+        var origin = NSPoint(x: buttonRect.minX, y: buttonRect.minY - size.height - 2)
         if let screen = buttonWindow.screen ?? NSScreen.main {
             let visible = screen.visibleFrame
             origin.x = min(max(origin.x, visible.minX + 6), visible.maxX - size.width - 6)
@@ -176,6 +184,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func closePanel() {
         guard let panel, panel.isVisible else { return }
+        HoverDetailPresenter.shared.hide()
         panel.orderOut(nil)
         appState.isPanelVisible = false
         lastCloseAt = Date()
@@ -219,8 +228,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func goToSettings() {
-        appState.selectedTab = .settings
-        showPanel()
+        showSettingsWindow()
+    }
+
+    private func showSettingsWindow() {
+        closePanel()
+        settingsWindow.show()
     }
 
     @objc private func setDebugLevel(_ sender: NSMenuItem) {
@@ -241,6 +254,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 extension AppDelegate: NSWindowDelegate {
     func windowDidResignKey(_ notification: Notification) {
+        // Only the menu-bar panel uses this delegate; the Settings window
+        // stays open when it loses focus.
+        guard (notification.object as? NSWindow) === panel else { return }
         closePanel()
     }
 }

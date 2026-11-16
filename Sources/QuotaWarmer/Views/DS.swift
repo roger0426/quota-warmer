@@ -46,7 +46,7 @@ enum DS {
         // Surfaces — tints laid over the vibrant panel material.
         static let bg          = Color(light: 0xF5F5F7, dark: 0x1E1F23, lightAlpha: 0.55, darkAlpha: 0.55)   // content base
         static let sidebar     = Color(light: 0x000000, dark: 0x000000, lightAlpha: 0.035, darkAlpha: 0.22)  // narrow left rail
-        static let surface     = Color(light: 0xFFFFFF, dark: 0xFFFFFF, lightAlpha: 0.62, darkAlpha: 0.055)  // grouped sections
+        static let surface     = Color(light: 0xFFFFFF, dark: 0xFFFFFF, lightAlpha: 0.66, darkAlpha: 0.075)  // grouped sections (iStat-style cards)
         static let surfaceHigh = Color(light: 0x000000, dark: 0xFFFFFF, lightAlpha: 0.055, darkAlpha: 0.09)  // quiet button / segmented fill
         static let track       = Color(light: 0x000000, dark: 0xFFFFFF, lightAlpha: 0.09, darkAlpha: 0.11)   // gauge track (no data)
         static let ink         = Color(light: 0x0F172A, dark: 0xF1F3F6)   // selected indicator
@@ -59,6 +59,10 @@ enum DS {
         static let onAccent    = Color(light: 0xFFFFFF, dark: 0x101216)
         /// Pace knob: stays bright on any bar color in both themes.
         static let knob        = Color(light: 0xFFFFFF, dark: 0xE8EAEE)
+        /// Outline that keeps the white knob / time-marker dot visible on a
+        /// light background or a pale track (light theme), and separated from
+        /// the fill in dark theme.
+        static let knobStroke  = Color(light: 0x0F172A, dark: 0x000000, lightAlpha: 0.55, darkAlpha: 0.45)
 
         // Borders
         static let border      = Color(light: 0x000000, dark: 0xFFFFFF, lightAlpha: 0.11, darkAlpha: 0.11)   // hairline section / divider border
@@ -78,13 +82,12 @@ enum DS {
         static let red    = Color(light: 0xD92525, dark: 0xD5817E)
         static let blue   = Color(light: 0x2563EB, dark: 0x709AD0)
 
-        // Usage bars — claude.ai's light-theme tokens. In dark they are toned
-        // down (lower lightness/saturation, same hues) so a full bar doesn't
-        // glare against the graphite panel.
+        // Usage bars and rings, iStat Menus–style: blue below the warning
+        // level, pink-red at or above it. Only the graphics carry colour;
+        // numbers and labels stay plain text.
         // Each fill keeps >= 3:1 against its own track (WCAG 1.4.11).
-        static let usageBlue   = Color(light: 0x2C84DB, dark: 0x5082BD)   // --accent-secondary-100
-        static let usageOrange = Color(light: 0xC96E51, dark: 0xBA6E55)   // --accent-main-100
-        static let usageRed    = Color(light: 0xB53333, dark: 0xC16565)   // --danger-100
+        static let usageBlue   = Color(light: 0x2F7DEB, dark: 0x4A8CF0)   // iStat Menus–style blue
+        static let usageRed    = Color(light: 0xD8365A, dark: 0xF0506E)   // iStat Menus–style pink-red
         /// Colored track tint behind a usage bar (a touch lighter in dark).
         static let usageTrackOpacity: Double = 0.16
         /// Single-color bar used when Colorful Quota Bars is off: the original
@@ -94,7 +97,6 @@ enum DS {
         static func usage(_ level: QuotaUsageLevel) -> Color {
             switch level {
             case .normal:   return usageBlue
-            case .warning:  return usageOrange
             case .critical: return usageRed
             }
         }
@@ -146,9 +148,10 @@ enum DS {
     // text 11–12 pt and labels 10 pt, the range macOS uses for menu-bar panels
     // (system font 13 pt, small 11 pt). The earlier 0.81 drew 10 pt labels at 8 pt.
     static let panelScale: CGFloat = 1.0
-    static let sidebarWidth: CGFloat = 56
     static let contentWidth: CGFloat = 372
-    static let totalWidth:   CGFloat = sidebarWidth + contentWidth
+    static let totalWidth:   CGFloat = contentWidth
+    /// Tab bar along the bottom edge of the panel (Overview, History, Settings).
+    static let tabBarHeight: CGFloat = 40
     // The panel height on every tab. History and Settings scroll inside it;
     // the overview and tool tabs do not scroll, so they report their content
     // height (see `PanelHeightKey`) and the panel grows only when that content
@@ -185,8 +188,8 @@ extension View {
 
     /// Uppercase, letter-spaced section label (e.g. "WINDOW STATUS").
     func dsSectionLabel() -> some View {
-        self.font(.system(size: 10, weight: .semibold))
-            .foregroundStyle(DS.C.textMuted)
+        self.font(.system(size: 10, weight: .bold))
+            .foregroundStyle(DS.C.textSub)
             .tracking(0.7)
             .textCase(.uppercase)
     }

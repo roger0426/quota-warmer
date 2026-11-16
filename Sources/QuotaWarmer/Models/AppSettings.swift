@@ -57,9 +57,12 @@ struct AppSettings: @unchecked Sendable {
 
         // Appearance
         static let colorfulQuotaBars = "colorfulQuotaBars"
+        static let usageWarningPercent = "usageWarningPercent"
         static let appearanceMode = "appearanceMode"
         static let historyRange = "historyRange"
         static let historyProvider = "historyProvider"
+        /// Selected page of the standalone Settings window.
+        static let settingsWindowPane = "settingsWindowPane"
 
         // Hotkey
         static let globalHotKeyEnabled = "globalHotKeyEnabled"

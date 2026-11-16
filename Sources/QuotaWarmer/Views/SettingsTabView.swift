@@ -5,6 +5,8 @@ import ServiceManagement
 
 struct SettingsTabView: View {
     @EnvironmentObject var appState: AppState
+    /// Which page of the standalone Settings window this view renders.
+    var pane: SettingsPane = .general
 
     @AppStorage("refreshInterval")   private var refreshInterval: Int    = 300
     @AppStorage("notifyWarning")     private var notifyWarning: Bool     = true
@@ -18,7 +20,7 @@ struct SettingsTabView: View {
     @AppStorage(QuotaAlertSettings.paceEnabledKey)    private var alertPace: Bool = true
     @State private var launchAtLogin: Bool = SMAppService.mainApp.status == .enabled
     @State private var launchAtLoginError: String?
-    @State private var historyExpanded = false
+    @State private var historyExpanded = true
     @State private var historyFilter = EventFilter()
     @State private var historyVisible = 25
     @AppStorage("rateLimitGuard")    private var rateLimitGuard: Bool    = true
@@ -27,6 +29,7 @@ struct SettingsTabView: View {
     @AppStorage("morningPrewarmMinute")       private var morningMinute: Int       = 0
     @AppStorage("morningPrewarmWeekdaysOnly") private var morningWeekdaysOnly: Bool = true
     @AppStorage(QuotaDisplay.colorfulBarsKey) private var colorfulBars: Bool = true
+    @AppStorage(QuotaUsageLevel.warningPercentKey) private var warningPercent: Int = QuotaUsageLevel.defaultWarningPercent
     @State private var language = AppLanguage.stored()
     @AppStorage(AppearanceMode.defaultsKey) private var appearanceRaw = AppearanceMode.system.rawValue
 
@@ -38,9 +41,7 @@ struct SettingsTabView: View {
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 0) {
-                settingsHeader
-
-                group("CHECKS") {
+                group("CHECKS", in: .general) {
                     row(icon: "clock.arrow.2.circlepath", title: "Quota Refresh Interval",
                         subtitle: "Default 5 minutes") {
                         segmentedPicker(
@@ -74,11 +75,11 @@ struct SettingsTabView: View {
                     }
                 }
 
-                group("ACCOUNTS") {
+                group("ACCOUNTS", in: .accounts) {
                     AccountsSection()
                 }
 
-                group("DISPLAY") {
+                group("DISPLAY", in: .general) {
                     row(icon: "circle.lefthalf.filled", title: "Theme",
                         subtitle: "System follows macOS") {
                         themePicker
@@ -110,17 +111,42 @@ struct SettingsTabView: View {
                     Divider().background(DS.C.border).padding(.leading, 36)
 
                     row(icon: "paintpalette", title: "Colorful Quota Bars",
-                        subtitle: colorfulBars ? "Blue → orange at 50% → red at 80% used" : "Single-color bars") {
+                        subtitle: colorfulBars ? "Blue, then red from the warning level" : "Single-color bars") {
                         Toggle(isOn: $colorfulBars) { Text("Colorful Quota Bars") }.labelsHidden()
                             .toggleStyle(.switch).scaleEffect(0.75).tint(DS.C.green)
                     }
+
+                    Divider().background(DS.C.border).padding(.leading, 36)
+
+                    row(icon: "exclamationmark.triangle", title: "Warning At",
+                        subtitle: "Usage at or above this shows red, in the panel and the widget") {
+                        HStack(spacing: DS.Space.sm) {
+                            Slider(
+                                value: Binding(
+                                    get: { Double(QuotaUsageLevel.clampedWarningPercent(warningPercent)) },
+                                    set: { warningPercent = QuotaUsageLevel.clampedWarningPercent(Int($0.rounded())) }
+                                ),
+                                in: Double(QuotaUsageLevel.warningPercentRange.lowerBound)...Double(QuotaUsageLevel.warningPercentRange.upperBound),
+                                step: Double(QuotaUsageLevel.warningPercentStep)
+                            ) { Text("Warning At") }
+                            .labelsHidden()
+                            .controlSize(.small)
+                            .frame(width: 120)
+                            Text(verbatim: "\(QuotaUsageLevel.clampedWarningPercent(warningPercent))%")
+                                .font(.system(size: 11.5, weight: .semibold).monospacedDigit())
+                                .foregroundStyle(DS.C.text)
+                                .frame(width: 36, alignment: .trailing)
+                        }
+                    }
+                    // The widget reads the threshold from status.json.
+                    .onChange(of: warningPercent) { appState.quota.exportStatus() }
                 }
 
-                group("SHORTCUTS") {
+                group("SHORTCUTS", in: .shortcuts) {
                     HotKeySettingsSection()
                 }
 
-                group("MORNING PRE-WARM") {
+                group("MORNING PRE-WARM", in: .morning) {
                     row(icon: "sunrise", title: "Wake & Warm Each Morning",
                         subtitle: "Wakes a sleeping Mac to start your window") {
                         Toggle(isOn: Binding(
@@ -167,7 +193,7 @@ struct SettingsTabView: View {
                     }
                 }
 
-                group("ALERTS") {
+                group("ALERTS", in: .alerts) {
                     row(icon: "bell.badge", title: "Window Expiring Soon",
                         subtitle: "30 min before reset") {
                         Toggle(isOn: $notifyWarning) { Text("Window Expiring Soon") }.labelsHidden()
@@ -211,7 +237,7 @@ struct SettingsTabView: View {
                     }
                 }
 
-                group("SYSTEM") {
+                group("SYSTEM", in: .general) {
                     row(icon: "power", title: "Launch at Login",
                         subtitle: "Start with macOS") {
                         Toggle(isOn: $launchAtLogin) { Text("Launch at Login") }.labelsHidden()
@@ -231,21 +257,24 @@ struct SettingsTabView: View {
                     }
                 }
 
-                group("WELCOME") {
+                group("WELCOME", in: .general) {
                     row(icon: "hand.wave", title: "Welcome Guide",
                         subtitle: "Modes, CLI check and permissions") {
-                        Button("Show Welcome Guide") { appState.openWelcomeGuide() }
+                        Button("Show Welcome Guide") {
+                            appState.openWelcomeGuide()
+                            appState.onShowPanel?()
+                        }
                             .buttonStyle(.plain)
                             .font(.system(size: 10, weight: .medium))
                             .foregroundStyle(DS.C.blue)
                     }
                 }
 
-                group("HISTORY") {
+                group("HISTORY", in: .history) {
                     historyContent
                 }
 
-                group("HOW IT WORKS") {
+                group("HOW IT WORKS", in: .privacy) {
                     transparencyRow(
                         "What QuotaWarmer does",
                         "It watches your own Claude Code and Codex quota windows. Only for tools you switch to Auto-warm, it sends a single minimal \"hi\" through the CLI you're already logged into, the moment a fresh window opens."
@@ -262,7 +291,7 @@ struct SettingsTabView: View {
                     )
                 }
 
-                group("PRIVACY") {
+                group("PRIVACY", in: .privacy) {
                     infoRow(
                         title: "Credential access",
                         detail: "Monitored accounts only. Claude reads Keychain Claude Code-credentials, env CLAUDE_CODE_OAUTH_TOKEN, or ~/.claude/.credentials.json. Codex reads auth.json or Keychain Codex Auth. An added account reads only its own folder's Keychain item or credentials file."
@@ -274,7 +303,7 @@ struct SettingsTabView: View {
                     )
                 }
 
-                group("ABOUT") {
+                group("ABOUT", in: .about) {
                     HStack(spacing: DS.Space.md) {
                         Image(systemName: "flame.fill")
                             .font(.system(size: 18))
@@ -486,25 +515,22 @@ struct SettingsTabView: View {
         }
     }
 
-    private var settingsHeader: some View {
-        PanelHeader(title: "Settings") { EmptyView() }
-            .padding(.horizontal, DS.Page.side)
-            .padding(.top, DS.Page.top)
-    }
+    @ViewBuilder
+    private func group<Content: View>(_ title: LocalizedStringKey, in groupPane: SettingsPane, @ViewBuilder content: () -> Content) -> some View {
+        if groupPane == pane {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(title)
+                    .dsSectionLabel()
+                    .padding(.horizontal, DS.Page.side + 2)
+                    .padding(.top, DS.Space.md)
+                    .padding(.bottom, DS.Space.xs + 2)
 
-    private func group<Content: View>(_ title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text(title)
-                .dsSectionLabel()
-                .padding(.horizontal, DS.Page.side + 2)
-                .padding(.top, DS.Space.md)
-                .padding(.bottom, DS.Space.xs + 2)
-
-            VStack(spacing: 0) {
-                content()
+                VStack(spacing: 0) {
+                    content()
+                }
+                .dsCard()
+                .padding(.horizontal, DS.Page.side)
             }
-            .dsCard()
-            .padding(.horizontal, DS.Page.side)
         }
     }
 

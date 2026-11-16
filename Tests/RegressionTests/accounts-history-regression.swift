@@ -64,8 +64,10 @@ struct AccountsHistoryRegression {
             (K.alertSessionSecond, "alertSessionSecond"), (K.alertWeeklyEnabled, "alertWeeklyEnabled"),
             (K.alertWeeklyFirst, "alertWeeklyFirst"), (K.alertWeeklySecond, "alertWeeklySecond"),
             (K.alertPaceEnabled, "alertPaceEnabled"),
-            (K.colorfulQuotaBars, "colorfulQuotaBars"), (K.appearanceMode, "appearanceMode"),
+            (K.colorfulQuotaBars, "colorfulQuotaBars"), (K.usageWarningPercent, "usageWarningPercent"),
+            (K.appearanceMode, "appearanceMode"),
             (K.historyRange, "historyRange"), (K.historyProvider, "historyProvider"),
+            (K.settingsWindowPane, "settingsWindowPane"),
             (K.globalHotKeyEnabled, "globalHotKeyEnabled"), (K.globalHotKeyCode, "globalHotKeyCode"),
             (K.globalHotKeyModifiers, "globalHotKeyModifiers"),
             (K.onboardingCompletedVersion, "onboardingCompletedVersion"), (K.onboardingDismissed, "onboardingDismissed"),
@@ -576,7 +578,8 @@ struct AccountsHistoryRegression {
               "tool" : "codex"
             }
           ],
-          "schemaVersion" : 1
+          "schemaVersion" : 1,
+          "warningPercent" : 80
         }
 
         """

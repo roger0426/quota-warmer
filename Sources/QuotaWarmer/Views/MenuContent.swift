@@ -42,7 +42,9 @@ struct MenuContent: View {
     /// floor and grow only when their content would not fit.
     private var panelHeight: CGFloat {
         let overview = appState.selectedTab == .main && !appState.showWelcomeGuide
-        return AppState.panelHeight(forMeasured: appState.panelContentHeight, fitsContent: overview)
+        let measured = appState.panelContentHeight
+        return AppState.panelHeight(forMeasured: measured > 0 ? measured + DS.tabBarHeight : 0,
+                                    fitsContent: overview)
     }
 
     var body: some View {
@@ -65,23 +67,25 @@ struct MenuContent: View {
     }
 
     private var panel: some View {
-        HStack(spacing: 0) {
-            sidebar
+        VStack(spacing: 0) {
+            mainContent
+                .frame(maxHeight: .infinity)
             Rectangle()
                 .fill(DS.C.border)
-                .frame(width: 0.5)
-            mainContent
+                .frame(height: 0.5)
+            tabBar
         }
         // iStat Menus–style: the translucent menu material, lightly tinted.
         .background(DS.C.bg)
         .background(VibrancyBackground(material: .popover))
     }
 
-    // MARK: - Sidebar
+    // MARK: - Tab bar
 
-    private var sidebar: some View {
-        VStack(spacing: 6) {
-            SidebarSlot(isSelected: appState.selectedTab == .main, help: "Overview", shortcut: "1") {
+    /// Overview and History on the left, Settings (its own window) on the right.
+    private var tabBar: some View {
+        HStack(spacing: 4) {
+            TabBarSlot(isSelected: appState.selectedTab == .main, help: "Overview", shortcut: "1") {
                 appState.selectedTab = .main
             } icon: {
                 Image(systemName: appState.selectedTab == .main ? "house.fill" : "house")
@@ -89,9 +93,7 @@ struct MenuContent: View {
                     .foregroundStyle(appState.selectedTab == .main ? DS.C.ink : DS.C.textSub)
             }
 
-            Spacer()
-
-            SidebarSlot(isSelected: appState.selectedTab == .history, help: "History", shortcut: "2") {
+            TabBarSlot(isSelected: appState.selectedTab == .history, help: "History", shortcut: "2") {
                 appState.selectedTab = .history
             } icon: {
                 Image(systemName: "chart.bar.xaxis")
@@ -99,21 +101,24 @@ struct MenuContent: View {
                     .foregroundStyle(appState.selectedTab == .history ? DS.C.ink : DS.C.textSub)
             }
 
-            SidebarSlot(isSelected: appState.selectedTab == .settings, help: "Settings", shortcut: "3") {
-                appState.selectedTab = .settings
+            Spacer()
+
+            // Settings lives in its own window (see SettingsWindowController),
+            // so this slot opens it instead of switching the panel's tab.
+            TabBarSlot(isSelected: false, help: "Settings", shortcut: ",") {
+                appState.openSettings()
             } icon: {
                 Image(systemName: "gearshape")
                     .font(.system(size: 16, weight: .regular))
-                    .foregroundStyle(appState.selectedTab == .settings ? DS.C.ink : DS.C.textSub)
+                    .foregroundStyle(DS.C.textSub)
             }
         }
-        .padding(.top, 10)
-        .padding(.bottom, 10)
-        .frame(width: DS.sidebarWidth)
+        .padding(.horizontal, 8)
+        .frame(width: DS.totalWidth, height: DS.tabBarHeight)
         .background(DS.C.sidebar)
         // Opening the panel puts keyboard focus on the first slot (Home); the
         // selected slot already has its own highlight, so the system's blue
-        // focus ring is not drawn here. Tab and ⌘1–3 still work.
+        // focus ring is not drawn here. Tab, ⌘1, ⌘2 and ⌘, still work.
         .focusEffectDisabled()
     }
 
@@ -133,28 +138,26 @@ struct MenuContent: View {
     @ViewBuilder
     private var tabContent: some View {
         switch appState.selectedTab {
-        case .main:
-            MainTabView()
-                .frame(width: DS.contentWidth)
-                .frame(maxHeight: .infinity)
         case .history:
             HistoryTabView()
                 .frame(width: DS.contentWidth)
                 .frame(maxHeight: .infinity)
-        case .settings:
-            SettingsTabView()
+        case .main, .settings:
+            // `.settings` is kept only so `quotawarmer://open/settings` still
+            // parses; the panel never shows settings itself any more.
+            MainTabView()
                 .frame(width: DS.contentWidth)
                 .frame(maxHeight: .infinity)
         }
     }
 }
 
-// MARK: - Sidebar items
+// MARK: - Tab bar items
 
-/// One icon slot in the narrow left rail. Selected state is a soft filled
+/// One icon slot in the bottom tab bar. Selected state is a soft filled
 /// rounded highlight, like the selected pane in iStat Menus; hover gives a
 /// fainter one. Holds any icon (SF Symbol or template provider glyph).
-struct SidebarSlot<Icon: View>: View {
+struct TabBarSlot<Icon: View>: View {
     let isSelected: Bool
     let help: LocalizedStringKey
     /// Optional ⌘-number key that selects this slot while the panel is focused.
@@ -167,12 +170,12 @@ struct SidebarSlot<Icon: View>: View {
     var body: some View {
         Button(action: action) {
             icon()
-                .frame(width: 36, height: 30)
+                .frame(width: 36, height: 28)
                 .background(
                     RoundedRectangle(cornerRadius: DS.R.md, style: .continuous)
                         .fill(highlight)
                 )
-                .frame(width: DS.sidebarWidth, height: 36)
+                .contentShape(Rectangle())
         }
         .buttonStyle(PressableButtonStyle())
         .modifier(OptionalKeyboardShortcut(key: shortcut))

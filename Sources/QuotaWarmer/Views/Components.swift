@@ -54,9 +54,9 @@ struct UsageBar: View {
                     let thumbW: CGFloat = 5
                     Capsule()
                         .fill(DS.C.knob)
-                        .overlay(Capsule().stroke(DS.C.textMuted, lineWidth: 1))
+                        .overlay(Capsule().strokeBorder(DS.C.knobStroke, lineWidth: 1))
                         .frame(width: thumbW, height: height + 5)
-                        .shadow(color: .black.opacity(0.18), radius: 1.5, y: 0.5)
+                        .shadow(color: .black.opacity(0.28), radius: 1.5, y: 0.5)
                         .offset(x: min(max(w * clamp(thumbFraction) - thumbW / 2, 0), w - thumbW))
                 }
             }
@@ -145,6 +145,49 @@ struct ResetCreditsRow: View {
 
 @MainActor
 enum ToolStatusCopy {
+    /// "just now" / "3 min ago" / "2 hr ago", localized by the system.
+    static func ago(_ date: Date, now: Date = Date()) -> String {
+        if now.timeIntervalSince(date) < 60 { return String(localized: "just now") }
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .short
+        return formatter.localizedString(for: date, relativeTo: now)
+    }
+
+    /// Hover detail for an account's refresh button.
+    static func refreshHint(for state: ToolState, now: Date = Date()) -> String {
+        if state.isFetchingQuota { return String(localized: "Checking now…") }
+        var lines: [String] = []
+        if let fetched = state.lastSuccessfulFetch {
+            lines.append(String(localized: "Updated \(ago(fetched, now: now))"))
+        } else {
+            lines.append(String(localized: "Not updated yet"))
+        }
+        if state.quotaBackoffActive {
+            lines.append(String(localized: "Rate-limited: automatic checks are backing off"))
+        }
+        return lines.joined(separator: "\n")
+    }
+
+    /// Hover detail for an account's warm-up (bolt) button.
+    static func warmHint(for state: ToolState, now: Date = Date()) -> String {
+        if state.isWarming { return String(localized: "Warming up now…") }
+        switch state.lastWarmupOutcome {
+        case .none:
+            if let last = state.warmupLogs.map(\.timestamp).max() {
+                return String(localized: "Last warmed \(ago(last, now: now))")
+            }
+            return String(localized: "No warm-up since launch")
+        case .pending(let sentAt):
+            return String(localized: "Warmed \(ago(sentAt, now: now)), verifying…")
+        case .confirmed(let at, _):
+            return String(localized: "Last warmed \(ago(at, now: now)), window confirmed")
+        case .unverified(let sentAt, _):
+            return String(localized: "Warmed \(ago(sentAt, now: now)), not verified")
+        case .failed(let at, _):
+            return String(localized: "Last warm-up failed \(ago(at, now: now))")
+        }
+    }
+
     static func quotaLeftText(for state: ToolState, metric: QuotaMetric?, settling: Bool = false) -> String {
         if settling { return String(localized: "Updating...") }
         return QuotaDisplay.quotaText(
@@ -306,11 +349,13 @@ struct QuotaWindowRow: View {
     }
 
     @AppStorage(QuotaDisplay.colorfulBarsKey) private var colorfulBars = true
+    @AppStorage(QuotaUsageLevel.warningPercentKey) private var warningPercent = QuotaUsageLevel.defaultWarningPercent
 
     /// nil = plain single-color bars (Settings → Colorful Quota Bars off).
     private var level: QuotaUsageLevel? {
         QuotaDisplay.colorLevel(remainingFraction: quotaLeft, hasMetric: hasMetric,
-                                settling: settling, colorful: colorfulBars)
+                                settling: settling, colorful: colorfulBars,
+                                warningPercent: warningPercent)
     }
 
     private var barColor: Color { level.map(DS.C.usage) ?? DS.C.barPlain }
@@ -320,10 +365,8 @@ struct QuotaWindowRow: View {
         return barColor.opacity(DS.C.usageTrackOpacity)
     }
 
-    private var percentTextColor: Color {
-        guard let level, level != .normal else { return DS.C.textSub }
-        return barColor
-    }
+    /// Like iStat Menus, only the bar carries the usage colour; the number stays plain text.
+    private var percentTextColor: Color { DS.C.text }
 
     private func bar(height: CGFloat) -> some View {
         UsageBar(
@@ -497,9 +540,18 @@ struct IconButton: View {
     var isDisabled: Bool = false
     /// Optional ⌘-letter that presses this button while the panel is focused.
     var shortcut: KeyEquivalent? = nil
+    /// Status line(s) shown in a quick hover bubble (e.g. "Updated 3 min
+    /// ago"), so the user can see it's fresh before clicking. When set, the
+    /// bubble replaces the slow system tooltip.
+    var hint: String? = nil
+    /// The bubble sits above the button, right-aligned with it. Controls at
+    /// the top edge of the panel put it to the button's left instead, so it
+    /// neither leaves the panel nor hides under the cards below.
+    var hintBeside: Bool = false
     let action: () -> Void
 
     @State private var hovering = false
+    @State private var showHint = false
 
     var body: some View {
         Button(action: action) {
@@ -519,9 +571,51 @@ struct IconButton: View {
         .buttonStyle(PressableButtonStyle())
         .disabled(isDisabled)
         .modifier(OptionalKeyboardShortcut(key: shortcut))
-        .onHover { hovering = $0 }
-        .help(help)
+        .onHover { inside in
+            hovering = inside
+            guard hint != nil else { return }
+            if inside {
+                // Short delay so sweeping the cursor across doesn't flash it.
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                    if hovering { showHint = true }
+                }
+            } else {
+                showHint = false
+            }
+        }
+        .overlay(alignment: hintBeside ? .trailing : .topTrailing) {
+            if showHint, let hint {
+                HoverHintBubble(text: hint)
+                    .fixedSize()
+                    .alignmentGuide(.top) { $0[.bottom] + 5 }
+                    .alignmentGuide(.trailing) { hintBeside ? $0[.trailing] + size + 6 : $0[.trailing] }
+                    .allowsHitTesting(false)
+                    .transition(.opacity)
+            }
+        }
+        .animation(.easeOut(duration: 0.12), value: showHint)
+        .help(hint == nil ? help : "")
         .accessibilityLabel(Text(help))
+        .accessibilityHint(hint.map { Text($0) } ?? Text(""))
+    }
+}
+
+/// Small dark bubble used for instant hover details (iStat Menus style).
+/// Callers that place it over later siblings must raise their own `zIndex`.
+struct HoverHintBubble: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: 10.5, weight: .medium))
+            .foregroundStyle(DS.C.text)
+            .lineLimit(nil)
+            .multilineTextAlignment(.leading)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: DS.R.md, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: DS.R.md, style: .continuous).stroke(DS.C.border, lineWidth: 0.5))
+        .shadow(color: .black.opacity(0.18), radius: 6, y: 2)
     }
 }
 
@@ -626,7 +720,7 @@ struct StatSectionTitle: View {
                 .font(.system(size: 11, weight: .bold))
                 .tracking(0.6)
                 .textCase(.uppercase)
-                .foregroundStyle(DS.C.text)
+                .foregroundStyle(DS.C.textSub)
         }
     }
 }

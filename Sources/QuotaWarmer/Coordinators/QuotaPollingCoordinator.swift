@@ -73,7 +73,7 @@ final class QuotaPollingCoordinator {
                 snapshot: state.quotaSnapshot
             )
         }
-        let file = QuotaStatusExport.make(entries)
+        let file = QuotaStatusExport.make(entries, warningPercent: QuotaUsageLevel.storedWarningPercent())
         QuotaStatusExport.write(file)
         QuotaWidgetReload.reloadIfChanged(file)
     }

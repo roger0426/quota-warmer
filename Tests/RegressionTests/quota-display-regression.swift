@@ -23,6 +23,7 @@ struct QuotaDisplayRegression {
         testAppLanguage()
         testTimeInput()
         testColorfulSetting()
+        testWarningSetting()
         testQuotaAlerts()
         testAutoWarmExplanation()
         testOnboardingFlow()
@@ -119,23 +120,40 @@ struct QuotaDisplayRegression {
     // MARK: - Colors
 
     static func testUsageLevels() {
+        // Two levels only: blue below the warning level, red at or above it.
         for used in 0...100 {
             let level = QuotaUsageLevel(remainingFraction: Double(100 - used) / 100)
-            let expected: QuotaUsageLevel = used >= 80 ? .critical : used >= 50 ? .warning : .normal
-            expect(level, expected, "\(used)% used color band")
+            expect(level, used >= 80 ? .critical : .normal, "\(used)% used color band (default 80%)")
         }
         // The claude.ai screenshot: 29% used is blue, 95% used is red.
         expect(QuotaUsageLevel(remainingFraction: 0.71), .normal, "29% used is blue")
         expect(QuotaUsageLevel(remainingFraction: 0.05), .critical, "95% used is red")
         // Boundaries agree with the displayed number, not raw float error.
-        expect(QuotaUsageLevel(remainingFraction: 0.50), .warning, "exactly 50% used is orange")
-        expect(QuotaUsageLevel(remainingFraction: 0.511), .normal, "51.1% left (shown 49% used) stays blue")
-        expect(QuotaUsageLevel(remainingFraction: 0.501), .warning, "50.1% left (shown 50% used) is orange, matching its label")
-        expect(QuotaUsageLevel(remainingFraction: 0.219), .warning, "21.9% left (shown 79% used) stays orange")
+        expect(QuotaUsageLevel(remainingFraction: 0.50), .normal, "50% used is blue (no middle level)")
+        expect(QuotaUsageLevel(remainingFraction: 0.219), .normal, "21.9% left (shown 79% used) stays blue")
         expect(QuotaUsageLevel(remainingFraction: 0.20), .critical, "exactly 80% used is red")
         expect(QuotaUsageLevel(remainingFraction: 0.201), .critical, "20.1% left (shown 80% used) is red, matching its label")
         expect(QuotaUsageLevel(remainingFraction: 1.5), .normal, "over-full clamps to blue")
         expect(QuotaUsageLevel(remainingFraction: -1), .critical, "negative clamps to red")
+        // User-set warning level.
+        expect(QuotaUsageLevel(remainingFraction: 0.40, warningPercent: 60), .critical, "60% used is red at a 60% warning level")
+        expect(QuotaUsageLevel(remainingFraction: 0.41, warningPercent: 60), .normal, "59% used is blue at a 60% warning level")
+        expect(QuotaUsageLevel(remainingFraction: 0.70, warningPercent: 10), .normal, "a too-low warning level clamps to 50%")
+        expect(QuotaUsageLevel(remainingFraction: 0.04, warningPercent: 100), .critical, "a too-high warning level clamps to 95%")
+    }
+
+    static func testWarningSetting() {
+        expect(QuotaUsageLevel.warningPercentKey, "usageWarningPercent", "warning key is stable (AppStorage + status.json export)")
+        let suite = "quota-warning-test-\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suite) else { fail("no test defaults"); return }
+        defer { defaults.removePersistentDomain(forName: suite) }
+        expect(QuotaUsageLevel.storedWarningPercent(defaults: defaults), 80, "unset warning level defaults to 80%")
+        defaults.set(65, forKey: QuotaUsageLevel.warningPercentKey)
+        expect(QuotaUsageLevel.storedWarningPercent(defaults: defaults), 65, "stored warning level is read")
+        defaults.set(3, forKey: QuotaUsageLevel.warningPercentKey)
+        expect(QuotaUsageLevel.storedWarningPercent(defaults: defaults), 50, "stored warning level is clamped")
+        expect(QuotaDisplay.colorLevel(remainingFraction: 0.3, hasMetric: true, settling: false, colorful: true, warningPercent: 70),
+               .critical, "colorLevel passes the warning level through")
     }
 
     // MARK: - Bar geometry
