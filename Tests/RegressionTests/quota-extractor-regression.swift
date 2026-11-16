@@ -45,9 +45,36 @@ struct QuotaExtractorRegression {
             "Claude warmup should skip user CLAUDE.md/MCP/skills context and thinking so one `hi` stays ~400 tokens"
         )
         require(
-            ToolID.claude.fallbackWarmupCommand?.contains("--model haiku") == true
-                && ToolID.claude.fallbackWarmupCommand?.contains("--max-turns 1") == true,
-            "Claude warmup fallback must stay pinned to Haiku, never the user's default model"
+            ToolID.claude.fallbackWarmupCommand == nil,
+            "Claude warmup must have no fallback that runs without --safe-mode"
+        )
+        require(
+            claudeWarmup.contains("--output-format json ")
+                && WarmupRunner.modelArgument(in: claudeWarmup) == "haiku",
+            "Claude warmup should ask for the JSON result so its token usage can be checked"
+        )
+        let claudeJSON = #"[claude-code:some_warning] {"model":"haiku"}"# + "\n"
+            + #"{"type":"result","is_error":false,"result":"Hi!","usage":{"input_tokens":2,"cache_creation_input_tokens":922,"cache_read_input_tokens":0,"output_tokens":6}}"#
+        require(
+            WarmupRunner.warmupTokens(in: claudeJSON) == 930
+                && WarmupRunner.displayOutput(claudeJSON) == "Hi!",
+            "Claude warmup: tokens and reply text come from the JSON result line"
+        )
+        let codexOutput = "user\nhi\ncodex\nHi!\ntokens used\n9,116"
+        require(
+            WarmupRunner.warmupTokens(in: codexOutput) == 9116
+                && WarmupRunner.displayOutput(codexOutput) == codexOutput
+                && WarmupRunner.warmupTokens(in: "Hello!") == nil,
+            "Codex warmup: tokens come from the `tokens used` line; other output reports none"
+        )
+        require(
+            ToolID.claude.warmupTokenAlertThreshold > 930 && ToolID.codex.warmupTokenAlertThreshold > 15_410,
+            "Warm-up token alert thresholds must sit above the measured normal runs"
+        )
+        let claudeRejected = #"{"type":"result","is_error":true,"result":"There's an issue with the selected model (x). It may not exist or you may not have access to it.","usage":{"input_tokens":0,"output_tokens":0}}"#
+        require(
+            WarmupRunner.isInvalidModelFailure(claudeRejected) && WarmupRunner.warmupTokens(in: claudeRejected) == nil,
+            "Claude warmup: a rejected model is still recognised in the JSON result"
         )
         require(
             WarmupRunner.isUnsupportedOptionFailure("error: unknown option '--safe-mode'")
@@ -1373,6 +1400,7 @@ access_token=private-value
         )
         let refreshCommand = ToolID.claudeTokenRefreshCommand
         require(refreshCommand.hasSuffix("-p '/usage'"), "CLI token refresh: runs the local /usage command")
+        require(refreshCommand.contains("--safe-mode "), "CLI token refresh: keeps user hooks and plugins out of the background run")
         require(
             refreshCommand.contains("--model \(ToolID.claudeTokenRefreshModel) "),
             "CLI token refresh: an invalid model guards CLIs that would send /usage to the model"

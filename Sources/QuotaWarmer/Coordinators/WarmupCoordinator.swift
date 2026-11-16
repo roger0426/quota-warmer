@@ -126,11 +126,23 @@ final class WarmupCoordinator {
             state.warmupLogs.insert(entry, at: 0)
             if state.warmupLogs.count > 20 { state.warmupLogs.removeLast() }
             state.backoffUntil = nil
+            var detail = "Command completed"
+            if let tokens = result.tokens {
+                let limit = tool.kind.warmupTokenAlertThreshold
+                if tokens > limit {
+                    // The isolation flags are what keep a warm-up small; a large
+                    // one means user context is being loaded into it again.
+                    detail += " · \(tokens) tokens (expected under \(limit): check the isolation flags)"
+                    DiagnosticLogger.append("warmup_tokens_high tool=\(tool.storageKey) tokens=\(tokens) limit=\(limit)")
+                } else {
+                    detail += " · \(tokens) tokens"
+                }
+            }
             host.events.addHistory(
                 tool: tool,
                 kind: historyKind(forWarmupMode: mode),
                 title: historyTitle(forWarmupMode: mode),
-                detail: "Command completed",
+                detail: detail,
                 outcome: .sent,
                 model: WarmupRunner.modelArgument(in: result.command),
                 source: WarmupSource(mode: mode)

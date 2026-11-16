@@ -33,6 +33,8 @@ struct WarmupResult {
     let date: Date
     let command: String
     let output: String
+    /// Tokens the CLI reported for this run; nil when it reported none.
+    var tokens: Int? = nil
 }
 
 enum CLIAuthenticationStatus: Equatable {
@@ -183,6 +185,40 @@ class WarmupRunner {
             || text.contains("model_not_found")
     }
 
+    /// The result object of `claude --output-format json`: one line of JSON,
+    /// possibly with CLI warnings on other lines around it.
+    static func claudeJSONResult(in output: String) -> [String: Any]? {
+        for line in output.split(whereSeparator: \.isNewline) {
+            let text = line.trimmingCharacters(in: .whitespaces)
+            guard text.hasPrefix("{"), let data = text.data(using: .utf8),
+                  let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  object["usage"] != nil else { continue }
+            return object
+        }
+        return nil
+    }
+
+    /// Tokens a warm-up used, as the CLI reported it: the `usage` object of
+    /// Claude's JSON result (input + cache write + cache read + output), or the
+    /// number after Codex's "tokens used" line.
+    static func warmupTokens(in output: String) -> Int? {
+        if let usage = claudeJSONResult(in: output)?["usage"] as? [String: Any] {
+            let keys = ["input_tokens", "cache_creation_input_tokens", "cache_read_input_tokens", "output_tokens"]
+            let total = keys.reduce(0) { $0 + ((usage[$1] as? NSNumber)?.intValue ?? 0) }
+            return total > 0 ? total : nil
+        }
+        guard let regex = try? NSRegularExpression(pattern: #"(?i)tokens used\s*([0-9][0-9,]*)"#),
+              let match = regex.firstMatch(in: output, range: NSRange(output.startIndex..<output.endIndex, in: output)),
+              let range = Range(match.range(at: 1), in: output) else { return nil }
+        return Int(output[range].replacingOccurrences(of: ",", with: ""))
+    }
+
+    /// What the warm-up log shows: Claude's reply text instead of the raw JSON
+    /// result; any other output unchanged.
+    static func displayOutput(_ output: String) -> String {
+        (claudeJSONResult(in: output)?["result"] as? String) ?? output
+    }
+
     /// The model named by `--model` in a warm-up command line.
     static func modelArgument(in command: String) -> String? {
         let parts = command.split(separator: " ")
@@ -272,7 +308,12 @@ class WarmupRunner {
                 let combined = collector.stop()
 
                 if p.terminationStatus == 0 {
-                    continuation.resume(returning: WarmupResult(date: Date(), command: command, output: combined.isEmpty ? "(no output)" : combined))
+                    let shown = Self.displayOutput(combined)
+                    continuation.resume(returning: WarmupResult(
+                        date: Date(), command: command,
+                        output: shown.isEmpty ? "(no output)" : shown,
+                        tokens: Self.warmupTokens(in: combined)
+                    ))
                 } else if cliName == "claude", Self.isClaudeAuthenticationFailure(combined) {
                     continuation.resume(throwing: WarmupError.authenticationRequired(Self.claudeLoginRequiredMessage))
                 } else if Self.isInvalidModelFailure(combined) {

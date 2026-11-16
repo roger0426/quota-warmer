@@ -53,7 +53,7 @@ Claude Code and Codex CLI use rolling quota windows. If a window starts only whe
 QuotaWarmer keeps the app running in the menu bar and periodically checks quota state for monitored providers. For a tool set to Auto-warm, when a fresh reset is detected it runs a minimal warm-up command from an isolated temporary working directory:
 
 ```bash
-claude --model haiku --effort low --settings '{"alwaysThinkingEnabled":false}' --safe-mode --strict-mcp-config --system-prompt 'Reply with one word.' --no-session-persistence --max-turns 1 --tools '' -p 'hi'
+claude --model haiku --effort low --settings '{"alwaysThinkingEnabled":false}' --safe-mode --strict-mcp-config --system-prompt 'Reply with one word.' --no-session-persistence --max-turns 1 --tools '' --output-format json -p 'hi'
 codex exec --model gpt-5.6-luna -c model_reasoning_effort="low" -c 'model_instructions_file="…/warmup-instructions.md"' --skip-git-repo-check --ephemeral --ignore-user-config --ignore-rules --disable hooks --disable apps … 'hi'
 ```
 

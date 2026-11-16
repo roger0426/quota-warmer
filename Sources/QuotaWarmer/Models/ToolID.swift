@@ -94,7 +94,7 @@ enum ToolID: String, CaseIterable, Identifiable, Codable {
     func warmupCommand(model: String, instructionsFile: String? = nil) -> String {
         switch self {
         case .claude:
-            return "claude --model \(model) --effort low --settings '{\"alwaysThinkingEnabled\":false}' --safe-mode --strict-mcp-config --system-prompt 'Reply with one word.' --no-session-persistence --max-turns 1 --tools '' -p 'hi'"
+            return "claude --model \(model) --effort low --settings '{\"alwaysThinkingEnabled\":false}' --safe-mode --strict-mcp-config --system-prompt 'Reply with one word.' --no-session-persistence --max-turns 1 --tools '' --output-format json -p 'hi'"
         case .codex:
             var instructions = ""
             if let path = instructionsFile, path.hasPrefix("/"),
@@ -110,13 +110,18 @@ enum ToolID: String, CaseIterable, Identifiable, Codable {
     /// call: non-interactive `/usage` is a local command. The invalid model is
     /// the guard: a CLI that doesn't know `/usage` sends it as a prompt, and the
     /// API rejects the model before any quota is spent or a window opens.
+    /// `--safe-mode` keeps the user's hooks, plugins and CLAUDE.md out of this
+    /// background run (checked 2026-11-15 on CLI 2.1.322: `/usage` still works).
     static let claudeTokenRefreshModel = "quotawarmer-no-model"
     static let claudeTokenRefreshCommand =
-        "claude --model \(claudeTokenRefreshModel) --strict-mcp-config --no-session-persistence --max-turns 1 --tools '' -p '/usage'"
+        "claude --model \(claudeTokenRefreshModel) --safe-mode --strict-mcp-config --no-session-persistence --max-turns 1 --tools '' -p '/usage'"
 
     func legacyWarmupCommand(model: String) -> String? {
         switch self {
-        case .claude: return "claude --model \(model) --no-session-persistence --max-turns 1 --tools '' -p 'hi'"
+        // None in this fork: a run without `--safe-mode` loads the user's
+        // CLAUDE.md, hooks, plugins and MCP tool schemas (~51K tokens for one
+        // `hi`), so a CLI that rejects the flag fails visibly instead.
+        case .claude: return nil
         // Same pinned model, without the feature switches: for a Codex CLI
         // that no longer knows one of `codexWarmupDisabledFeatures`.
         case .codex:  return "codex exec --model \(model) -c model_reasoning_effort=\"low\" --skip-git-repo-check --ephemeral --ignore-user-config --ignore-rules 'hi'"
@@ -130,6 +135,16 @@ enum ToolID: String, CaseIterable, Identifiable, Codable {
             return home.appendingPathComponent(".claude/projects")
         case .codex:
             return home.appendingPathComponent(".codex/sessions")
+        }
+    }
+
+    /// A warm-up that used more tokens than this means the isolation flags no
+    /// longer keep context out. Measured 2026-11-15: Claude ~930 (CLI 2.1.322),
+    /// Codex ~9,100, or ~15,200 on the fallback command (codex-cli 0.166.0).
+    var warmupTokenAlertThreshold: Int {
+        switch self {
+        case .claude: return 5_000
+        case .codex:  return 20_000
         }
     }
 
