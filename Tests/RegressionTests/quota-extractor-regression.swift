@@ -914,28 +914,31 @@ access_token=private-value
             "The `security` read must time out so a stuck Keychain dialog cannot outlive it"
         )
         // Every read that runs on a background poll has to be silenced, not just
-        // the Claude one: a foreign Codex item, or a mirror left behind by an
-        // older signature, would otherwise open the same password window.
+        // the Claude one: a foreign Codex item would otherwise open the same
+        // password window.
         let unguardedReads = credentialStoreSource.components(separatedBy: .newlines)
             .filter { $0.contains("SecItemCopyMatching(query as CFDictionary, &item)") }
             .filter { !$0.contains("//") }
         require(
-            unguardedReads.count == 4,
+            unguardedReads.count == 3,
             "Unexpected number of Keychain reads (\(unguardedReads.count)); each one must be reviewed for dialog suppression"
         )
         require(
             credentialStoreSource.components(separatedBy: "Self.withoutKeychainDialogs {").count - 1 == 3,
-            "The mirror, Codex and background Claude reads must all run inside withoutKeychainDialogs"
+            "The Codex read, the background Claude read and the legacy-mirror delete must all run inside withoutKeychainDialogs"
         )
-        // QuotaWarmer mirrors Claude's *access* token into an item it owns, so a
-        // relaunch does not re-trigger the macOS approval dialog. The dangerous
-        // things that mirror must never do are spelled out below; a blanket ban on
-        // Keychain writes would also forbid the safe mirror, so assert the actual
-        // invariants instead.
+        // This fork keeps the Claude access token in memory only. The app must
+        // write nothing to the Keychain; the one delete removes the mirror an
+        // older build left in a service QuotaWarmer owns.
         require(
-            credentialStoreSource.contains("Self.claudeCacheService")
-                && credentialStoreSource.contains("claudeCacheService = \"com.quotawarmer.app.claude-oauth-cache\""),
-            "The Claude credential mirror must live in a Keychain service QuotaWarmer owns"
+            !credentialStoreSource.contains("SecItemAdd") && !credentialStoreSource.contains("SecItemUpdate"),
+            "QuotaWarmer must not write any credential to the Keychain"
+        )
+        require(
+            credentialStoreSource.components(separatedBy: "SecItemDelete(").count - 1 == 1
+                && credentialStoreSource.contains("kSecAttrService as String: Self.legacyCacheService(for: provider)")
+                && credentialStoreSource.contains("legacyCacheService = \"com.quotawarmer.app.claude-oauth-cache\""),
+            "The only Keychain delete must target the legacy mirror QuotaWarmer itself created"
         )
         for writeCall in ["SecItemAdd", "SecItemUpdate", "SecItemDelete"] {
             for line in credentialStoreSource.components(separatedBy: .newlines)
@@ -952,11 +955,9 @@ access_token=private-value
             "QuotaWarmer must not run a Claude token-refresh chain of its own"
         )
         require(
-            credentialStoreSource.contains("struct CachedClaudeCredential")
-                && !credentialStoreSource.components(separatedBy: "struct CachedClaudeCredential")[1]
-                    .components(separatedBy: "}")[0]
-                    .contains("refreshToken"),
-            "The mirrored Claude credential must hold only the access token, never the rotating refresh token"
+            !credentialStoreSource.contains("struct CachedClaudeCredential")
+                && credentialStoreSource.contains("memoryCache[provider.storageKey] = kept"),
+            "The kept Claude credential lives in memory, without the rotating refresh token"
         )
         // The Refresh button was a silent no-op for the whole backoff window: a
         // 4h rate-limit Retry-After pinned the menu bar to a stale reading and
