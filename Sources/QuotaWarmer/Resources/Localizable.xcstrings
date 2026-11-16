@@ -1457,6 +1457,22 @@
         }
       }
     },
+    "Add back": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add back"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geri ekle"
+          }
+        }
+      }
+    },
     "After warmup succeeds": {
       "localizations": {
         "en": {

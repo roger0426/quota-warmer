@@ -72,6 +72,8 @@ struct AppSettings: @unchecked Sendable {
         static let launchAtLogin = "launchAtLogin"
         static let debugLevel = "debugLevel"
         static let accounts = "accounts.v1"
+        /// Tool raw values whose built-in (default) account the user removed.
+        static let hiddenDefaultAccounts = "hiddenDefaultAccounts"
 
         // Per provider (`suffix` is `ProviderID.rawValue` == `storageKey`)
         static func toolMode(_ suffix: String) -> String { "toolMode.\(suffix)" }
@@ -152,6 +154,14 @@ struct AppSettings: @unchecked Sendable {
         defaults.set(day, forKey: Key.lastMorningWarmDay(suffix))
     }
     var lastMorningWarmDayLegacy: String? { defaults.string(forKey: Key.lastMorningWarmDayLegacy) }
+
+    // MARK: Removed default accounts
+
+    /// Tools (`claude`, `codex`) whose built-in account is not watched.
+    var hiddenDefaultAccounts: Set<String> {
+        get { Set(defaults.stringArray(forKey: Key.hiddenDefaultAccounts) ?? []) }
+        nonmutating set { defaults.set(newValue.sorted(), forKey: Key.hiddenDefaultAccounts) }
+    }
 
     // MARK: Warm-up model
 

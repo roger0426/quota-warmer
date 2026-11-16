@@ -102,10 +102,12 @@ final class AccountsCoordinator {
         host.toolStates[tool]?.tool = host.accounts[index].providerID
     }
 
-    /// Stops watching an added account and forgets its settings. The CLI home
-    /// folder (and the login inside it) is left on disk untouched.
+    /// Stops watching an account and forgets its settings. The CLI home
+    /// folder (and the login inside it) is left on disk untouched. A CLI's
+    /// built-in account has no entry in `accounts`; removing it records the
+    /// tool in `hiddenDefaults`, and `restoreDefaultAccount` brings it back.
     func removeAccount(_ tool: ProviderID) {
-        guard !tool.isDefault, let state = host.toolStates[tool] else { return }
+        guard let state = host.toolStates[tool] else { return }
         scheduler.invalidate(tool: tool)
         notifications.cancelAll(for: tool)
         state.claimVerifyTask?.cancel()
@@ -122,11 +124,31 @@ final class AccountsCoordinator {
         host.history.removeAll { $0.tool?.storageKey == tool.storageKey }
 
         host.notifyChange()
-        host.accounts.removeAll { $0.id == tool.accountID }
-        ProviderAccount.save(host.accounts)
+        if tool.isDefault {
+            host.hiddenDefaults.insert(tool.kind)
+            host.settings.hiddenDefaultAccounts = Set(host.hiddenDefaults.map(\.rawValue))
+        } else {
+            host.accounts.removeAll { $0.id == tool.accountID && $0.kind == tool.kind }
+            ProviderAccount.save(host.accounts)
+        }
         host.toolStates[tool] = nil
         host.quota.forgetTokenUsage(for: tool)
         host.quota.exportStatus()
         host.events.addHistory(tool: nil, kind: .quotaFetch, title: "Account removed", detail: tool.displayName)
+    }
+
+    /// Watches a CLI's built-in account again, in Monitor mode: nothing is
+    /// sent until the user opts in.
+    func restoreDefaultAccount(_ kind: ToolID) {
+        guard host.hiddenDefaults.contains(kind) else { return }
+        let provider = ProviderID.default(kind)
+        UserDefaults.standard.set(ToolMode.monitor.rawValue, forKey: AppSettings.Key.toolMode(provider.storageKey))
+        host.notifyChange()
+        host.hiddenDefaults.remove(kind)
+        host.settings.hiddenDefaultAccounts = Set(host.hiddenDefaults.map(\.rawValue))
+        orphanStates[provider] = nil
+        host.toolStates[provider] = ToolState(tool: provider)
+        host.events.addHistory(tool: provider, kind: .quotaFetch, title: "Account added", detail: provider.displayName)
+        Task { await host.quota.refreshQuota(for: provider, allowAutomaticWarmup: false) }
     }
 }

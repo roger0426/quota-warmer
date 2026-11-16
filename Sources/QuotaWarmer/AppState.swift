@@ -27,6 +27,9 @@ final class AppState: ObservableObject, CoordinatorHost {
     /// Accounts the user added on top of each CLI's default account. Mutated
     /// only by `AccountsCoordinator`.
     @Published var accounts: [ProviderAccount]
+    /// CLIs whose built-in account the user removed (`~/.claude`, `~/.codex`
+    /// are then not read at all). Mutated only by `AccountsCoordinator`.
+    @Published var hiddenDefaults: Set<ToolID>
     @Published var history: [HistoryEvent] = []
     @Published var morningPrewarmEnabled: Bool
     @Published var morningStatus: String?
@@ -66,8 +69,12 @@ final class AppState: ObservableObject, CoordinatorHost {
         settings.migrateIfNeeded()
         let storedAccounts = ProviderAccount.load()
         accounts = storedAccounts
+        let hidden = Set(settings.hiddenDefaultAccounts.compactMap(ToolID.init(rawValue:)))
+        hiddenDefaults = hidden
         var states: [ProviderID: ToolState] = [:]
-        for tool in Self.orderedProviders(accounts: storedAccounts) { states[tool] = ToolState(tool: tool) }
+        for tool in Self.orderedProviders(accounts: storedAccounts, hiddenDefaults: hidden) {
+            states[tool] = ToolState(tool: tool)
+        }
         toolStates = states
         globalPassive = settings.globalPassive
         morningPrewarmEnabled = settings.morningPrewarmEnabled
@@ -120,12 +127,14 @@ final class AppState: ObservableObject, CoordinatorHost {
     func state(for tool: ProviderID) -> ToolState { accountsCoordinator.state(for: tool) }
 
     /// Every watched account in display order: per CLI, the default account
-    /// first, then added accounts in the order they were added.
-    var providers: [ProviderID] { Self.orderedProviders(accounts: accounts) }
+    /// first (unless the user removed it), then added accounts in the order
+    /// they were added.
+    var providers: [ProviderID] { Self.orderedProviders(accounts: accounts, hiddenDefaults: hiddenDefaults) }
 
-    static func orderedProviders(accounts: [ProviderAccount]) -> [ProviderID] {
+    static func orderedProviders(accounts: [ProviderAccount], hiddenDefaults: Set<ToolID> = []) -> [ProviderID] {
         ToolID.allCases.flatMap { kind in
-            [ProviderID.default(kind)] + accounts.filter { $0.kind == kind }.map(\.providerID)
+            (hiddenDefaults.contains(kind) ? [] : [ProviderID.default(kind)])
+                + accounts.filter { $0.kind == kind }.map(\.providerID)
         }
     }
 
@@ -138,6 +147,7 @@ final class AppState: ObservableObject, CoordinatorHost {
 
     func renameAccount(_ tool: ProviderID, to name: String) { accountsCoordinator.renameAccount(tool, to: name) }
     func removeAccount(_ tool: ProviderID) { accountsCoordinator.removeAccount(tool) }
+    func restoreDefaultAccount(_ kind: ToolID) { accountsCoordinator.restoreDefaultAccount(kind) }
 
     // MARK: - Per-account switches
 

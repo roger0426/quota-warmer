@@ -16,6 +16,8 @@ struct WidgetStatusFile: Decodable {
 struct WidgetProvider: Decodable, Identifiable {
     let id: String
     let tool: String
+    /// `default` for the CLI's built-in account.
+    let account: String
     let name: String
     let mode: String
     let displayMode: String
@@ -28,6 +30,8 @@ struct WidgetWindow: Decodable {
     let usedPercent: Int
     let remainingPercent: Int
     let resetAt: Date?
+    /// Not started yet: there is no running window to place a time marker in.
+    let idle: Bool
     let settling: Bool
 }
 
@@ -72,166 +76,181 @@ struct QuotaTimelineProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuotaEntry>) -> Void) {
-        // The app asks WidgetKit to reload when a reading changes; this is the
-        // fallback cadence, and it also lets a reading that stopped updating
-        // turn dim.
+        // The app asks WidgetKit to reload when a reading changes. Between
+        // reloads the same reading is re-drawn every 10 minutes so the time
+        // marker keeps moving and a reading that stopped updating turns dim.
         let now = Date()
-        let entry = QuotaEntry(date: now, providers: WidgetStatusReader.read())
-        completion(Timeline(entries: [entry], policy: .after(now.addingTimeInterval(15 * 60))))
+        let providers = WidgetStatusReader.read()
+        let entries = (0..<12).map { step in
+            QuotaEntry(date: now.addingTimeInterval(Double(step) * 600), providers: providers)
+        }
+        completion(Timeline(entries: entries, policy: .after(now.addingTimeInterval(12 * 600))))
     }
 
     static let sample: [WidgetProvider] = [
         WidgetProvider(
-            id: "claude", tool: "claude", name: "Claude", mode: "monitor", displayMode: "remaining",
+            id: "claude", tool: "claude", account: "default", name: "Claude", mode: "monitor", displayMode: "used",
             fetchedAt: Date(),
-            session: WidgetWindow(usedPercent: 35, remainingPercent: 65, resetAt: nil, settling: false),
-            weekly: WidgetWindow(usedPercent: 20, remainingPercent: 80, resetAt: nil, settling: false)
+            session: WidgetWindow(usedPercent: 35, remainingPercent: 65, resetAt: Date().addingTimeInterval(3 * 3600), idle: false, settling: false),
+            weekly: WidgetWindow(usedPercent: 20, remainingPercent: 80, resetAt: Date().addingTimeInterval(4 * 86400), idle: false, settling: false)
         ),
         WidgetProvider(
-            id: "codex", tool: "codex", name: "Codex", mode: "monitor", displayMode: "remaining",
+            id: "codex", tool: "codex", account: "default", name: "Codex", mode: "monitor", displayMode: "used",
             fetchedAt: Date(),
-            session: WidgetWindow(usedPercent: 10, remainingPercent: 90, resetAt: nil, settling: false),
-            weekly: WidgetWindow(usedPercent: 5, remainingPercent: 95, resetAt: nil, settling: false)
+            session: WidgetWindow(usedPercent: 85, remainingPercent: 15, resetAt: Date().addingTimeInterval(3600), idle: false, settling: false),
+            weekly: WidgetWindow(usedPercent: 40, remainingPercent: 60, resetAt: Date().addingTimeInterval(2 * 86400), idle: false, settling: false)
         )
     ]
 }
 
+// MARK: - Ring values
+
+/// One ring: how much of a quota window is used, and how far through the
+/// window the clock is.
+struct RingValue {
+    /// Used percent; nil when there is no usable reading.
+    let used: Int?
+    /// 0…1 of the window's time that has passed; nil when it is not running.
+    let elapsed: Double?
+
+    /// Same threshold as the app's red bar: 80% used.
+    static let criticalUsedPercent = 80
+
+    init(window: WidgetWindow?, duration: TimeInterval, now: Date) {
+        guard let window, !window.settling else {
+            used = nil
+            elapsed = nil
+            return
+        }
+        used = min(max(window.usedPercent, 0), 100)
+        if !window.idle, let resetAt = window.resetAt, resetAt > now {
+            elapsed = min(max(1 - resetAt.timeIntervalSince(now) / duration, 0), 1)
+        } else {
+            elapsed = nil
+        }
+    }
+
+    /// Green, like a battery ring; red once the quota is nearly gone.
+    var color: Color {
+        guard let used else { return .secondary }
+        return used >= Self.criticalUsedPercent ? .red : .green
+    }
+}
+
+private let sessionDuration: TimeInterval = 5 * 3600
+private let weeklyDuration: TimeInterval = 7 * 86400
+
 // MARK: - Views
 
-/// What one ring shows for one quota window.
-struct RingValue {
-    /// Percent drawn and printed: left or used, as the account is set in the app.
-    let percent: Int?
-    let usedPercent: Int?
-    /// The reading is older than 30 minutes (the app's "expired" threshold).
-    let stale: Bool
+/// Battery-style gauge for one account: the outer ring is the session (5h)
+/// window, the inner ring the weekly window, both as quota used. A white dot
+/// on each ring marks how far through the window the clock is, so a fill that
+/// runs ahead of its dot means quota is being used faster than time.
+struct QuotaGauge: View {
+    let provider: WidgetProvider
+    let now: Date
 
-    init(window: WidgetWindow?, provider: WidgetProvider, now: Date) {
-        if let window, !window.settling {
-            percent = provider.displayMode == "used" ? window.usedPercent : window.remainingPercent
-            usedPercent = window.usedPercent
-        } else {
-            percent = nil
-            usedPercent = nil
-        }
-        stale = provider.fetchedAt.map { now.timeIntervalSince($0) > 30 * 60 } ?? true
-    }
-
-    /// Same bands as the app's bars: 50% used turns orange, 80% red.
-    var color: Color {
-        guard let usedPercent else { return .secondary }
-        if usedPercent >= 80 { return .red }
-        if usedPercent >= 50 { return .orange }
-        return .green
-    }
-}
-
-/// Battery-style ring: a track, a rounded arc for the percent, the provider
-/// glyph in the middle.
-struct QuotaRing: View {
-    let value: RingValue
-    let glyph: String?
-    var lineWidth: CGFloat = 5
+    private var session: RingValue { RingValue(window: provider.session, duration: sessionDuration, now: now) }
+    private var weekly: RingValue { RingValue(window: provider.weekly, duration: weeklyDuration, now: now) }
 
     var body: some View {
+        GeometryReader { geo in
+            let size = min(geo.size.width, geo.size.height)
+            let line = max(3, size * 0.095)
+            let gap = line * 0.45
+            let outer = size - line
+            let inner = outer - 2 * (line + gap)
+            ZStack {
+                ring(session, diameter: outer, line: line)
+                ring(weekly, diameter: inner, line: line)
+                glyph
+                    .frame(width: max(8, inner - line * 2.6), height: max(8, inner - line * 2.6))
+            }
+            .frame(width: geo.size.width, height: geo.size.height)
+        }
+        .aspectRatio(1, contentMode: .fit)
+    }
+
+    private func ring(_ value: RingValue, diameter: CGFloat, line: CGFloat) -> some View {
         ZStack {
-            Circle().stroke(Color.primary.opacity(0.12), lineWidth: lineWidth)
-            if let percent = value.percent {
+            Circle().stroke(Color.primary.opacity(0.13), lineWidth: line)
+            if let used = value.used, used > 0 {
                 Circle()
-                    .trim(from: 0, to: max(0.001, CGFloat(percent) / 100))
-                    .stroke(value.color, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                    .trim(from: 0, to: CGFloat(used) / 100)
+                    .stroke(value.color, style: StrokeStyle(lineWidth: line, lineCap: .round))
                     .rotationEffect(.degrees(-90))
             }
-            if let glyph {
-                Image(glyph)
-                    .resizable()
-                    .renderingMode(.template)
-                    .scaledToFit()
-                    .padding(lineWidth * 2.4)
-                    .foregroundStyle(.primary)
+            if let elapsed = value.elapsed {
+                Circle()
+                    .fill(Color.white)
+                    .frame(width: line * 0.62, height: line * 0.62)
+                    .shadow(color: .black.opacity(0.35), radius: 0.6)
+                    .offset(y: -diameter / 2)
+                    .rotationEffect(.degrees(360 * elapsed))
             }
         }
-        .padding(lineWidth / 2)
-        .opacity(value.stale ? 0.45 : 1)
+        .frame(width: diameter, height: diameter)
+    }
+
+    /// The provider glyph with the account's initial, as in the app's sidebar.
+    private var glyph: some View {
+        Image(provider.tool == "claude" ? "ClaudeCode" : "Codex")
+            .resizable()
+            .renderingMode(.template)
+            .scaledToFit()
+            .foregroundStyle(.primary)
+            .overlay(alignment: .bottomTrailing) {
+                if let badge = provider.badge {
+                    Text(badge)
+                        .font(.system(size: 8, weight: .heavy, design: .rounded))
+                        .foregroundStyle(.background)
+                        .frame(minWidth: 11, minHeight: 11)
+                        .background(Color.primary, in: Circle())
+                        .offset(x: 5, y: 4)
+                }
+            }
     }
 }
 
-private func glyphName(for provider: WidgetProvider) -> String {
-    provider.tool == "claude" ? "ClaudeCode" : "Codex"
+extension WidgetProvider {
+    /// Initial of an added account ("Claude · Work" → "W"); nil for the default.
+    var badge: String? {
+        guard account != "default" else { return nil }
+        let label = name.components(separatedBy: " · ").last ?? name
+        return label.first.map { String($0).uppercased() }
+    }
+
+    /// Reading older than 30 minutes (the app's "expired" threshold).
+    func isStale(at now: Date) -> Bool {
+        fetchedAt.map { now.timeIntervalSince($0) > 30 * 60 } ?? true
+    }
 }
 
-private func percentText(_ value: RingValue) -> String {
-    value.percent.map { "\($0)%" } ?? "–"
-}
-
-/// Small: one ring per account (session window), up to four, like the
-/// Batteries widget.
-struct SmallQuotaView: View {
-    let entry: QuotaEntry
+/// A gauge with the session's used percent under it, as the Batteries widget
+/// puts the charge under each ring.
+struct QuotaCell: View {
+    let provider: WidgetProvider
+    let now: Date
+    var percentSize: CGFloat = 13
 
     var body: some View {
-        let shown = Array(entry.providers.prefix(4))
-        let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 2)
-        LazyVGrid(columns: columns, spacing: 6) {
-            ForEach(shown) { provider in
-                let value = RingValue(window: provider.session, provider: provider, now: entry.date)
-                VStack(spacing: 2) {
-                    QuotaRing(value: value, glyph: glyphName(for: provider))
-                        .frame(maxWidth: shown.count > 2 ? 44 : 56, maxHeight: shown.count > 2 ? 44 : 56)
-                    Text(percentText(value))
-                        .font(.system(size: shown.count > 2 ? 11 : 13, weight: .semibold, design: .rounded))
-                        .monospacedDigit()
-                        .foregroundStyle(value.stale ? .secondary : .primary)
-                }
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(Text("\(provider.name) session \(percentText(value))"))
-            }
-        }
-    }
-}
-
-/// Medium: per account, a session ring and a weekly ring side by side.
-struct MediumQuotaView: View {
-    let entry: QuotaEntry
-
-    var body: some View {
-        let shown = Array(entry.providers.prefix(3))
-        HStack(spacing: 14) {
-            ForEach(shown) { provider in
-                VStack(spacing: 5) {
-                    Text(provider.name)
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                    HStack(spacing: 8) {
-                        ring(provider.session, provider: provider, label: "5h", glyph: glyphName(for: provider))
-                        ring(provider.weekly, provider: provider, label: "7d", glyph: nil)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-            }
-        }
-    }
-
-    private func ring(_ window: WidgetWindow?, provider: WidgetProvider, label: String, glyph: String?) -> some View {
-        let value = RingValue(window: window, provider: provider, now: entry.date)
-        return VStack(spacing: 2) {
-            QuotaRing(value: value, glyph: glyph)
-                .frame(maxWidth: 52, maxHeight: 52)
-                .overlay {
-                    if glyph == nil {
-                        Text(label)
-                            .font(.system(size: 10, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            Text(percentText(value))
-                .font(.system(size: 12, weight: .semibold, design: .rounded))
+        let session = RingValue(window: provider.session, duration: sessionDuration, now: now)
+        let weekly = RingValue(window: provider.weekly, duration: weeklyDuration, now: now)
+        let stale = provider.isStale(at: now)
+        let sessionText = session.used.map { "\($0)%" } ?? "–"
+        let weeklyText = weekly.used.map { "\($0)%" } ?? "–"
+        let critical = (session.used ?? 0) >= RingValue.criticalUsedPercent
+        VStack(spacing: 3) {
+            QuotaGauge(provider: provider, now: now)
+            Text(sessionText)
+                .font(.system(size: percentSize, weight: .semibold, design: .rounded))
                 .monospacedDigit()
-                .foregroundStyle(value.stale ? .secondary : .primary)
+                .foregroundStyle(critical ? Color.red : Color.primary)
+                .lineLimit(1)
         }
+        .opacity(stale ? 0.45 : 1)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text("\(provider.name) \(label) \(percentText(value))"))
+        .accessibilityLabel(Text("\(provider.name): session \(sessionText) used, week \(weeklyText) used"))
     }
 }
 
@@ -251,9 +270,22 @@ struct QuotaWidgetView: View {
                 }
                 .foregroundStyle(.secondary)
             } else if family == .systemMedium {
-                MediumQuotaView(entry: entry)
+                // One row, up to four accounts.
+                HStack(spacing: 12) {
+                    ForEach(Array(entry.providers.prefix(4))) { provider in
+                        QuotaCell(provider: provider, now: entry.date, percentSize: 14)
+                            .frame(maxWidth: .infinity)
+                    }
+                }
             } else {
-                SmallQuotaView(entry: entry)
+                // 2 × 2 grid, up to four accounts.
+                let shown = Array(entry.providers.prefix(4))
+                let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 2)
+                LazyVGrid(columns: columns, spacing: 4) {
+                    ForEach(shown) { provider in
+                        QuotaCell(provider: provider, now: entry.date, percentSize: shown.count > 2 ? 11 : 13)
+                    }
+                }
             }
         }
         .containerBackground(.fill.tertiary, for: .widget)
@@ -264,7 +296,6 @@ struct QuotaWidgetView: View {
 
 @main
 struct QuotaWarmerWidget: Widget {
-    /// Also used by the app to ask for a reload (`QuotaWidgetReload`).
     static let kind = "com.quotawarmer.app.widget.quota"
 
     var body: some WidgetConfiguration {
@@ -272,7 +303,7 @@ struct QuotaWarmerWidget: Widget {
             QuotaWidgetView(entry: entry)
         }
         .configurationDisplayName("Quota")
-        .description("Session and weekly quota for each account.")
+        .description("Session (outer ring) and weekly (inner ring) quota used for each account.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }

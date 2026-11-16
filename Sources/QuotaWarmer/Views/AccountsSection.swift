@@ -16,7 +16,7 @@ struct AccountsSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             ForEach(ToolID.allCases) { kind in
-                defaultRow(kind)
+                DefaultAccountRow(kind: kind)
                 divider
                 ForEach(appState.providers.filter { $0.kind == kind && !$0.isDefault }) { tool in
                     AccountRow(tool: tool, toolState: appState.state(for: tool))
@@ -33,26 +33,6 @@ struct AccountsSection: View {
 
     private var divider: some View {
         Divider().background(DS.C.border).padding(.leading, 36)
-    }
-
-    private func defaultRow(_ kind: ToolID) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: DS.Space.sm) {
-                AccountGlyph(tool: .default(kind))
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(kind.shortName)
-                        .font(.system(size: 11.5, weight: .medium))
-                        .foregroundStyle(DS.C.text)
-                    Text(kind == .claude ? "~/.claude · default" : "~/.codex · default")
-                        .font(.system(size: 9.5))
-                        .foregroundStyle(DS.C.textMuted)
-                }
-                Spacer()
-            }
-            WarmupModelControl(tool: .default(kind))
-        }
-        .padding(.horizontal, DS.Space.md)
-        .padding(.vertical, DS.Space.sm - 1)
     }
 
     private var addButtons: some View {
@@ -166,6 +146,54 @@ struct AccountsSection: View {
             draftHome = url.path.replacingOccurrences(of: NSHomeDirectory(), with: "~")
             homeEdited = true
         }
+    }
+}
+
+/// A CLI's built-in account (`~/.claude`, `~/.codex`). It can be removed like
+/// an added account; a removed one stays listed, dimmed, with a button that
+/// brings it back.
+private struct DefaultAccountRow: View {
+    @EnvironmentObject var appState: AppState
+    let kind: ToolID
+    @State private var confirmRemove = false
+
+    private var removed: Bool { appState.hiddenDefaults.contains(kind) }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: DS.Space.sm) {
+                AccountGlyph(tool: .default(kind))
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(kind.shortName)
+                        .font(.system(size: 11.5, weight: .medium))
+                        .foregroundStyle(DS.C.text)
+                    Text(kind == .claude ? "~/.claude · default" : "~/.codex · default")
+                        .font(.system(size: 9.5))
+                        .foregroundStyle(DS.C.textMuted)
+                }
+                .opacity(removed ? 0.55 : 1)
+                Spacer()
+                if removed {
+                    SmallButton(title: "Add back", systemImage: "plus") {
+                        appState.restoreDefaultAccount(kind)
+                    }
+                } else if confirmRemove {
+                    SmallButton(title: "Remove", systemImage: nil, prominent: DS.C.red) {
+                        confirmRemove = false
+                        appState.removeAccount(.default(kind))
+                    }
+                    .help("Stops watching this account. Its folder and login stay on disk.")
+                } else {
+                    IconButton(systemName: "trash", help: "Remove account", size: 22) {
+                        confirmRemove = true
+                        Task { try? await Task.sleep(nanoseconds: 4_000_000_000); confirmRemove = false }
+                    }
+                }
+            }
+            if !removed { WarmupModelControl(tool: .default(kind)) }
+        }
+        .padding(.horizontal, DS.Space.md)
+        .padding(.vertical, DS.Space.sm - 1)
     }
 }
 

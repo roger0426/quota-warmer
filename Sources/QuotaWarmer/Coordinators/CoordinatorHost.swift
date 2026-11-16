@@ -13,6 +13,7 @@ protocol CoordinatorHost: AnyObject {
     var providers: [ProviderID] { get }
     var toolStates: [ProviderID: ToolState] { get set }
     var accounts: [ProviderAccount] { get set }
+    var hiddenDefaults: Set<ToolID> { get set }
     var history: [HistoryEvent] { get set }
     var globalPassive: Bool { get }
     var lastSuccessfulPollAt: Date? { get set }

@@ -69,6 +69,7 @@ struct AccountsHistoryRegression {
             (K.globalHotKeyModifiers, "globalHotKeyModifiers"),
             (K.onboardingCompletedVersion, "onboardingCompletedVersion"), (K.onboardingDismissed, "onboardingDismissed"),
             (K.launchAtLogin, "launchAtLogin"), (K.debugLevel, "debugLevel"), (K.accounts, "accounts.v1"),
+            (K.hiddenDefaultAccounts, "hiddenDefaultAccounts"),
             (K.toolMode("claude.work"), "toolMode.claude.work"),
             (K.toolActiveLegacy("codex"), "toolActive.codex"),
             (K.menuBarVisible("codex"), "menuBarVisible.codex"),
