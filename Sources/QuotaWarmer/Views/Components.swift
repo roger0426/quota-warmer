@@ -50,24 +50,33 @@ struct UsageBar: View {
         return 0.675 + 0.325 * cos(phase)
     }
 
+    private func highlightCapsule(from: CGFloat, to: CGFloat, opacity: Double) -> some View {
+        Capsule()
+            .fill(DS.C.unusedYellow)
+            .frame(width: max(0, to - from))
+            .offset(x: from)
+            .opacity(opacity)
+    }
+
     private func bar(fillOpacity: Double, highlightOpacity: Double) -> some View {
         GeometryReader { geo in
             let w = geo.size.width
             let fillW = max(0, w * clamp(fraction))
             ZStack(alignment: .leading) {
                 Capsule().fill(track)
+                // Used mode: the unused part follows the fill. Its capsule starts
+                // under the fill's rounded end so both ends stay round.
+                if let highlight, highlight.lowerBound > 0 {
+                    highlightCapsule(from: max(0, w * clamp(highlight.lowerBound) - height),
+                                     to: w * clamp(highlight.upperBound), opacity: highlightOpacity)
+                }
                 Capsule()
                     .fill(fill)
                     .frame(width: fillW)
                     .opacity(fillOpacity)
-                if let highlight {
-                    let from = w * clamp(highlight.lowerBound)
-                    Rectangle()
-                        .fill(DS.C.unusedYellow)
-                        .frame(width: max(0, w * clamp(highlight.upperBound) - from))
-                        .offset(x: from)
-                        .opacity(highlightOpacity)
-                        .clipShape(Capsule().size(width: w, height: height).offset(x: -from))
+                // Remaining mode: the unused part is the fill itself.
+                if let highlight, highlight.lowerBound <= 0 {
+                    highlightCapsule(from: 0, to: w * clamp(highlight.upperBound), opacity: highlightOpacity)
                 }
                 if let thumbFraction {
                     let thumbW: CGFloat = 5

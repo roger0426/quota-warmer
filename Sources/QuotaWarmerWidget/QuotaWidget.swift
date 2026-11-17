@@ -318,6 +318,13 @@ struct QuotaRing: View {
         ZStack {
             Circle()
                 .stroke(Color.primary.opacity(0.12), lineWidth: line)
+            // Unused quota about to reset, in yellow with round ends. Widgets
+            // can't animate, so it is steady here (the panel and menu bar
+            // pulse). Used mode: it follows the fill and sits under it, so the
+            // fill's round end overlaps it. Remaining mode: it is the fill.
+            if let arc = value.unusedArc, arc.upperBound > arc.lowerBound, arc.lowerBound > 0 {
+                unusedRing(arc, line: line)
+            }
             if value.fraction > 0 {
                 Circle()
                     .trim(from: 0, to: value.fraction)
@@ -326,16 +333,18 @@ struct QuotaRing: View {
                     // In tinted / clear widgets the fill takes the accent tint.
                     .widgetAccentable()
             }
-            if let arc = value.unusedArc, arc.upperBound > arc.lowerBound {
-                // Unused quota about to reset. Widgets can't animate, so it
-                // is steady here (the panel and menu bar pulse).
-                Circle()
-                    .trim(from: arc.lowerBound, to: arc.upperBound)
-                    .stroke(Color.yellow, style: StrokeStyle(lineWidth: line, lineCap: .butt))
-                    .rotationEffect(.degrees(-90))
+            if let arc = value.unusedArc, arc.upperBound > arc.lowerBound, arc.lowerBound <= 0 {
+                unusedRing(arc, line: line)
             }
         }
         .frame(width: diameter, height: diameter)
+    }
+
+    private func unusedRing(_ arc: ClosedRange<Double>, line: CGFloat) -> some View {
+        Circle()
+            .trim(from: arc.lowerBound, to: arc.upperBound)
+            .stroke(Color.yellow, style: StrokeStyle(lineWidth: line, lineCap: .round))
+            .rotationEffect(.degrees(-90))
     }
 
     /// The provider glyph with a status badge in its corner: the status

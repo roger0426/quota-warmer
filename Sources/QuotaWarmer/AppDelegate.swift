@@ -83,15 +83,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private var lastImageKey: String?
+    /// ~12 fps redraw while a menu-bar bar fades (the 1 s tick is too coarse).
+    private var glowTimer: Timer?
 
     /// Called every second and on every state change; rebuilds and reassigns the
     /// status-item image only when what it shows changed (about once a minute).
     private func refreshButtonImage() {
+        updateGlowTimer()
         let key = MenuBarStatus.contentKey(for: appState)
         guard key != lastImageKey else { return }
         lastImageKey = key
         statusItem?.button?.image = MenuBarStatus.image(for: appState)
         statusItem?.button?.setAccessibilityLabel(MenuBarStatus.accessibilityLabel(for: appState))
+    }
+
+    private func updateGlowTimer() {
+        let needed = MenuBarStatus.needsGlowAnimation(for: appState)
+        if needed, glowTimer == nil {
+            glowTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 12, repeats: true) { [weak self] _ in
+                Task { @MainActor [weak self] in self?.refreshButtonImage() }
+            }
+        } else if !needed, let timer = glowTimer {
+            timer.invalidate()
+            glowTimer = nil
+        }
     }
 
     // MARK: - Click routing
