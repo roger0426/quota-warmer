@@ -3,10 +3,15 @@ import WidgetKit
 
 /// Tells WidgetKit to redraw the quota widget after `status.json` changed.
 /// WidgetKit budgets reloads, and the app rewrites the file on every poll, so
-/// a reload is requested only when something the widget shows is different.
+/// a reload is requested only when something the widget shows is different,
+/// or when the widget's copy is about to look stale. The widget dims a
+/// reading older than 30 minutes, so while usage stays flat it still needs a
+/// fresh `fetchedAt` before then (at most ~58 reloads a day while awake).
 enum QuotaWidgetReload {
     private static let lock = NSLock()
     nonisolated(unsafe) private static var lastSignature = ""
+    nonisolated(unsafe) private static var lastReloadAt = Date.distantPast
+    static let freshnessRefresh: TimeInterval = 25 * 60
 
     static func reloadIfChanged(_ file: QuotaStatusFile) {
         let signature = "\(file.warningPercent ?? 0)#\(file.unusedAlert.map { "\($0.days)/\($0.percent)" } ?? "-")#" + file.providers.map { provider in
@@ -17,8 +22,10 @@ enum QuotaWidgetReload {
         }.joined(separator: "|")
 
         lock.lock()
-        let changed = signature != lastSignature
+        let now = Date()
+        let changed = signature != lastSignature || now.timeIntervalSince(lastReloadAt) >= freshnessRefresh
         lastSignature = signature
+        if changed { lastReloadAt = now }
         lock.unlock()
         guard changed else { return }
         // The file is written on a background queue just before this; give
