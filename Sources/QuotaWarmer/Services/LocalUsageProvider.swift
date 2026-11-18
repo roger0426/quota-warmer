@@ -146,7 +146,7 @@ final class LocalUsageProvider: @unchecked Sendable {
         let today = calendar.startOfDay(for: now)
         let yesterday = calendar.date(byAdding: .day, value: -1, to: today) ?? today
         let since = calendar.date(byAdding: .day, value: -30, to: today) ?? today
-        let root = baseURL ?? tool.logDirectoryURL
+        let root = Self.scanRoot(baseURL ?? tool.logDirectoryURL)
 
         let buckets: [Date: UsageBucket]
         let records: [CachedRecord]
@@ -194,6 +194,13 @@ final class LocalUsageProvider: @unchecked Sendable {
                 price: tool == .claude ? claudeCostSplit : codexCostSplit
             )
         )
+    }
+
+    /// The log folder with symlinks resolved: `FileManager.enumerator` lists
+    /// nothing when the folder it starts from is itself a symlink (an Orca
+    /// profile's `projects` → `~/.claude/projects`).
+    static func scanRoot(_ url: URL?) -> URL? {
+        url?.resolvingSymlinksInPath()
     }
 
     /// Calendar for the History buckets: the user's local time, since "when

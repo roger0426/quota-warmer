@@ -33,6 +33,7 @@ struct AccountsHistoryRegression {
         testDailyAndHourlyTokens()
         testCostRollup()
         testCostRollupStore()
+        testSharedLogFolders()
         testStatusExport()
         await testEventLog()
         testImpactReport()
@@ -627,6 +628,29 @@ struct AccountsHistoryRegression {
         let broken = CostRollupStore(directory: dir).rollup(storageKey: "claude.work")
         check(broken.isEmpty, "an unreadable file loads as empty")
         check(FileManager.default.fileExists(atPath: file.path + ".unreadable"), "and is kept aside, not overwritten")
+    }
+
+    /// Orca gives each Claude account its own home but symlinks `projects`
+    /// to `~/.claude/projects`: the scan must follow that symlink.
+    static func testSharedLogFolders() {
+        let fm = FileManager.default
+        let base = fm.temporaryDirectory.appendingPathComponent("qw-shared-logs-\(UUID().uuidString)")
+        defer { try? fm.removeItem(at: base) }
+        let real = base.appendingPathComponent("dot-claude/projects")
+        try? fm.createDirectory(at: real.appendingPathComponent("p"), withIntermediateDirectories: true)
+        let line = #"{"timestamp":"2026-06-15T10:05:00Z","message":{"id":"a","model":"claude-haiku-4-5-20251001","usage":{"input_tokens":100,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":0}}}"#
+        try? (line + "\n").write(to: real.appendingPathComponent("p/s.jsonl"), atomically: true, encoding: .utf8)
+        let home = base.appendingPathComponent("profiles/work")
+        try? fm.createDirectory(at: home, withIntermediateDirectories: true)
+        try? fm.createSymbolicLink(at: home.appendingPathComponent("projects"), withDestinationURL: real)
+
+        var utc = Calendar(identifier: .gregorian)
+        utc.timeZone = TimeZone(secondsFromGMT: 0)!
+        let now = ISO8601DateFormatter().date(from: "2026-06-15T12:00:00Z")!
+        let provider = LocalUsageProvider(calendar: utc)
+        provider.hourCalendar = utc
+        expect(provider.usage(for: .claude, baseURL: home.appendingPathComponent("projects"), now: now).today.totalTokens, 100,
+               "a log folder that is a symlink is scanned")
     }
 
     // MARK: - Status export
