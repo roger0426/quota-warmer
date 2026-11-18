@@ -184,6 +184,15 @@ final class QuotaPollingCoordinator {
             clearQuotaBackoff(for: state)
             clearAuthRetry(for: state)
             host.lastSuccessfulPollAt = Date()
+            // A new week: warm-ups that failed against the used-up week say
+            // nothing about this one, so don't keep the new window waiting.
+            if let oldReset = state.quotaSnapshot?.weekly?.resetAt,
+               let newReset = snapshot.weekly?.resetAt,
+               newReset.timeIntervalSince(oldReset) > 60 * 60,
+               state.backoffUntil != nil {
+                state.backoffUntil = nil
+                DiagnosticLogger.append("weekly_reset_cleared_backoff tool=\(tool.rawValue)")
+            }
             state.quotaSnapshot = snapshot
             state.awaitingCLITokenRefresh = false
             // Removed mid-fetch: don't recreate the deleted history file.

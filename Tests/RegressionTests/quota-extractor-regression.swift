@@ -60,6 +60,18 @@ struct QuotaExtractorRegression {
                 && WarmupRunner.displayOutput(claudeJSON) == "Hi!",
             "Claude warmup: tokens and reply text come from the JSON result line"
         )
+        // A failed run: the error is in `result`, after the long `usage` object,
+        // so the detail must lead with it instead of the cut-off raw output.
+        let claudeFailure = #"{"type":"result","is_error":true,"duration_api_ms":0,"usage":{"input_tokens":0,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":0,"server_tool_use":{"web_search_requests":0}},"modelUsage":{},"permission_denials":[],"terminal_reason":"api_error","api_error_status":429,"result":"Claude AI usage limit reached"}"#
+        require(
+            WarmupRunner.failureDetail(claudeFailure)
+                == "Claude AI usage limit reached · api_error_status=429 · terminal_reason=api_error",
+            "Claude warmup failure: the detail leads with the JSON result's error message"
+        )
+        require(
+            WarmupRunner.failureDetail("error: unknown option '--foo'") == "error: unknown option '--foo'",
+            "Warmup failure without a Claude JSON result keeps the sanitized output"
+        )
         let codexOutput = "user\nhi\ncodex\nHi!\ntokens used\n9,116"
         require(
             WarmupRunner.warmupTokens(in: codexOutput) == 9116
@@ -406,6 +418,20 @@ access_token=private-value
             windowDuration: 5 * 3600
         )
         require(!unavailableQuotaSource.shouldRun, "Unavailable live quota must skip catch-up")
+
+        let weeklyLimitSchedule = MorningWarmupPolicy.decision(
+            now: catchUpNow,
+            scheduledAt: scheduledAt,
+            dayKey: scheduledDayKey,
+            lastSuccessfulDay: nil,
+            liveWindowActive: false,
+            sourceFresh: true,
+            weeklyLimitReached: true,
+            windowDuration: 5 * 3600
+        )
+        if case .skip(.weeklyLimitReached) = weeklyLimitSchedule {} else {
+            require(false, "A used-up weekly limit must skip the morning pre-warm")
+        }
 
         let activeWindowOverlap = MorningWarmupPolicy.decision(
             now: catchUpNow,
@@ -1184,6 +1210,39 @@ access_token=private-value
 
         // Window: the refreshed quota reading.
         require(decide { _ in } == .warm, "Auto-warm window: a fresh, full, just-opened window warms")
+        func withWeekly(remaining: Double, resetIn: TimeInterval?, idle: Bool = true) -> QuotaSnapshot {
+            let base = snapshot(openedAgo: idle ? 0 : 120, idle: idle)
+            return QuotaSnapshot(
+                tool: base.tool, fetchedAt: base.fetchedAt, primarySource: base.primarySource,
+                corroboratingSource: nil, fiveHour: base.fiveHour,
+                weekly: QuotaMetric(
+                    name: "Weekly", usedPercent: 1 - remaining, remainingPercent: remaining,
+                    resetAt: resetIn.map { now.addingTimeInterval($0) }, detail: nil
+                ),
+                extras: [], rawWindowKey: base.rawWindowKey, message: nil
+            )
+        }
+        let weeklyReset = now.addingTimeInterval(3 * 3600)
+        require(
+            decide { $0.snapshot = withWeekly(remaining: 0, resetIn: 3 * 3600) } == .skip(.weeklyLimitReached(until: weeklyReset)),
+            "Auto-warm window: a used-up weekly limit skips until the weekly reset (a warm-up would fail)"
+        )
+        require(
+            decide { $0.snapshot = withWeekly(remaining: 0.01, resetIn: 3 * 3600) } == .warm,
+            "Auto-warm window: a weekly limit with anything left still warms"
+        )
+        require(
+            decide { $0.snapshot = withWeekly(remaining: 0, resetIn: -60) } == .warm,
+            "Auto-warm window: a used-up weekly reading whose reset has passed no longer blocks"
+        )
+        require(
+            decide {
+                $0.snapshot = withWeekly(remaining: 0, resetIn: 3 * 3600, idle: false)
+                $0.sourceHealth = .rateLimited
+                $0.awaitingCLITokenRefresh = true
+            } != .warm,
+            "Auto-warm window: the expired-token fallback never warms into a used-up weekly limit"
+        )
         require(decide { $0.sourceHealth = .stale } == .skip(.sourceUnhealthy(.stale)), "Auto-warm window: a stale source never warms")
         require(
             decide { $0.sourceHealth = .rateLimited } == .skip(.sourceUnhealthy(.rateLimited)),

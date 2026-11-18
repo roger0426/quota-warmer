@@ -709,7 +709,8 @@ struct QuotaDisplayRegression {
             .backoff(until: at(10)), .sourceUnhealthy(.stale), .sourceUnhealthy(.rateLimited), .noQuotaReading,
             .snapshotNotFresh(.stale), .snapshotNotFresh(.expired), .windowInUse(remaining: 0.42),
             .windowNotJustOpened, .reservedForMorning(at: at(30)), .alreadyWarmedWindow,
-            .warmedWindowActive(until: at(120)),
+            .warmedWindowActive(until: at(120)), .weeklyLimitReached(until: at(180)),
+            .morning(.weeklyLimitReached),
             .morning(.alreadySucceeded), .morning(.beforeScheduledTime), .morning(.outsideCatchUpHorizon),
             .morning(.activeWindowInProgress), .morning(.quotaSourceUnavailable),
         ]
@@ -724,6 +725,9 @@ struct QuotaDisplayRegression {
         expect(explain(.backoff(until: at(10))).status,
                "Backing off after a failed warm-up until \(hm(at(10)))", "backoff text")
         expect(explain(.backoff(until: at(10))).nextEligibleAt, at(10), "backoff next eligible")
+        expect(explain(.weeklyLimitReached(until: at(180))).status,
+               "Weekly limit reached — waiting for the weekly reset at \(hm(at(180)))", "weekly-limit text")
+        expect(explain(.weeklyLimitReached(until: at(180))).nextEligibleAt, at(180), "weekly-limit next eligible")
         expect(explain(.warmedWindowActive(until: at(120))).status,
                "Already warmed this window (resets \(hm(at(120))))", "warmed-window text")
         expect(explain(.warmedWindowActive(until: at(120))).nextEligibleAt, at(120), "warmed-window next eligible")
@@ -754,6 +758,9 @@ struct QuotaDisplayRegression {
         }
         check(entry(nil, .backoff(until: at(5))), "backoff appearing is recorded")
         check(!entry(.backoff(until: at(5)), .backoff(until: at(9))), "drifting backoff deadline is not re-recorded")
+        check(entry(nil, .weeklyLimitReached(until: at(180))), "weekly limit appearing is recorded")
+        check(!entry(.weeklyLimitReached(until: at(180)), .weeklyLimitReached(until: at(181))),
+              "drifting weekly reset is not re-recorded")
         check(entry(.windowInUse(remaining: 0.5), .authUnavailable(.failed)), "auth failure is recorded")
         check(!entry(.authUnavailable(.failed), .authUnavailable(.failed)), "unchanged auth failure is not re-recorded")
         check(entry(.authUnavailable(.missing), .authUnavailable(.failed)), "auth missing -> failed is recorded")

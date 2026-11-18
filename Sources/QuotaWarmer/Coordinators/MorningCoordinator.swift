@@ -171,6 +171,7 @@ final class MorningCoordinator {
             // warm-up's CLI run is what refreshes the token.
             let expiredCredentialWindowEnded = state.awaitingCLITokenRefresh
                 && state.quotaSnapshot?.lastKnownWindowEnded() == true
+            let weeklyResetAt = state.quotaSnapshot?.weeklyLimitResetAt(now: now)
             let decision = MorningWarmupPolicy.decision(
                 now: now,
                 scheduledAt: scheduledAt,
@@ -179,11 +180,15 @@ final class MorningCoordinator {
                 liveWindowActive: liveWindowActive,
                 sourceFresh: sourceFresh,
                 expiredCredentialWindowEnded: expiredCredentialWindowEnded,
+                weeklyLimitReached: weeklyResetAt != nil,
                 windowDuration: tool.windowDuration
             )
 
             guard case .run(let caughtUp) = decision else {
                 if case .skip(let reason) = decision {
+                    if reason == .weeklyLimitReached, let weeklyResetAt {
+                        host.warmup.scheduleWeeklyResetCheck(for: tool, at: weeklyResetAt)
+                    }
                     host.warmup.noteAutoWarmDecision(state, .skip(.morning(reason)))
                     logMorningSkip(tool: tool, reason: reason.rawValue, source: source)
                 }

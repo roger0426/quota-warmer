@@ -182,6 +182,8 @@ final class AppState: ObservableObject, CoordinatorHost {
             scheduler.invalidate(tool: tool)
             notifications.cancelAll(for: tool)
             state.claimVerifyTask?.cancel(); state.claimVerifyTask = nil
+            state.weeklyResetCheckTask?.cancel(); state.weeklyResetCheckTask = nil
+            state.weeklyResetCheckAt = nil
             quota.clearAuthRetry(for: state)
             state.nextRefreshAt = nil
             events.addHistory(tool: tool, kind: .quotaFetch, title: "Monitoring off", detail: "QuotaWarmer will not watch this tool")

@@ -47,6 +47,8 @@ final class WarmupCoordinator {
                 )
             case .warmedWindowActive(let endsAt):
                 DiagnosticLogger.append("auto_warm_skipped_active_window tool=\(tool.rawValue) windowEndsAt=\(ISO8601DateFormatter().string(from: endsAt))")
+            case .weeklyLimitReached(let until):
+                scheduleWeeklyResetCheck(for: tool, at: until)
             default:
                 break
             }
@@ -190,7 +192,7 @@ final class WarmupCoordinator {
             host.quota.scheduleClaudeAuthRecheckIfNeeded(for: state, reason: message)
         } catch {
             state.errorMessage = error.localizedDescription
-            state.backoffUntil = Date().addingTimeInterval(nextBackoff(for: state))
+            state.backoffUntil = Date().addingTimeInterval(Self.failedWarmupBackoff)
             state.lastWarmupOutcome = .failed(at: Date(), reason: error.localizedDescription)
             host.events.addHistory(tool: tool, kind: .pollingError, title: "Warmup failed", detail: error.localizedDescription, outcome: .failed)
         }
@@ -377,10 +379,39 @@ final class WarmupCoordinator {
         (state.quotaSnapshot?.rawWindowKey, state.resetAt, state.lastWarmupModel)
     }
 
-    func nextBackoff(for state: ToolState) -> TimeInterval {
-        if let backoffUntil = state.backoffUntil, backoffUntil > Date() {
-            return min(backoffUntil.timeIntervalSinceNow * 2, 30 * 60)
+    /// Fixed delay after a failed warm-up. Automatic retries are blocked by the
+    /// gate while it runs, so a failure always lands after it expired: a
+    /// doubling schedule would never escalate. Persistent failures with a known
+    /// end (a used-up weekly limit) are skipped by `weeklyLimitReached` instead.
+    static let failedWarmupBackoff: TimeInterval = 5 * 60
+
+    /// Small margin after the weekly reset so the provider reports the new week.
+    private let weeklyResetGrace: TimeInterval = 30
+
+    /// Runs one auto-warm check right after a used-up weekly limit resets, so
+    /// the first window of the new week opens without waiting for the next
+    /// poll. The regular poll still covers a Mac that slept through it.
+    func scheduleWeeklyResetCheck(for tool: ProviderID, at resetAt: Date) {
+        let state = host.state(for: tool)
+        if state.weeklyResetCheckAt == resetAt, state.weeklyResetCheckTask != nil { return }
+        state.weeklyResetCheckTask?.cancel()
+        state.weeklyResetCheckAt = resetAt
+        let fireAt = resetAt.addingTimeInterval(weeklyResetGrace)
+        DiagnosticLogger.append(
+            "weekly_reset_check_scheduled tool=\(tool.rawValue) at=\(ISO8601DateFormatter().string(from: fireAt))"
+        )
+        state.weeklyResetCheckTask = Task { [weak self] in
+            let delay = max(0, fireAt.timeIntervalSinceNow)
+            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            guard !Task.isCancelled, let self else { return }
+            let state = self.host.state(for: tool)
+            state.weeklyResetCheckTask = nil
+            state.weeklyResetCheckAt = nil
+            // The failures before the reset were the exhausted week, not a
+            // reason to delay the new one.
+            state.backoffUntil = nil
+            DiagnosticLogger.append("weekly_reset_check tool=\(tool.rawValue)")
+            await self.host.quota.refreshQuota(for: tool, allowAutomaticWarmup: state.isAutoWarmEnabled)
         }
-        return 5 * 60
     }
 }

@@ -17,6 +17,8 @@ enum AutoWarmSkipReason: Equatable {
     case sourceUnhealthy(SourceHealth)
     /// No quota snapshot, or it has no 5h metric with a reset time.
     case noQuotaReading
+    /// The weekly limit is used up; a warm-up can't succeed until it resets.
+    case weeklyLimitReached(until: Date)
     /// The snapshot is older than the fresh threshold.
     case snapshotNotFresh(QuotaFreshness)
     /// Less than the claimable share of the window is left.
@@ -41,6 +43,7 @@ enum AutoWarmSkipReason: Equatable {
         case .backoff: return "backing off after a failed warm-up"
         case .sourceUnhealthy(let health): return "quota source \(health.label)"
         case .noQuotaReading: return "no 5h quota reading"
+        case .weeklyLimitReached: return "weekly limit reached"
         case .snapshotNotFresh(let freshness): return "quota reading \(freshness.label)"
         case .windowInUse(let remaining): return "window in use (\(Int((remaining * 100).rounded()))% left)"
         case .windowNotJustOpened: return "window already running"
@@ -114,6 +117,9 @@ enum AutoWarmDecision: Equatable {
         }
         guard window.sourceHealth == .healthy else { return .skip(.sourceUnhealthy(window.sourceHealth)) }
         guard let snapshot = window.snapshot else { return .skip(.noQuotaReading) }
+        if let until = snapshot.weeklyLimitResetAt(now: now) {
+            return .skip(.weeklyLimitReached(until: until))
+        }
         guard snapshot.canAutoWarm(now: now, windowDuration: window.windowDuration) else {
             return .skip(notClaimableReason(snapshot, now: now))
         }
@@ -148,6 +154,9 @@ enum AutoWarmDecision: Equatable {
     private static func expiredCredentialWindow(_ window: Window, now: Date) -> AutoWarmDecision {
         guard let snapshot = window.snapshot, snapshot.lastKnownWindowEnded(now: now) else {
             return .skip(.sourceUnhealthy(window.sourceHealth))
+        }
+        if let until = snapshot.weeklyLimitResetAt(now: now) {
+            return .skip(.weeklyLimitReached(until: until))
         }
         if let morningAt = window.upcomingMorningAt,
            MorningWarmupPolicy.reservesAutomaticWarmup(

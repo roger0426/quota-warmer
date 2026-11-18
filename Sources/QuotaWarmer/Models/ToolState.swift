@@ -80,6 +80,9 @@ final class ToolState: ObservableObject {
     var authRetryTask: Task<Void, Never>?
     var claimVerifyTask: Task<Void, Never>?
     var settleRepollTask: Task<Void, Never>?
+    /// One-shot auto-warm check just after a used-up weekly limit resets.
+    var weeklyResetCheckTask: Task<Void, Never>?
+    var weeklyResetCheckAt: Date?
 
     /// A stand-in for a removed account: off, nothing restored or saved.
     init(orphan tool: ProviderID) {

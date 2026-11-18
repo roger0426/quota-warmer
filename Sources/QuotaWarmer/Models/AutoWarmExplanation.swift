@@ -120,6 +120,11 @@ struct AutoWarmExplanation: Equatable {
             return make(.neutral, String(localized: "No 5h quota reading yet", locale: locale),
                         String(localized: "The provider hasn't reported a 5-hour window with a reset time.", locale: locale),
                         next: input.nextCheckAt)
+        case .weeklyLimitReached(let until):
+            return make(.attention,
+                        String(localized: "Weekly limit reached — waiting for the weekly reset at \(time(until))", locale: locale),
+                        String(localized: "Warm-ups can't run until the weekly quota resets; auto-warm tries again right after the reset.", locale: locale),
+                        next: until)
         case .snapshotNotFresh(let freshness):
             var lead = String(localized: "Quota reading \(freshness.displayLabel(locale: locale))", locale: locale)
             if let fetched = input.snapshotFetchedAt, now > fetched {
@@ -184,6 +189,10 @@ struct AutoWarmExplanation: Equatable {
             return make(.attention, String(localized: "Morning pre-warm skipped — quota unavailable", locale: locale),
                         String(localized: "A fresh, healthy quota reading was needed first and wasn't available.", locale: locale),
                         String(localized: "Press Refresh; check sign-in if it persists.", locale: locale), input.nextCheckAt, false)
+        case .weeklyLimitReached:
+            return make(.attention, String(localized: "Morning pre-warm skipped — weekly limit reached", locale: locale),
+                        String(localized: "The weekly quota is used up; auto-warm opens a window right after the weekly reset.", locale: locale),
+                        nil, input.nextCheckAt, false)
         }
     }
 
@@ -205,6 +214,7 @@ struct AutoWarmExplanation: Equatable {
         case .backoff: return "backoff"
         case .sourceUnhealthy(let h): return "source.\(h.rawValue)"
         case .noQuotaReading: return "noQuotaReading"
+        case .weeklyLimitReached: return "weeklyLimitReached"
         case .snapshotNotFresh(let f): return "fresh.\(f.rawValue)"
         case .windowInUse: return "windowInUse"
         case .windowNotJustOpened: return "windowNotJustOpened"

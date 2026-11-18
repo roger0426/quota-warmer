@@ -101,6 +101,7 @@ enum ScheduledWarmupSkipReason: String {
     case outsideCatchUpHorizon
     case activeWindowInProgress
     case quotaSourceUnavailable
+    case weeklyLimitReached
 }
 
 enum ScheduledWarmupDecision {
@@ -154,6 +155,7 @@ struct MorningWarmupPolicy {
         liveWindowActive: Bool,
         sourceFresh: Bool,
         expiredCredentialWindowEnded: Bool = false,
+        weeklyLimitReached: Bool = false,
         windowDuration: TimeInterval,
         catchUpHorizon: TimeInterval? = nil,
         catchUpLatenessThreshold: TimeInterval = Self.catchUpLatenessThreshold
@@ -176,6 +178,10 @@ struct MorningWarmupPolicy {
         // warm-up is that run. Allowed only when the last reading's window ended.
         guard sourceFresh || expiredCredentialWindowEnded else {
             return .skip(.quotaSourceUnavailable)
+        }
+
+        if weeklyLimitReached {
+            return .skip(.weeklyLimitReached)
         }
 
         if liveWindowActive {
@@ -359,6 +365,15 @@ struct QuotaSnapshot {
         if age <= 5 * 60 { return .fresh }
         if age <= 30 * 60 { return .stale }
         return .expired
+    }
+
+    /// The weekly reset time while the weekly limit is used up (nothing left
+    /// and the reset still ahead); nil otherwise. A warm-up can't succeed
+    /// until then: the CLI exits with an API error and spends no tokens.
+    func weeklyLimitResetAt(now: Date = Date()) -> Date? {
+        guard let weekly, weekly.remainingFraction <= 0.001,
+              let resetAt = weekly.resetAt, resetAt > now else { return nil }
+        return resetAt
     }
 
     func canAutoWarm(

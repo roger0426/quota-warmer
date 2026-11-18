@@ -6689,6 +6689,28 @@
         }
       }
     },
+    "Morning pre-warm skipped — weekly limit reached": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Morning pre-warm skipped — weekly limit reached"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sabah ön ısıtması atlandı — haftalık sınıra ulaşıldı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已略過早晨預熱：已達每週額度上限"
+          }
+        }
+      }
+    },
     "Morning pre-warm skipped — window already running": {
       "localizations": {
         "en": {
@@ -10913,6 +10935,28 @@
         }
       }
     },
+    "The weekly quota is used up; auto-warm opens a window right after the weekly reset.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The weekly quota is used up; auto-warm opens a window right after the weekly reset."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haftalık kota tükendi; otomatik ısıtma haftalık sıfırlanmadan hemen sonra bir pencere açar."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每週額度已用完；每週重置後，自動預熱會立即開啟新的時段。"
+          }
+        }
+      }
+    },
     "The window opened more than 10 minutes ago, so it's too late to claim it.": {
       "localizations": {
         "en": {
@@ -12145,6 +12189,28 @@
         }
       }
     },
+    "Warm-ups can't run until the weekly quota resets; auto-warm tries again right after the reset.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warm-ups can't run until the weekly quota resets; auto-warm tries again right after the reset."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haftalık kota sıfırlanana kadar ısıtma yapılamaz; otomatik ısıtma sıfırlanmadan hemen sonra yeniden dener."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每週額度重置前無法預熱；重置後自動預熱會立即再試一次。"
+          }
+        }
+      }
+    },
     "Warm-ups run through the official CLIs you already use. Monitoring only needs you to be signed in.": {
       "localizations": {
         "en": {
@@ -12471,6 +12537,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "每週已用（%）"
+          }
+        }
+      }
+    },
+    "Weekly limit reached — waiting for the weekly reset at %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weekly limit reached — waiting for the weekly reset at %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haftalık sınıra ulaşıldı — %@ haftalık sıfırlanması bekleniyor"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已達每週額度上限，等待 %@ 的每週重置"
           }
         }
       }

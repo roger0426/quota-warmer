@@ -217,6 +217,28 @@ class WarmupRunner {
         return nil
     }
 
+    /// The failure text worth showing for a non-zero exit. Claude's JSON result
+    /// puts the actual error (`result`, e.g. a usage-limit message) after a
+    /// long `usage` object, so the plain sanitized output cut it off; lead with
+    /// it (plus `api_error_status` when present) and fall back to the output.
+    static func failureDetail(_ output: String) -> String {
+        guard let object = claudeJSONResult(in: output) else {
+            return sanitizedFailureDetail(output)
+        }
+        var parts: [String] = []
+        if let message = object["result"] as? String,
+           !message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            parts.append(sanitizedFailureDetail(message, limit: 400))
+        }
+        if let status = object["api_error_status"], !(status is NSNull) {
+            parts.append("api_error_status=\(status)")
+        }
+        if let reason = object["terminal_reason"] as? String {
+            parts.append("terminal_reason=\(reason)")
+        }
+        return parts.isEmpty ? sanitizedFailureDetail(output) : parts.joined(separator: " · ")
+    }
+
     /// Tokens a warm-up used, as the CLI reported it: the `usage` object of
     /// Claude's JSON result (input + cache write + cache read + output), or the
     /// number after Codex's "tokens used" line.
@@ -378,7 +400,7 @@ class WarmupRunner {
                 } else {
                     continuation.resume(throwing: WarmupError.exitCode(
                         p.terminationStatus,
-                        Self.sanitizedFailureDetail(combined)
+                        Self.failureDetail(combined)
                     ))
                 }
             }

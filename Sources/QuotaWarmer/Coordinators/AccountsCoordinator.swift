@@ -112,6 +112,7 @@ final class AccountsCoordinator {
         notifications.cancelAll(for: tool)
         state.claimVerifyTask?.cancel()
         state.settleRepollTask?.cancel()
+        state.weeklyResetCheckTask?.cancel()
         host.quota.clearAuthRetry(for: state)
         if tool.kind == .claude { CredentialStore().invalidateCachedClaudeCredential(for: tool) }
 
