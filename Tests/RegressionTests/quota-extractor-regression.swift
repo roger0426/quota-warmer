@@ -1625,7 +1625,7 @@ access_token=private-value
             bundle: nil,
             cacheURL: cacheURL,
             remoteURL: URL(string: "https://example.invalid/\(tool.rawValue)-models.json")!,
-            defaults: UserDefaults(suiteName: "quotawarmer-regression-\(UUID().uuidString)")!
+            defaults: freshTestDefaults("quotawarmer-regression")
         )
         store.remoteRefreshEnabled = false
         store.adopt(catalog, source: "test")
@@ -1746,7 +1746,7 @@ access_token=private-value
             bundle: nil,
             cacheURL: cacheURL,
             remoteURL: URL(string: "https://example.invalid/codex-models.json")!,
-            defaults: UserDefaults(suiteName: "quotawarmer-regression-\(UUID().uuidString)")!
+            defaults: freshTestDefaults("quotawarmer-regression")
         )
         require(cachedStore.catalog?.revision == 7, "A previously fetched catalog should load from the on-disk cache")
 
@@ -2102,4 +2102,13 @@ access_token=private-value
         }
         return source
     }
+}
+
+/// A cleared, fixed-name defaults domain. A UUID per run left one plist in
+/// ~/Library/Preferences per test run (removing a domain empties it but
+/// cfprefsd keeps the file), so test runs reuse a fixed name instead.
+func freshTestDefaults(_ suite: String) -> UserDefaults {
+    let defaults = UserDefaults(suiteName: suite)!
+    defaults.removePersistentDomain(forName: suite)
+    return defaults
 }

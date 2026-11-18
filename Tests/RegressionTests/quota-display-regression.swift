@@ -146,8 +146,9 @@ struct QuotaDisplayRegression {
 
     static func testWarningSetting() {
         expect(QuotaUsageLevel.warningPercentKey, "usageWarningPercent", "warning key is stable (AppStorage + status.json export)")
-        let suite = "quota-warning-test-\(UUID().uuidString)"
+        let suite = "quota-warning-test"
         guard let defaults = UserDefaults(suiteName: suite) else { fail("no test defaults"); return }
+        defaults.removePersistentDomain(forName: suite)  // fixed name: start clean
         defer { defaults.removePersistentDomain(forName: suite) }
         expect(QuotaUsageLevel.storedWarningPercent(defaults: defaults), 80, "unset warning level defaults to 80%")
         defaults.set(65, forKey: QuotaUsageLevel.warningPercentKey)
@@ -159,8 +160,9 @@ struct QuotaDisplayRegression {
     }
 
     static func testMenuBarGauge() {
-        let suite = "quota-menubar-test-\(UUID().uuidString)"
+        let suite = "quota-menubar-test"
         guard let defaults = UserDefaults(suiteName: suite) else { fail("no test defaults"); return }
+        defaults.removePersistentDomain(forName: suite)  // fixed name: start clean
         defer { defaults.removePersistentDomain(forName: suite) }
         expect(QuotaDisplay.MenuBarStyle.stored(defaults: defaults), .gauge, "menu bar defaults to bars")
         defaults.set("text", forKey: QuotaDisplay.menuBarStyleKey)
@@ -255,8 +257,9 @@ struct QuotaDisplayRegression {
     // MARK: - Persistence
 
     static func testModePersistence() {
-        let suite = "QuotaDisplayRegression.\(UUID().uuidString)"
+        let suite = "QuotaDisplayRegression"
         guard let defaults = UserDefaults(suiteName: suite) else { fail("could not create defaults suite"); return }
+        defaults.removePersistentDomain(forName: suite)  // fixed name: start clean
         defer { defaults.removePersistentDomain(forName: suite) }
 
         for tool in ToolID.allCases {
@@ -275,8 +278,9 @@ struct QuotaDisplayRegression {
     // MARK: - Language
 
     static func testAppLanguage() {
-        let suite = "QuotaDisplayRegression.language.\(UUID().uuidString)"
+        let suite = "QuotaDisplayRegression.language"
         guard let defaults = UserDefaults(suiteName: suite) else { fail("could not create defaults suite"); return }
+        defaults.removePersistentDomain(forName: suite)  // fixed name: start clean
         defer { defaults.removePersistentDomain(forName: suite) }
         expect(AppLanguage.stored(defaults: defaults, domain: suite), .system, "language defaults to system")
         expect(AppLanguage.stored(defaults: defaults, domain: nil), .system, "no bundle id reads as system")
@@ -315,8 +319,9 @@ struct QuotaDisplayRegression {
         expect(AppearanceMode.light.symbolName, "sun.max", "light icon")
         expect(AppearanceMode.dark.symbolName, "moon", "dark icon")
 
-        let suite = "QuotaDisplayRegression.theme.\(UUID().uuidString)"
+        let suite = "QuotaDisplayRegression.theme"
         guard let defaults = UserDefaults(suiteName: suite) else { fail("could not create defaults suite"); return }
+        defaults.removePersistentDomain(forName: suite)  // fixed name: start clean
         defer { defaults.removePersistentDomain(forName: suite) }
         expect(AppearanceMode.stored(defaults: defaults), .system, "theme defaults to system")
         for theme in AppearanceMode.allCases {
@@ -471,8 +476,9 @@ struct QuotaDisplayRegression {
               "off: never flagged")
 
         // Settings persistence.
-        let suite = "QuotaWarmerUnusedRegression.\(UUID().uuidString)"
+        let suite = "QuotaWarmerUnusedRegression"
         let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)  // fixed name: start clean
         defer { defaults.removePersistentDomain(forName: suite) }
         expect(UnusedQuotaRule.load(from: defaults), UnusedQuotaRule(), "unset defaults load the stock rule")
         defaults.set(false, forKey: UnusedQuotaRule.enabledKey)
@@ -510,8 +516,9 @@ struct QuotaDisplayRegression {
         expect(QuotaAlertSettings.nextThreshold(after: 77), 80, "off-list value snaps to next choice")
 
         // Settings defaults and persistence.
-        let suite = "QuotaWarmerAlertRegression.\(UUID().uuidString)"
+        let suite = "QuotaWarmerAlertRegression"
         let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)  // fixed name: start clean
         defer { defaults.removePersistentDomain(forName: suite) }
         let stock = QuotaAlertSettings.load(from: defaults)
         expect(stock, QuotaAlertSettings(), "unset defaults load the stock settings")
