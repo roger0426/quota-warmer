@@ -109,6 +109,9 @@ struct CostRollup: Codable, Equatable {
     var days: [String: [String: CostCell]] = [:]
     /// Start of the hour (seconds since 1970, as a string) → cell.
     var hours: [String: CostCell] = [:]
+    /// When every log still on disk was read into this rollup (seconds since
+    /// 1970); nil until that one-time backfill ran. Regular scans read 30 days.
+    var backfilledAt: Double?
 
     var isEmpty: Bool { days.isEmpty && hours.isEmpty }
 
@@ -327,12 +330,14 @@ final class CostRollupStore: @unchecked Sendable {
     }
 
     /// Merges a fresh scan into the stored rollup, saves it, and returns the
-    /// result. Blocks; call off the main actor.
-    func merge(_ fresh: CostRollup, storageKey: String, now: Date = Date()) -> CostRollup {
+    /// result. `backfill` marks a scan of every log on disk (`backfilledAt`).
+    /// Blocks; call off the main actor.
+    func merge(_ fresh: CostRollup, storageKey: String, backfill: Bool = false, now: Date = Date()) -> CostRollup {
         queue.sync {
             var rollup = loadLocked(storageKey)
             let before = rollup
             rollup.merge(fresh, now: now)
+            if backfill { rollup.backfilledAt = now.timeIntervalSince1970 }
             cache[storageKey] = rollup
             if rollup != before { saveLocked(rollup, storageKey: storageKey) }
             return rollup
@@ -341,6 +346,32 @@ final class CostRollupStore: @unchecked Sendable {
 
     func rollup(storageKey: String) -> CostRollup {
         queue.sync { loadLocked(storageKey) }
+    }
+
+    /// Moves files kept under older keys (one per account, before rollups
+    /// were kept per log folder) into `storageKey`. Accounts that shared a
+    /// folder hold the same cells, and `merge` keeps the larger cell, so
+    /// nothing is counted twice. A legacy file that cannot be read stays.
+    func adoptLegacy(_ legacyKeys: [String], into storageKey: String) {
+        queue.sync {
+            var rollup = loadLocked(storageKey)
+            let before = rollup
+            var adopted: [URL] = []
+            for key in legacyKeys where key != storageKey {
+                let url = fileURL(key)
+                guard let data = try? Data(contentsOf: url),
+                      let legacy = try? JSONDecoder().decode(CostRollup.self, from: data) else { continue }
+                rollup.merge(legacy)
+                adopted.append(url)
+                cache[key] = nil
+            }
+            cache[storageKey] = rollup
+            // Delete only once the merged rollup is on disk.
+            let saved = rollup == before || saveLocked(rollup, storageKey: storageKey)
+            if saved {
+                for url in adopted { try? FileManager.default.removeItem(at: url) }
+            }
+        }
     }
 
     func removeAll(storageKey: String) {
@@ -376,14 +407,17 @@ final class CostRollupStore: @unchecked Sendable {
         return loaded
     }
 
-    private func saveLocked(_ rollup: CostRollup, storageKey: String) {
+    @discardableResult
+    private func saveLocked(_ rollup: CostRollup, storageKey: String) -> Bool {
         do {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
             let encoder = JSONEncoder()
             encoder.outputFormatting = [.sortedKeys]
             try encoder.encode(rollup).write(to: fileURL(storageKey), options: .atomic)
+            return true
         } catch {
             DiagnosticLogger.append("cost_rollup_save_failed key=\(storageKey)")
+            return false
         }
     }
 }

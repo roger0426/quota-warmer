@@ -47,6 +47,14 @@ final class ToolState: ObservableObject {
     /// Stored API-equivalent cost rollup (`CostRollupStore`), updated after
     /// each local-log scan; nil until the first scan finishes.
     @Published var costRollup: CostRollup?
+    /// The log folder `tokenUsageSummary` and `costRollup` come from
+    /// (`ProviderID.tokenLogKey`); accounts with the same key hold the same
+    /// data, so totals across accounts count each key once. Nil until the
+    /// first scan.
+    @Published var tokenLogKey: String?
+    /// Other accounts whose CLI writes to the same log folder: their tokens
+    /// are mixed into this account's data and cannot be told apart.
+    @Published var tokenLogSharedWith: [String] = []
     @Published var sourceHealth: SourceHealth = .unknown
     /// The last fetch found Claude's access token expired; only the CLI can
     /// refresh it. Cleared by the next successful fetch.

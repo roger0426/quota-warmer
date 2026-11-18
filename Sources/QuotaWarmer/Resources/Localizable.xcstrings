@@ -45,6 +45,28 @@
         }
       }
     },
+    " Accounts that share a log folder are one segment, under the first of them.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " Accounts that share a log folder are one segment, under the first of them."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " Aynı günlük klasörünü paylaşan hesaplar, ilkinin altında tek bir bölüm olarak gösterilir."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " 共用 log 資料夾的帳號合為一段，顯示在其中第一個帳號下。"
+          }
+        }
+      }
+    },
     " Each account is a segment of the bar.": {
       "localizations": {
         "en": {
@@ -85,6 +107,28 @@
           "stringUnit": {
             "state": "translated",
             "value": " 橘色是 Claude、藍色是 Codex；兩者都用到（且都未超過自身 token 的 80%）的格子為紫色。"
+          }
+        }
+      }
+    },
+    " This account shares its log folder with %@, so these tokens include theirs.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " This account shares its log folder with %@, so these tokens include theirs."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " Bu hesap günlük klasörünü %@ ile paylaşıyor; bu token'lar onlarınkini de içerir."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " 這個帳號和 %@ 共用 log 資料夾，所以這些 token 也包含它們的用量。"
           }
         }
       }
@@ -481,6 +525,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ 額度以已用百分比顯示。啟用以改為顯示剩餘百分比。"
+          }
+        }
+      }
+    },
+    "%@ share one log folder; their tokens are counted once.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ share one log folder; their tokens are counted once."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ aynı günlük klasörünü paylaşıyor; token'ları bir kez sayılır."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 共用同一個 log 資料夾；它們的 token 只計算一次。"
           }
         }
       }
@@ -8031,6 +8097,28 @@
         }
       }
     },
+    "Pick Claude or Codex to see what its weekly quota was worth.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick Claude or Codex to see what its weekly quota was worth."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haftalık kotanın değerini görmek için Claude veya Codex'i seçin."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇 Claude 或 Codex，查看它的每週額度值多少。"
+          }
+        }
+      }
+    },
     "Pick a mode for each tool. You can change it any time from the tool's tab.": {
       "localizations": {
         "en": {
@@ -8049,28 +8137,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "為每個工具選擇模式。之後隨時可在該工具的分頁中變更。"
-          }
-        }
-      }
-    },
-    "Pick one account to see what its weekly quota was worth.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pick one account to see what its weekly quota was worth."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Haftalık kotanın değerini görmek için bir hesap seçin."
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "選擇一個帳號，查看它的每週額度值多少。"
           }
         }
       }
@@ -12581,6 +12647,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "每週額度已用"
+          }
+        }
+      }
+    },
+    "Weekly quota value needs a tool with one account and its own log folder; these accounts' tokens can't be told apart.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weekly quota value needs a tool with one account and its own log folder; these accounts' tokens can't be told apart."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haftalık kota değeri için aracın tek bir hesabı ve kendi günlük klasörü olmalı; bu hesapların token'ları birbirinden ayrılamıyor."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每週額度的價值需要該工具只有一個帳號、且有自己的 log 資料夾；這些帳號的 token 無法區分。"
           }
         }
       }

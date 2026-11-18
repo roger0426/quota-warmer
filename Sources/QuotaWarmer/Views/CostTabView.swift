@@ -3,35 +3,72 @@ import SwiftUI
 
 /// API-equivalent value of the local CLI logs: what the same tokens would cost
 /// at API prices, split by token kind and model, plus what each weekly quota
-/// period was worth. Data is each account's stored `CostRollup`, so days whose
-/// logs the CLI already deleted stay visible. Not a bill.
+/// period was worth. Totals are per tool, not per account: logs carry no
+/// account, and accounts whose CLI writes to one folder (an Orca profile's
+/// `projects` symlinked to `~/.claude/projects`) cannot be told apart, so each
+/// log folder (`ToolState.tokenLogKey`) is counted once. Data is each folder's
+/// stored `CostRollup`, so days whose logs the CLI already deleted stay
+/// visible. Not a bill.
 struct CostTabView: View {
     @EnvironmentObject var appState: AppState
     @AppStorage("costRange") private var rangeRaw = CostRange.week.rawValue
-    @AppStorage("costProvider") private var providerKey = HistoryTabView.allKey
+    @AppStorage("costTool") private var toolRaw = HistoryTabView.allKey
     @State private var weeklySamples: [QuotaSample] = []
 
     private var range: CostRange { CostRange(rawValue: rangeRaw) ?? .week }
 
+    private var kinds: [ToolID] {
+        ToolID.allCases.filter { kind in appState.providers.contains { $0.kind == kind } }
+    }
+
     /// nil = All.
-    private var selectedProvider: ProviderID? {
-        appState.providers.first { $0.storageKey == providerKey }
+    private var selectedKind: ToolID? {
+        kinds.first { $0.rawValue == toolRaw }
     }
 
     private var selectedProviders: [ProviderID] {
-        selectedProvider.map { [$0] } ?? appState.providers
+        appState.providers.filter { selectedKind == nil || $0.kind == selectedKind }
     }
 
+    /// One rollup per log folder among the selected accounts.
     private var rollup: CostRollup {
-        CostRollup.combined(selectedProviders.compactMap { appState.state(for: $0).costRollup })
+        var seen = Set<String>()
+        var rollups: [CostRollup] = []
+        for tool in selectedProviders {
+            let state = appState.state(for: tool)
+            guard let stored = state.costRollup,
+                  seen.insert(state.tokenLogKey ?? tool.storageKey).inserted else { continue }
+            rollups.append(stored)
+        }
+        return CostRollup.combined(rollups)
     }
 
     private var isLoading: Bool {
         selectedProviders.contains { appState.state(for: $0).costRollup == nil }
     }
 
+    /// Names of accounts that share a log folder, one entry per such folder.
+    private var sharedFolders: [String] {
+        var seen = Set<String>()
+        return selectedProviders.compactMap { tool in
+            let state = appState.state(for: tool)
+            guard !state.tokenLogSharedWith.isEmpty,
+                  seen.insert(state.tokenLogKey ?? tool.storageKey).inserted else { return nil }
+            return ([tool.shortName] + state.tokenLogSharedWith).formatted(.list(type: .and))
+        }
+    }
+
+    /// The account whose weekly quota the tool's cost can be set against:
+    /// only when the selected tool has one account and nobody else writes to
+    /// its log folder.
+    private var weeklyTool: ProviderID? {
+        guard selectedKind != nil, selectedProviders.count == 1, let tool = selectedProviders.first,
+              appState.state(for: tool).tokenLogSharedWith.isEmpty else { return nil }
+        return tool
+    }
+
     private var weeklyLoadKey: String {
-        guard let tool = selectedProvider else { return "all" }
+        guard let tool = weeklyTool else { return "none" }
         let fetched = appState.state(for: tool).lastSuccessfulFetch?.timeIntervalSince1970 ?? 0
         return "\(tool.storageKey)|\(Int(fetched))"
     }
@@ -40,10 +77,15 @@ struct CostTabView: View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: DS.Page.spacing) {
                 PanelHeader(title: "Cost") { rangePicker }
-                providerPicker
+                toolPicker
                 Text("API-equivalent value of this Mac's CLI logs · not a bill")
                     .font(.system(size: 10))
                     .foregroundStyle(DS.C.textMuted)
+                ForEach(sharedFolders, id: \.self) { names in
+                    Text("\(names) share one log folder; their tokens are counted once.")
+                        .font(.system(size: 10))
+                        .foregroundStyle(DS.C.textMuted)
+                }
                 CostContent(rollup: rollup, range: range, isLoading: isLoading)
                 weeklySection
             }
@@ -53,7 +95,7 @@ struct CostTabView: View {
             .reportsPanelHeight()
         }
         .task(id: weeklyLoadKey) {
-            guard let tool = selectedProvider else {
+            guard let tool = weeklyTool else {
                 weeklySamples = []
                 return
             }
@@ -63,19 +105,22 @@ struct CostTabView: View {
         .task {
             // Show the stored rollup before this launch's first scan finishes.
             for tool in appState.providers where appState.state(for: tool).costRollup == nil {
-                let key = tool.storageKey
+                let key = tool.tokenLogKey
                 let stored = await Task.detached(priority: .utility) {
                     CostRollupStore.shared.rollup(storageKey: key)
                 }.value
                 let state = appState.state(for: tool)
-                if state.costRollup == nil, !stored.isEmpty { state.costRollup = stored }
+                if state.costRollup == nil, !stored.isEmpty {
+                    state.costRollup = stored
+                    state.tokenLogKey = key
+                }
             }
         }
     }
 
     @ViewBuilder
     private var weeklySection: some View {
-        if let tool = selectedProvider {
+        if let tool = weeklyTool {
             let state = appState.state(for: tool)
             if let weekly = state.weeklyMetric, let resetAt = weekly.resetAt {
                 WeeklyValueCard(
@@ -90,7 +135,10 @@ struct CostTabView: View {
                 )
             }
         } else {
-            Text("Pick one account to see what its weekly quota was worth.")
+            let note: LocalizedStringKey = selectedKind == nil
+                ? "Pick Claude or Codex to see what its weekly quota was worth."
+                : "Weekly quota value needs a tool with one account and its own log folder; these accounts' tokens can't be told apart."
+            Text(note)
                 .font(.system(size: 10))
                 .foregroundStyle(DS.C.textMuted)
         }
@@ -117,20 +165,20 @@ struct CostTabView: View {
         .background(DS.C.surfaceHigh, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
-    private var providerPicker: some View {
+    private var toolPicker: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
-                chip(title: "All", selected: selectedProvider == nil, color: DS.C.ink) {
-                    providerKey = HistoryTabView.allKey
+                chip(title: "All", selected: selectedKind == nil, color: DS.C.ink) {
+                    toolRaw = HistoryTabView.allKey
                 } icon: {
                     Image(systemName: "square.stack.3d.up.fill")
                         .font(.system(size: 10, weight: .semibold))
                 }
-                ForEach(appState.providers) { tool in
-                    chip(title: LocalizedStringKey(tool.shortName), selected: tool == selectedProvider, color: DS.C.history(tool.kind)) {
-                        providerKey = tool.storageKey
+                ForEach(kinds, id: \.self) { kind in
+                    chip(title: LocalizedStringKey(kind.shortName), selected: kind == selectedKind, color: DS.C.history(kind)) {
+                        toolRaw = kind.rawValue
                     } icon: {
-                        Image(tool.kind.glyphAssetName)
+                        Image(kind.glyphAssetName)
                             .resizable()
                             .renderingMode(.template)
                             .scaledToFit()

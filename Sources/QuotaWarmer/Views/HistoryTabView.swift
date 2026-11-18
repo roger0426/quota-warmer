@@ -5,7 +5,7 @@ import SwiftUI
 /// trend, daily tokens from the local CLI logs and the busy hours — for one
 /// account, or for every account at once ("All"). Quota samples are recorded
 /// on every successful poll (`UsageHistoryStore`); token data comes from each
-/// account's `tokenUsageSummary`.
+/// account's `tokenUsageSummary`, once per log folder.
 struct HistoryTabView: View {
     static let allKey = "all"
 
@@ -27,13 +27,18 @@ struct HistoryTabView: View {
         selectedProvider.map { [$0] } ?? appState.providers
     }
 
+    /// Accounts that share a log folder hold the same token data; only the
+    /// first of them carries it, so "All" counts each folder once.
     private var series: [HistorySeries] {
-        selectedProviders.map { tool in
+        var seenLogs = Set<String>()
+        return selectedProviders.map { tool in
             let state = appState.state(for: tool)
+            let firstForLog = seenLogs.insert(state.tokenLogKey ?? tool.storageKey).inserted
             return HistorySeries(
                 tool: tool,
                 samples: samplesByKey[tool.storageKey] ?? [],
-                tokens: state.tokenUsageSummary,
+                tokens: firstForLog ? state.tokenUsageSummary : nil,
+                tokenLogSharedWith: state.tokenLogSharedWith,
                 isMonitored: state.isMonitored,
                 isFetchingTokens: state.isFetchingTokenUsage
             )
@@ -183,6 +188,8 @@ struct HistorySeries: Identifiable {
     let tool: ProviderID
     let samples: [QuotaSample]
     let tokens: TokenUsageSummary?
+    /// Other accounts writing to the same log folder (see `ToolState`).
+    let tokenLogSharedWith: [String]
     let isMonitored: Bool
     let isFetchingTokens: Bool
 
@@ -628,7 +635,14 @@ private struct HistoryContent: View {
         let reading = series.contains(where: \.isFetchingTokens)
         let unit: Calendar.Component = hourlyView ? .hour : .day
         let tokenDomain = hourlyView ? hourDomain(end: now) : dayDomain(end: now)
-        let combinedNote = combined ? String(localized: " Each account is a segment of the bar.") : ""
+        var combinedNote = combined ? String(localized: " Each account is a segment of the bar.") : ""
+        let shared = series.map(\.tokenLogSharedWith)
+        if combined, shared.contains(where: { !$0.isEmpty }) {
+            combinedNote += String(localized: " Accounts that share a log folder are one segment, under the first of them.")
+        } else if !combined, let others = shared.first, !others.isEmpty {
+            let names: String = others.formatted(.list(type: .and))
+            combinedNote += String(localized: " This account shares its log folder with \(names), so these tokens include theirs.")
+        }
         let info: LocalizedStringKey = hourlyView
             ? "Tokens in each of the last 24 hours (your local time), from the CLI's local logs on this Mac (input, output and cache), with the estimated API-equivalent cost. Usage on other machines or the web isn't included.\(combinedNote)"
             : "Tokens per day (your local time) over the \(range.longLabel), from the CLI's local logs on this Mac (input, output and cache), with the estimated API-equivalent cost. Usage on other machines or the web isn't included.\(combinedNote)"

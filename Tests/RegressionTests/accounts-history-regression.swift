@@ -631,26 +631,72 @@ struct AccountsHistoryRegression {
     }
 
     /// Orca gives each Claude account its own home but symlinks `projects`
-    /// to `~/.claude/projects`: the scan must follow that symlink.
+    /// to `~/.claude/projects`: the scan must follow that symlink, and the
+    /// accounts must count as one log folder, not twice.
     static func testSharedLogFolders() {
         let fm = FileManager.default
         let base = fm.temporaryDirectory.appendingPathComponent("qw-shared-logs-\(UUID().uuidString)")
         defer { try? fm.removeItem(at: base) }
         let real = base.appendingPathComponent("dot-claude/projects")
         try? fm.createDirectory(at: real.appendingPathComponent("p"), withIntermediateDirectories: true)
-        let line = #"{"timestamp":"2026-06-15T10:05:00Z","message":{"id":"a","model":"claude-haiku-4-5-20251001","usage":{"input_tokens":100,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":0}}}"#
-        try? (line + "\n").write(to: real.appendingPathComponent("p/s.jsonl"), atomically: true, encoding: .utf8)
-        let home = base.appendingPathComponent("profiles/work")
-        try? fm.createDirectory(at: home, withIntermediateDirectories: true)
-        try? fm.createSymbolicLink(at: home.appendingPathComponent("projects"), withDestinationURL: real)
+        let lines = [
+            #"{"timestamp":"2026-06-15T10:05:00Z","message":{"id":"a","model":"claude-haiku-4-5-20251001","usage":{"input_tokens":100,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":0}}}"#,
+            // 76 days before "now": outside the 30-day scan, inside the backfill.
+            #"{"timestamp":"2026-03-31T10:05:00Z","message":{"id":"old","model":"claude-haiku-4-5-20251001","usage":{"input_tokens":40,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":0}}}"#,
+        ]
+        try? (lines.joined(separator: "\n") + "\n").write(to: real.appendingPathComponent("p/s.jsonl"), atomically: true, encoding: .utf8)
+        var homes: [URL] = []
+        for name in ["work", "home"] {
+            let home = base.appendingPathComponent("profiles/\(name)")
+            try? fm.createDirectory(at: home, withIntermediateDirectories: true)
+            try? fm.createSymbolicLink(at: home.appendingPathComponent("projects"), withDestinationURL: real)
+            homes.append(home)
+        }
+        let own = base.appendingPathComponent("profiles/own")
+        try? fm.createDirectory(at: own.appendingPathComponent("projects"), withIntermediateDirectories: true)
 
         var utc = Calendar(identifier: .gregorian)
         utc.timeZone = TimeZone(secondsFromGMT: 0)!
         let now = ISO8601DateFormatter().date(from: "2026-06-15T12:00:00Z")!
+        let link = homes[0].appendingPathComponent("projects")
         let provider = LocalUsageProvider(calendar: utc)
         provider.hourCalendar = utc
-        expect(provider.usage(for: .claude, baseURL: home.appendingPathComponent("projects"), now: now).today.totalTokens, 100,
+        expect(provider.usage(for: .claude, baseURL: link, now: now).today.totalTokens, 100,
                "a log folder that is a symlink is scanned")
+        let backfill = LocalUsageProvider(calendar: utc)
+        backfill.hourCalendar = utc
+        let all = backfill.costRollup(for: .claude, baseURL: link, since: .distantPast)
+        expect(all.sortedDayKeys, ["2026-03-31", "2026-06-15"], "the backfill reads logs older than 30 days")
+
+        let work = ProviderID(kind: .claude, accountID: "work", home: homes[0].path, name: "work")
+        let home = ProviderID(kind: .claude, accountID: "home", home: homes[1].path, name: "home")
+        let ownAccount = ProviderID(kind: .claude, accountID: "own", home: own.path, name: "own")
+        expect(work.tokenLogKey, home.tokenLogKey, "accounts whose logs land in one folder share a key")
+        check(work.tokenLogKey != ownAccount.tokenLogKey, "an account with its own folder has its own key")
+        check(work.tokenLogKey.hasPrefix("claude-") && !work.tokenLogKey.contains("/"), "the key names a file, not a path")
+        let codex = ProviderID(kind: .codex, accountID: "work", home: homes[0].path, name: "work")
+        check(codex.tokenLogKey != work.tokenLogKey, "tools never share a key")
+        let groups = TokenLogGroup.groups([work, ownAccount, home])
+        expect(groups.map { $0.members.map(\.accountID) }, [["work", "home"], ["own"]], "groups keep the accounts' order")
+
+        // Per-account files from before are merged into the folder's file once.
+        let dir = base.appendingPathComponent("cost")
+        let store = CostRollupStore(directory: dir)
+        var legacy = CostRollup()
+        legacy.add(dayKey: "2026-06-01", hourStart: now, model: "m", tokens: TokenSplit(input: 5), cost: CostSplit(input: 0.5))
+        _ = store.merge(legacy, storageKey: "claude.work")
+        _ = store.merge(legacy, storageKey: "claude.home")
+        store.adoptLegacy(["claude.work", "claude.home"], into: work.tokenLogKey)
+        let adopted = CostRollupStore(directory: dir).rollup(storageKey: work.tokenLogKey)
+        expect(adopted.days, legacy.days, "two accounts' copies of one folder's cost count once")
+        check(!fm.fileExists(atPath: dir.appendingPathComponent("claude.work.json").path)
+              && !fm.fileExists(atPath: dir.appendingPathComponent("claude.home.json").path),
+              "the per-account files are removed once merged")
+        check(adopted.backfilledAt == nil, "merging old files is not a backfill")
+        _ = store.merge(all, storageKey: work.tokenLogKey, backfill: true, now: now)
+        let backfilled = CostRollupStore(directory: dir).rollup(storageKey: work.tokenLogKey)
+        expect(backfilled.backfilledAt, now.timeIntervalSince1970, "the backfill is recorded and survives a relaunch")
+        expect(backfilled.sortedDayKeys, ["2026-03-31", "2026-06-01", "2026-06-15"], "backfilled days join the stored ones")
     }
 
     // MARK: - Status export

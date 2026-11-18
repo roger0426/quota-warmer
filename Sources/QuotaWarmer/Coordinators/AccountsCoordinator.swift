@@ -122,6 +122,11 @@ final class AccountsCoordinator {
         }
         UsageHistoryStore.shared.removeAll(for: tool)
         CostRollupStore.shared.removeAll(storageKey: tool.storageKey)
+        // Cost is kept per log folder: keep it while another account reads it.
+        let logKey = tool.tokenLogKey
+        if !host.providers.contains(where: { $0.storageKey != tool.storageKey && $0.tokenLogKey == logKey }) {
+            CostRollupStore.shared.removeAll(storageKey: logKey)
+        }
         EventLogStore.shared.removeAll(for: tool)
         host.history.removeAll { $0.tool?.storageKey == tool.storageKey }
 

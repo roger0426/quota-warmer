@@ -87,6 +87,18 @@ struct ProviderID: Hashable, Identifiable, CustomStringConvertible {
         }
     }
 
+    /// `logDirectoryURL` with every symlink resolved. Launchers such as Orca
+    /// give each account its own home but symlink `projects` back to
+    /// `~/.claude/projects`, so two accounts can write to one folder.
+    var resolvedLogDirectoryURL: URL? {
+        logDirectoryURL?.resolvingSymlinksInPath().standardizedFileURL
+    }
+
+    /// Accounts whose logs land in the same folder share this key. Log records
+    /// carry no account, so such accounts' tokens are scanned and counted once
+    /// per folder, never once per account.
+    var tokenLogKey: String { TokenLogGroup.key(kind: kind, folder: resolvedLogDirectoryURL) }
+
     /// The login command a user runs once to sign this account in, with the
     /// home already exported. The path is single-quoted for the shell.
     var loginCommand: String {
@@ -207,5 +219,37 @@ struct ProviderAccount: Codable, Hashable, Identifiable {
     static func save(_ accounts: [ProviderAccount], to defaults: UserDefaults = .standard) {
         guard let data = try? JSONEncoder().encode(accounts) else { return }
         defaults.set(data, forKey: defaultsKey)
+    }
+}
+
+/// Accounts grouped by the folder their CLI logs land in (`tokenLogKey`).
+/// Token usage and API-equivalent cost are per folder: shared logs carry no
+/// account, so they are counted once and shown per tool, not split by guess.
+enum TokenLogGroup {
+    /// `claude-<first 8 hex of sha256(path)>`; the bare tool name when the
+    /// folder is unknown. Used as the `CostRollupStore` file name, so it
+    /// never contains the path itself.
+    static func key(kind: ToolID, folder: URL?) -> String {
+        guard let folder else { return kind.rawValue }
+        let hash = SHA256.hash(data: Data(folder.path.utf8))
+            .map { String(format: "%02x", $0) }
+            .joined()
+        return "\(kind.rawValue)-\(hash.prefix(8))"
+    }
+
+    /// Groups `providers` by key, in their order; each group lists its members
+    /// in that order too.
+    static func groups(
+        _ providers: [ProviderID],
+        key: (ProviderID) -> String = { $0.tokenLogKey }
+    ) -> [(key: String, members: [ProviderID])] {
+        var order: [String] = []
+        var members: [String: [ProviderID]] = [:]
+        for provider in providers {
+            let groupKey = key(provider)
+            if members[groupKey] == nil { order.append(groupKey) }
+            members[groupKey, default: []].append(provider)
+        }
+        return order.map { ($0, members[$0] ?? []) }
     }
 }

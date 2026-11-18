@@ -15,10 +15,13 @@ final class QuotaPollingCoordinator {
     private let scheduler: Scheduler
     private let notifications: NotificationManager
 
-    /// One long-lived scanner per tool: each caches parsed log files and only
-    /// reads what was appended since its last scan.
-    private var usageProviders: [ProviderID: LocalUsageProvider] = [:]
-    private var tokenUsageScannedAt: [ProviderID: Date] = [:]
+    /// One long-lived scanner per log folder (`ProviderID.tokenLogKey`):
+    /// each caches parsed log files and only reads what was appended since its
+    /// last scan. Accounts sharing a folder share its scanner and its scan.
+    private var usageProviders: [String: LocalUsageProvider] = [:]
+    private var tokenUsageScannedAt: [String: Date] = [:]
+    /// Log folders whose legacy files and backfill were handled this launch.
+    private var preparedTokenLogs: Set<String> = []
     /// Quota refreshes come in bursts (warm-up verification, settle re-polls,
     /// wake); token totals need not follow each one.
     private let tokenUsageMinInterval: TimeInterval = 60
@@ -293,43 +296,74 @@ final class QuotaPollingCoordinator {
 
     // MARK: - Token usage
 
-    private func usageProvider(for tool: ProviderID) -> LocalUsageProvider {
-        if let existing = usageProviders[tool] { return existing }
+    private func usageProvider(for groupKey: String) -> LocalUsageProvider {
+        if let existing = usageProviders[groupKey] { return existing }
         let created = LocalUsageProvider()
-        usageProviders[tool] = created
+        usageProviders[groupKey] = created
         return created
     }
 
-    /// Drops the scanner state of a removed account.
+    /// Drops the scanner state of a removed account, unless another account
+    /// still reads the same log folder.
     func forgetTokenUsage(for tool: ProviderID) {
-        usageProviders[tool] = nil
-        tokenUsageScannedAt[tool] = nil
+        let groupKey = tool.tokenLogKey
+        guard !host.providers.contains(where: { $0.storageKey != tool.storageKey && $0.tokenLogKey == groupKey }) else { return }
+        usageProviders[groupKey] = nil
+        tokenUsageScannedAt[groupKey] = nil
+        preparedTokenLogs.remove(groupKey)
     }
 
+    /// Scans `tool`'s log folder once for every account that shares it and
+    /// gives them all the same summary and cost rollup, stored per folder.
+    /// The first scan of a folder each launch moves the old per-account cost
+    /// files into the folder's file and, once per folder, reads every log
+    /// still on disk (regular scans read 30 days).
     private func refreshTokenUsage(for tool: ProviderID, force: Bool = false) {
-        let state = host.state(for: tool)
-        // Skip if a scan is already in flight for this tool — otherwise rapid
+        let groupKey = tool.tokenLogKey
+        let members = host.providers.filter { $0.kind == tool.kind && $0.tokenLogKey == groupKey }
+        let states = (members.isEmpty ? [tool] : members).map { host.state(for: $0) }
+        // Skip if a scan is already in flight for this folder — otherwise rapid
         // refresh cycles can pile up overlapping disk scans. This single-flight
-        // is also what makes sharing one provider per tool safe.
-        guard !state.isFetchingTokenUsage else { return }
-        let provider = usageProvider(for: tool)
-        if !force, let last = tokenUsageScannedAt[tool], Date().timeIntervalSince(last) < tokenUsageMinInterval {
+        // is also what makes sharing one provider per folder safe.
+        guard !states.contains(where: \.isFetchingTokenUsage) else { return }
+        let provider = usageProvider(for: groupKey)
+        if !force, let last = tokenUsageScannedAt[groupKey], Date().timeIntervalSince(last) < tokenUsageMinInterval {
             return
         }
-        tokenUsageScannedAt[tool] = Date()
-        state.isFetchingTokenUsage = true
+        tokenUsageScannedAt[groupKey] = Date()
+        let prepare = preparedTokenLogs.insert(groupKey).inserted
+        let legacyKeys = Array(Set(members.map(\.storageKey) + [tool.storageKey]))
+        let kind = tool.kind
+        let logDirectory = tool.logDirectoryURL
+        for state in states {
+            state.isFetchingTokenUsage = true
+            state.tokenLogKey = groupKey
+            state.tokenLogSharedWith = members.filter { $0.storageKey != state.tool.storageKey }.map(\.shortName)
+        }
         // The scan walks the CLI JSONL logs synchronously; keep it off the main
         // actor so the menu-bar panel never freezes (which also kept it from
         // dismissing on outside clicks).
         Task.detached(priority: .utility) {
-            var scanned = provider.usage(for: tool.kind, baseURL: tool.logDirectoryURL)
-            let rollup = CostRollupStore.shared.merge(scanned.costRollup ?? CostRollup(), storageKey: tool.storageKey)
+            let store = CostRollupStore.shared
+            if prepare {
+                store.adoptLegacy(legacyKeys, into: groupKey)
+                if store.rollup(storageKey: groupKey).backfilledAt == nil {
+                    // A throwaway scanner, so old files' records are not kept.
+                    let full = LocalUsageProvider().costRollup(for: kind, baseURL: logDirectory, since: .distantPast)
+                    _ = store.merge(full, storageKey: groupKey, backfill: true)
+                    DiagnosticLogger.append("cost_backfill key=\(groupKey) days=\(full.days.count)")
+                }
+            }
+            var scanned = provider.usage(for: kind, baseURL: logDirectory)
+            let rollup = store.merge(scanned.costRollup ?? CostRollup(), storageKey: groupKey)
             scanned.costRollup = nil
             let summary = scanned
             await MainActor.run {
-                state.tokenUsageSummary = summary
-                state.costRollup = rollup
-                state.isFetchingTokenUsage = false
+                for state in states {
+                    state.tokenUsageSummary = summary
+                    state.costRollup = rollup
+                    state.isFetchingTokenUsage = false
+                }
             }
         }
     }

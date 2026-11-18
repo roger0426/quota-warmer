@@ -196,6 +196,25 @@ final class LocalUsageProvider: @unchecked Sendable {
         )
     }
 
+    /// The cost rollup of every log record since `since` (pass `.distantPast`
+    /// for all logs still on disk). Used once per log folder to backfill the
+    /// stored rollup beyond the 30 days `usage` reads; use a throwaway
+    /// instance, so the old files' records are not kept in memory.
+    func costRollup(for tool: ToolID, baseURL: URL? = nil, since: Date) -> CostRollup {
+        guard let root = Self.scanRoot(baseURL ?? tool.logDirectoryURL),
+              fileManager.fileExists(atPath: root.path) else { return CostRollup() }
+        unpricedModels.removeAll()
+        entryCache.removeAll()
+        switch tool {
+        case .claude:
+            let records = claudeRecords(in: root, since: since)
+            return Self.costRollup(records.map(\.record), tool: tool, calendar: hourCalendar, price: claudeCostSplit)
+        case .codex:
+            let records = codexRecords(in: root, since: since)
+            return Self.costRollup(records.map(\.record), tool: tool, calendar: hourCalendar, price: codexCostSplit)
+        }
+    }
+
     /// The log folder with symlinks resolved: `FileManager.enumerator` lists
     /// nothing when the folder it starts from is itself a symlink (an Orca
     /// profile's `projects` → `~/.claude/projects`).
