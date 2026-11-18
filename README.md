@@ -42,6 +42,7 @@ By default it only **monitors**: it watches live quota snapshots and shows each 
 - **Right-click menu**: jump to stats or settings, set the diagnostics level, or quit.
 - **Desktop widget**: one battery-style gauge per account, with a thick outer ring and a thin inner ring for the session and weekly windows (choose which is outside, the number shown — used, left or none — and the time marker in Edit Widget). Rings are blue and turn red at the warning level set in Settings (default 80% used); a white dot on each ring marks how far through that window the clock is. When the weekly window is about to reset with a lot left unused, the unused part of its ring turns yellow. The widget is sandboxed and only reads the `status.json` the app writes; add it from the desktop's Edit Widgets… gallery after the app has run once from `/Applications`.
 - **History and notifications**: recent checks, warm-ups and failures in Settings; optional reminders before a window resets and when a window is claimed, plus a nudge when the weekly window resets soon with quota still unused (default: within 2 days, at least 30% left; set in Settings → Alerts). That case also turns the weekly bar yellow: it pulses slowly in the panel and blinks in the menu bar's Bars style. (This fork has no in-app update check.)
+- **Cost tab (⌘3)**: what this Mac's CLI usage would cost at API prices — split by input, output, cache write and cache read, with the cache hit rate, a per-model breakdown and the value of each weekly quota period. It reads only the local CLI logs, so it is an API-equivalent value, not a bill. The app keeps its own daily totals, so days stay after Claude Code deletes old logs (30 days by default).
 - **Launch at login**: runs quietly as a menu bar utility.
 - **Statusline**: show live quota in Claude Code's status line, tmux or starship (see [Statusline](#statusline)).
 
@@ -206,7 +207,7 @@ since the file is only rewritten when a check succeeds.
 links can never send a warm-up or change a mode or setting; unknown actions and parameters are ignored.
 
 ```text
-quotawarmer://open[?tab=main|history|settings]
+quotawarmer://open[?tab=main|history|cost|settings]
 quotawarmer://refresh[?provider=claude|codex|<account key>]
 ```
 

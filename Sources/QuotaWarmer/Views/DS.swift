@@ -99,6 +99,9 @@ enum DS {
         /// "Use it or lose it": the unused part of a weekly bar that resets
         /// soon with much still left (see `UnusedQuotaRule`).
         static let unusedYellow = Color(light: 0xE0A100, dark: 0xF5C542)
+        /// Warning text on cards (unpriced models): ≥ 4.5:1 on the card in
+        /// both themes; always paired with a ⚠ so it is not color-only.
+        static let costWarn = Color(light: 0xA95D05, dark: 0xF5C542)
         /// Colored track tint behind a usage bar (a touch lighter in dark).
         static let usageTrackOpacity: Double = 0.16
         /// Single-color bar used when Colorful Quota Bars is off: the original

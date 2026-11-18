@@ -16,6 +16,7 @@ enum IntegrationURLHandler {
                 switch tab {
                 case .main: showPanel(.main)
                 case .history: showPanel(.history)
+                case .cost: showPanel(.cost)
                 case .settings: showPanel(.settings)
                 case nil: showPanel(nil)
                 }

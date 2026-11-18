@@ -31,6 +31,8 @@ struct AccountsHistoryRegression {
         testChartSegments()
         testHistoryStore()
         testDailyAndHourlyTokens()
+        testCostRollup()
+        testCostRollupStore()
         testStatusExport()
         await testEventLog()
         testImpactReport()
@@ -502,6 +504,129 @@ struct AccountsHistoryRegression {
 
         let missing = LocalUsageProvider(calendar: utc).usage(for: .claude, baseURL: root.appendingPathComponent("nope"), now: now)
         check(missing.hourly.isEmpty, "and no hourly usage")
+    }
+
+    // MARK: - Cost rollup
+
+    static func testCostRollup() {
+        var utc = Calendar(identifier: .gregorian)
+        utc.timeZone = TimeZone(secondsFromGMT: 0)!
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("qw-cost-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let project = root.appendingPathComponent("p")
+        try? FileManager.default.createDirectory(at: project, withIntermediateDirectories: true)
+        let lines = [
+            // Haiku 4.5: input 1, cache write 5m 1.25 / 1h 2, cache read 0.1, output 5 ($/MTok).
+            #"{"timestamp":"2026-06-15T10:05:00Z","message":{"id":"a","model":"claude-haiku-4-5-20251001","usage":{"input_tokens":1000000,"cache_creation":{"ephemeral_5m_input_tokens":1000000,"ephemeral_1h_input_tokens":1000000},"cache_creation_input_tokens":2000000,"cache_read_input_tokens":10000000,"output_tokens":1000000}}}"#,
+            #"{"timestamp":"2026-06-14T09:00:00Z","message":{"id":"b","model":"claude-nova-1","usage":{"input_tokens":500,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"output_tokens":0}}}"#,
+        ]
+        try? (lines.joined(separator: "\n") + "\n").write(to: project.appendingPathComponent("s.jsonl"), atomically: true, encoding: .utf8)
+        let provider = LocalUsageProvider(calendar: utc)
+        provider.hourCalendar = utc
+        let now = ISO8601DateFormatter().date(from: "2026-06-15T12:00:00Z")!
+        let summary = provider.usage(for: .claude, baseURL: root, now: now)
+        guard let rollup = summary.costRollup else { return check(false, "a scan carries its cost rollup") }
+
+        let haiku = rollup.days["2026-06-15"]?["claude-haiku-4-5-20251001"]
+        expect(haiku?.tokens, TokenSplit(input: 1_000_000, output: 1_000_000, cacheWrite: 2_000_000, cacheRead: 10_000_000), "tokens per kind")
+        check(abs((haiku?.cost.input ?? 0) - 1) < 1e-9, "input priced at the input rate")
+        check(abs((haiku?.cost.cacheWrite ?? 0) - 3.25) < 1e-9, "cache writes priced per TTL (1.25 + 2)")
+        check(abs((haiku?.cost.cacheRead ?? 0) - 1) < 1e-9, "cache reads at the read rate")
+        check(abs((haiku?.cost.output ?? 0) - 5) < 1e-9, "output at the output rate")
+        check(abs((haiku?.cost.total ?? 0) - (summary.today.costUSD ?? -1)) < 1e-9, "kinds add up to the day's cost")
+        expect(rollup.days["2026-06-14"]?["claude-nova-1"]?.unpricedTokens, 500, "an unpriced model keeps its tokens apart")
+        expect(rollup.days["2026-06-14"]?["claude-nova-1"]?.cost.total, 0, "and adds no cost")
+        expect(rollup.hours.count, 2, "one cell per hour with usage")
+
+        let week = rollup.summary(dayKeys: CostRollup.dayKeys(endingAt: now, count: 7, calendar: utc))
+        expect(week.models.first?.model, "claude-haiku-4-5-20251001", "priciest model first")
+        expect(week.unpricedModels.map(\.model), ["claude-nova-1"], "unpriced models listed")
+        expect(week.unpricedTokens, 500, "unpriced tokens counted once")
+        check(abs((week.cacheHitRate ?? 0) - 10_000_000.0 / 13_000_500.0) < 1e-9, "cache hit = reads / (input + writes + reads)")
+        expect(CostRollup.dayKeys(endingAt: now, count: 3, calendar: utc), ["2026-06-13", "2026-06-14", "2026-06-15"], "day keys oldest first")
+        expect(CostRollup.date(fromDayKey: "2026-06-14", calendar: utc), utc.date(from: DateComponents(year: 2026, month: 6, day: 14)), "day keys parse back")
+
+        // Codex: input includes the cached part; missing model = unlabeled.
+        let codexRoot = root.appendingPathComponent("codex")
+        try? FileManager.default.createDirectory(at: codexRoot, withIntermediateDirectories: true)
+        let codexLine = #"{"timestamp":"2026-06-15T10:00:00Z","payload":{"type":"token_count","info":{"last_token_usage":{"input_tokens":1000,"cached_input_tokens":200,"output_tokens":300,"total_tokens":1300}}}}"#
+        try? (codexLine + "\n").write(to: codexRoot.appendingPathComponent("rollout.jsonl"), atomically: true, encoding: .utf8)
+        let codexProvider = LocalUsageProvider(calendar: utc)
+        codexProvider.hourCalendar = utc
+        let codex = codexProvider.usage(for: .codex, baseURL: codexRoot, now: now)
+        let codexCell = codex.costRollup?.days["2026-06-15"]?[CostRollup.unlabeledModel]
+        expect(codexCell?.tokens, TokenSplit(input: 800, output: 300, cacheWrite: 0, cacheRead: 200), "Codex cached input is a cache read")
+        check(abs((codexCell?.cost.total ?? 0) - (codex.today.costUSD ?? -1)) < 1e-12, "Codex kinds add up to its cost")
+
+        // Explicit record costs win, split by the catalog's shares.
+        let explicitRecord = LocalUsageProvider.UsageRecord(
+            date: now, model: "x", inputTokens: 100, cacheCreationFiveMinuteTokens: 0, cacheCreationOneHourTokens: 0,
+            cacheReadTokens: 0, cachedInputTokens: 0, outputTokens: 300, totalTokens: 400, explicitCostUSD: 2
+        )
+        let explicit = LocalUsageProvider.costRollup([explicitRecord], tool: .claude, calendar: utc) { _ in nil }
+        let explicitCell = explicit.days["2026-06-15"]?["x"]
+        check(abs((explicitCell?.cost.output ?? 0) - 1.5) < 1e-9, "an explicit cost without a price splits by tokens")
+        expect(explicitCell?.unpricedTokens, 0, "and counts as priced")
+
+        // Merge: stored days survive deleted logs; a partial re-scan never shrinks a cell.
+        var stored = CostRollup()
+        let hour = utc.date(from: DateComponents(year: 2026, month: 6, day: 1, hour: 9))!
+        stored.add(dayKey: "2026-06-01", hourStart: hour, model: "m", tokens: TokenSplit(input: 100), cost: CostSplit(input: 1))
+        stored.add(dayKey: "2026-06-14", hourStart: hour.addingTimeInterval(13 * 86400), model: "m", tokens: TokenSplit(input: 100), cost: CostSplit(input: 1))
+        var fresh = CostRollup()
+        fresh.add(dayKey: "2026-06-14", hourStart: hour.addingTimeInterval(13 * 86400), model: "m", tokens: TokenSplit(input: 40), cost: CostSplit(input: 0.4))
+        fresh.add(dayKey: "2026-06-15", hourStart: hour.addingTimeInterval(14 * 86400), model: "m", tokens: TokenSplit(input: 10), cost: CostSplit(input: 0.1))
+        stored.merge(fresh, now: now)
+        expect(stored.days["2026-06-01"]?["m"]?.tokens.input, 100, "a day whose logs are gone stays")
+        expect(stored.days["2026-06-14"]?["m"]?.tokens.input, 100, "a re-scan with fewer tokens doesn't overwrite")
+        expect(stored.days["2026-06-15"]?["m"]?.tokens.input, 10, "new days are added")
+        var grown = CostRollup()
+        grown.add(dayKey: "2026-06-15", hourStart: hour.addingTimeInterval(14 * 86400), model: "m", tokens: TokenSplit(input: 30), cost: CostSplit(input: 0.3))
+        stored.merge(grown, now: now)
+        expect(stored.days["2026-06-15"]?["m"]?.tokens.input, 30, "a grown day replaces the stored one")
+        stored.merge(CostRollup(), now: now.addingTimeInterval(CostRollup.hourRetention - 2 * 86400))
+        expect(stored.hours.count, 2, "hours older than the retention are dropped")
+        expect(stored.days.count, 3, "days are kept")
+
+        let both = CostRollup.combined([stored, stored])
+        expect(both.days["2026-06-01"]?["m"]?.tokens.input, 200, "All adds accounts up")
+
+        // Weekly quota periods.
+        var weekly = CostRollup()
+        let reset = utc.date(from: DateComponents(year: 2026, month: 6, day: 17, hour: 15))!
+        let weekSpan: TimeInterval = 7 * 86400
+        for (offset, dollars) in [(-1.0, 4.0), (-8.0, 2.0)] {
+            let at = reset.addingTimeInterval(offset * 86400)
+            weekly.add(dayKey: CostRollup.dayKey(at, calendar: utc), hourStart: at, model: "m", tokens: TokenSplit(input: 1), cost: CostSplit(input: dollars))
+        }
+        let samples = [
+            QuotaSample(t: reset.addingTimeInterval(-weekSpan - 60), s: nil, w: 0.9, r: nil),       // old week, last reading
+            QuotaSample(t: reset.addingTimeInterval(-weekSpan + 60), s: nil, w: 0.9, r: nil),       // stale right after reset
+            QuotaSample(t: reset.addingTimeInterval(-weekSpan + 3600), s: nil, w: 0.1, r: nil),
+        ]
+        let periods = WeeklyQuotaValue.periods(rollup: weekly, resetAt: reset, duration: weekSpan, samples: samples, currentUsed: 0.3)
+        expect(periods.count, 2, "weeks before the first stored hour are left out")
+        expect(periods.map(\.costUSD), [2, 4], "each week sums its hours, oldest first")
+        expect(periods.map(\.usedFraction), [0.9, 0.3], "past weeks use their peak reading, the current one the live value")
+        check(periods.last?.isCurrent == true, "the last period is the current one")
+    }
+
+    static func testCostRollupStore() {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("qw-cost-store-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        var fresh = CostRollup()
+        fresh.add(dayKey: "2026-06-15", hourStart: Date(), model: "m", tokens: TokenSplit(input: 5), cost: CostSplit(input: 0.5))
+        _ = CostRollupStore(directory: dir).merge(fresh, storageKey: "claude.work")
+        let reloaded = CostRollupStore(directory: dir).rollup(storageKey: "claude.work")
+        expect(reloaded.days, fresh.days, "the rollup survives a relaunch")
+        let file = dir.appendingPathComponent("claude.work.json")
+        let text = (try? String(contentsOf: file, encoding: .utf8)) ?? ""
+        check(!text.contains("/"), "only counts, costs and model names are stored")
+
+        try? Data("not json".utf8).write(to: file)
+        let broken = CostRollupStore(directory: dir).rollup(storageKey: "claude.work")
+        check(broken.isEmpty, "an unreadable file loads as empty")
+        check(FileManager.default.fileExists(atPath: file.path + ".unreadable"), "and is kept aside, not overwritten")
     }
 
     // MARK: - Status export

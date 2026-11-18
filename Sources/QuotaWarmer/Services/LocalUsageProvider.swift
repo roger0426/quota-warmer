@@ -186,6 +186,12 @@ final class LocalUsageProvider: @unchecked Sendable {
                 records.map(\.record),
                 calendar: hourCalendar,
                 cost: tool == .claude ? claudeCost : codexCost
+            ),
+            costRollup: Self.costRollup(
+                records.map(\.record),
+                tool: tool,
+                calendar: hourCalendar,
+                price: tool == .claude ? claudeCostSplit : codexCostSplit
             )
         )
     }
@@ -411,18 +417,43 @@ final class LocalUsageProvider: @unchecked Sendable {
     }
 
     private func claudeCost(_ record: UsageRecord) -> Double? {
+        claudeCostSplit(record)?.total
+    }
+
+    private func claudeCostSplit(_ record: UsageRecord) -> CostSplit? {
         guard let rates = claudeRates(for: record.model) else { return nil }
-        return cost(
-            inputTokens: record.inputTokens,
-            cacheCreationFiveMinuteTokens: record.cacheCreationFiveMinuteTokens,
-            cacheCreationOneHourTokens: record.cacheCreationOneHourTokens,
-            cacheReadTokens: record.cacheReadTokens,
-            outputTokens: record.outputTokens,
-            rates: rates
-        )
+        var split = CostSplit()
+        split.input = Double(record.inputTokens) * rates.input / 1_000_000
+        split.cacheWrite = ((Double(record.cacheCreationFiveMinuteTokens) * rates.cacheWriteFiveMinute)
+            + (Double(record.cacheCreationOneHourTokens) * rates.cacheWriteOneHour)) / 1_000_000
+        split.cacheRead = Double(record.cacheReadTokens) * rates.cacheRead / 1_000_000
+        split.output = Double(record.outputTokens) * rates.output / 1_000_000
+        return split
+    }
+
+    /// Tokens per kind as the Cost tab counts them.
+    static func tokenSplit(_ record: UsageRecord, tool: ToolID) -> TokenSplit {
+        var split = TokenSplit()
+        switch tool {
+        case .codex:
+            // Codex input tokens include the cached part.
+            let cached = min(record.cachedInputTokens, record.inputTokens)
+            split.input = max(0, record.inputTokens - cached)
+            split.cacheRead = cached
+        case .claude:
+            split.input = record.inputTokens
+            split.cacheWrite = record.cacheCreationFiveMinuteTokens + record.cacheCreationOneHourTokens
+            split.cacheRead = record.cacheReadTokens
+        }
+        split.output = record.outputTokens
+        return split
     }
 
     private func codexCost(_ record: UsageRecord) -> Double? {
+        codexCostSplit(record)?.total
+    }
+
+    private func codexCostSplit(_ record: UsageRecord) -> CostSplit? {
         // Older Codex Desktop/VSCodium session files omit the model entirely.
         // Their token-count shape is still authoritative, so they are priced as
         // the catalog's `unlabeledModel`. An unknown model string remains
@@ -438,24 +469,40 @@ final class LocalUsageProvider: @unchecked Sendable {
         let longContext = catalog.longContext.flatMap { record.inputTokens > $0.inputTokensAbove ? $0 : nil }
         let inputMultiplier = longContext?.inputMultiplier ?? 1.0
         let outputMultiplier = longContext?.outputMultiplier ?? 1.0
-        return ((Double(uncached) * rates.input * inputMultiplier)
-            + (Double(cached) * rates.cacheRead * inputMultiplier)
-            + (Double(record.outputTokens) * rates.output * outputMultiplier)) / 1_000_000
+        var split = CostSplit()
+        split.input = Double(uncached) * rates.input * inputMultiplier / 1_000_000
+        split.cacheRead = Double(cached) * rates.cacheRead * inputMultiplier / 1_000_000
+        split.output = Double(record.outputTokens) * rates.output * outputMultiplier / 1_000_000
+        return split
     }
 
-    private func cost(
-        inputTokens: Int,
-        cacheCreationFiveMinuteTokens: Int,
-        cacheCreationOneHourTokens: Int,
-        cacheReadTokens: Int,
-        outputTokens: Int,
-        rates: ModelRates
-    ) -> Double {
-        ((Double(inputTokens) * rates.input)
-            + (Double(cacheCreationFiveMinuteTokens) * rates.cacheWriteFiveMinute)
-            + (Double(cacheCreationOneHourTokens) * rates.cacheWriteOneHour)
-            + (Double(cacheReadTokens) * rates.cacheRead)
-            + (Double(outputTokens) * rates.output)) / 1_000_000
+    /// The rollup the Cost tab stores: per local day and model, and per hour.
+    /// A record's own cost (`costUSD`) wins over the catalog price; it is
+    /// split across kinds by the catalog's shares, or by token counts.
+    static func costRollup(
+        _ records: [UsageRecord],
+        tool: ToolID,
+        calendar: Calendar,
+        price: (UsageRecord) -> CostSplit?
+    ) -> CostRollup {
+        var rollup = CostRollup()
+        var dayKeys: [Date: String] = [:]
+        for record in records where record.totalTokens > 0 {
+            guard let hour = calendar.dateInterval(of: .hour, for: record.date)?.start else { continue }
+            let dayKey = dayKeys[hour] ?? CostRollup.dayKey(hour, calendar: calendar)
+            dayKeys[hour] = dayKey
+            let tokens = tokenSplit(record, tool: tool)
+            var cost = price(record)
+            if let explicit = record.explicitCostUSD {
+                if let priced = cost, priced.total > 0 {
+                    cost = priced.scaled(to: explicit)
+                } else {
+                    cost = .distributing(explicit, by: tokens)
+                }
+            }
+            rollup.add(dayKey: dayKey, hourStart: hour, model: record.model, tokens: tokens, cost: cost)
+        }
+        return rollup
     }
 
     /// Prices come from the tool's model catalog (`ModelCatalogStore`), so a

@@ -1651,6 +1651,28 @@
         }
       }
     },
+    "30D": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30D"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30G"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 天"
+          }
+        }
+      }
+    },
     "30d": {
       "localizations": {
         "en": {
@@ -1883,6 +1905,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "7 Gün"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7 天"
+          }
+        }
+      }
+    },
+    "7D": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7D"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "7G"
           }
         },
         "zh-Hant": {
@@ -2131,6 +2175,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "提醒"
+          }
+        }
+      }
+    },
+    "API equivalent · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API equivalent · %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API karşılığı · %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API 等值 · %@"
+          }
+        }
+      }
+    },
+    "API-equivalent value of this Mac's CLI logs · not a bill": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API-equivalent value of this Mac's CLI logs · not a bill"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu Mac'teki CLI kayıtlarının API karşılığı değeri · fatura değildir"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本機 CLI 紀錄換算的 API 等值金額 · 不是帳單"
           }
         }
       }
@@ -3125,6 +3213,28 @@
         }
       }
     },
+    "By model": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "By model"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modele göre"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依模型"
+          }
+        }
+      }
+    },
     "CHECKS": {
       "localizations": {
         "en": {
@@ -3143,6 +3253,72 @@
           "stringUnit": {
             "state": "translated",
             "value": "檢查"
+          }
+        }
+      }
+    },
+    "Cache hit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cache hit"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Önbellek isabeti"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快取命中"
+          }
+        }
+      }
+    },
+    "Cache read": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cache read"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Önbellek okuma"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快取讀取"
+          }
+        }
+      }
+    },
+    "Cache write": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cache write"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Önbellek yazma"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快取寫入"
           }
         }
       }
@@ -3895,6 +4071,50 @@
         }
       }
     },
+    "Cost": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cost"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maliyet"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "費用"
+          }
+        }
+      }
+    },
+    "Cost by token type": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cost by token type"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token türüne göre maliyet"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依 token 類型的費用"
+          }
+        }
+      }
+    },
     "Could not change: %@": {
       "localizations": {
         "en": {
@@ -4023,6 +4243,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "顯示"
+          }
+        }
+      }
+    },
+    "Daily": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daily"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Günlük"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每日"
           }
         }
       }
@@ -4907,6 +5149,28 @@
         }
       }
     },
+    "Hourly": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hourly"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saatlik"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每小時"
+          }
+        }
+      }
+    },
     "Hourly tokens": {
       "localizations": {
         "en": {
@@ -5145,6 +5409,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "需包含 ⌃、⌥ 或 ⌘"
+          }
+        }
+      }
+    },
+    "Input": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Input"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Girdi"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "輸入"
           }
         }
       }
@@ -6645,6 +6931,28 @@
         }
       }
     },
+    "No local usage in this range.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No local usage in this range."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu aralıkta yerel kullanım yok."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這段期間沒有本機用量。"
+          }
+        }
+      }
+    },
     "No opened windows in this range.": {
       "localizations": {
         "en": {
@@ -6729,6 +7037,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "找不到登入資訊"
+          }
+        }
+      }
+    },
+    "No stored usage for these weeks yet.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No stored usage for these weeks yet."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu haftalar için henüz kayıtlı kullanım yok."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這幾週還沒有保存的用量。"
           }
         }
       }
@@ -6997,6 +7327,28 @@
         }
       }
     },
+    "Now": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Now"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şimdi"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現在"
+          }
+        }
+      }
+    },
     "Off": {
       "localizations": {
         "en": {
@@ -7257,6 +7609,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "其他"
+          }
+        }
+      }
+    },
+    "Output": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Output"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çıktı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "輸出"
           }
         }
       }
@@ -7653,6 +8027,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "為每個工具選擇模式。之後隨時可在該工具的分頁中變更。"
+          }
+        }
+      }
+    },
+    "Pick one account to see what its weekly quota was worth.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick one account to see what its weekly quota was worth."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haftalık kotanın değerini görmek için bir hesap seçin."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇一個帳號，查看它的每週額度值多少。"
           }
         }
       }
@@ -10583,6 +10979,28 @@
         }
       }
     },
+    "This Mac's logs only · web apps and other devices not included": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This Mac's logs only · web apps and other devices not included"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yalnızca bu Mac'in kayıtları · web uygulamaları ve diğer cihazlar dahil değil"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只含本機紀錄 · 不含網頁版與其他裝置"
+          }
+        }
+      }
+    },
     "This provider isn't watched or warmed.": {
       "localizations": {
         "en": {
@@ -10601,6 +11019,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "這個服務未被監看或預熱。"
+          }
+        }
+      }
+    },
+    "This week": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This week"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu hafta"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本週"
           }
         }
       }
@@ -12057,6 +12497,28 @@
         }
       }
     },
+    "Weekly quota · API equivalent": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weekly quota · API equivalent"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haftalık kota · API karşılığı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每週額度 · API 等值"
+          }
+        }
+      }
+    },
     "Weekly resets soon with this much left; its bar turns yellow": {
       "localizations": {
         "en": {
@@ -12607,6 +13069,28 @@
         }
       }
     },
+    "all stored days": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "all stored days"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kayıtlı tüm günler"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有已保存的天數"
+          }
+        }
+      }
+    },
     "all time": {
       "localizations": {
         "en": {
@@ -12959,6 +13443,28 @@
         }
       }
     },
+    "max %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "max %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "en çok %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最高 %@"
+          }
+        }
+      }
+    },
     "missing": {
       "localizations": {
         "en": {
@@ -13201,6 +13707,28 @@
         }
       }
     },
+    "resets %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "resets %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ sıfırlanır"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 重置"
+          }
+        }
+      }
+    },
     "resets in %@": {
       "localizations": {
         "en": {
@@ -13285,6 +13813,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "過時"
+          }
+        }
+      }
+    },
+    "today": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "today"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bugün"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今天"
           }
         }
       }
@@ -13615,6 +14165,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "≥%lld%%"
+          }
+        }
+      }
+    },
+    "⚠ Unpriced: %@ tokens (%@) are not in the total": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⚠ Unpriced: %@ tokens (%@) are not in the total"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⚠ Fiyatsız: %@ token (%@) toplama dahil değil"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⚠ 未定價：%@ tokens（%@）未計入總額"
           }
         }
       }

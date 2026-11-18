@@ -21,6 +21,7 @@ let package = Package(
                 "Models/AppearanceMode.swift",
                 "Models/AutoWarmDecision.swift",
                 "Models/AutoWarmExplanation.swift",
+                "Models/CostRollup.swift",
                 "Models/EventLog.swift",
                 "Models/ImpactReport.swift",
                 "Models/IntegrationCommand.swift",

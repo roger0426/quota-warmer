@@ -319,6 +319,8 @@ struct TokenUsageSummary: Equatable {
     /// Tokens per clock hour over the scanned 30 days, oldest first; hours
     /// without usage are omitted. See `UsageHistory` for the busy-hours views.
     var hourly: [TokenUsageHour] = []
+    /// This scan's cost rollup; merged into `CostRollupStore` and then dropped.
+    var costRollup: CostRollup?
 
     var hasUsage: Bool {
         today.totalTokens > 0 || yesterday.totalTokens > 0 || last30Days.totalTokens > 0

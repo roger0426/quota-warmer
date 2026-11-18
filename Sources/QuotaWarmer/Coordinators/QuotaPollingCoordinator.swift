@@ -313,9 +313,13 @@ final class QuotaPollingCoordinator {
         // actor so the menu-bar panel never freezes (which also kept it from
         // dismissing on outside clicks).
         Task.detached(priority: .utility) {
-            let summary = provider.usage(for: tool.kind, baseURL: tool.logDirectoryURL)
+            var scanned = provider.usage(for: tool.kind, baseURL: tool.logDirectoryURL)
+            let rollup = CostRollupStore.shared.merge(scanned.costRollup ?? CostRollup(), storageKey: tool.storageKey)
+            scanned.costRollup = nil
+            let summary = scanned
             await MainActor.run {
                 state.tokenUsageSummary = summary
+                state.costRollup = rollup
                 state.isFetchingTokenUsage = false
             }
         }

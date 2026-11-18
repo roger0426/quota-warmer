@@ -120,6 +120,7 @@ final class AccountsCoordinator {
             UserDefaults.standard.removeObject(forKey: key)
         }
         UsageHistoryStore.shared.removeAll(for: tool)
+        CostRollupStore.shared.removeAll(storageKey: tool.storageKey)
         EventLogStore.shared.removeAll(for: tool)
         host.history.removeAll { $0.tool?.storageKey == tool.storageKey }
 

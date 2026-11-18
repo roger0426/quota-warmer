@@ -44,6 +44,9 @@ final class ToolState: ObservableObject {
     @Published var quotaSnapshot: QuotaSnapshot?
     @Published var tokenUsageSummary: TokenUsageSummary?
     @Published var isFetchingTokenUsage = false
+    /// Stored API-equivalent cost rollup (`CostRollupStore`), updated after
+    /// each local-log scan; nil until the first scan finishes.
+    @Published var costRollup: CostRollup?
     @Published var sourceHealth: SourceHealth = .unknown
     /// The last fetch found Claude's access token expired; only the CLI can
     /// refresh it. Cleared by the next successful fetch.

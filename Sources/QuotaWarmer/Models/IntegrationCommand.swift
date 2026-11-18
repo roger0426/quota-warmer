@@ -2,7 +2,7 @@ import Foundation
 
 /// Panel tabs a `quotawarmer://open` link may select.
 enum IntegrationTab: String, CaseIterable {
-    case main, history, settings
+    case main, history, cost, settings
 }
 
 /// What a `quotawarmer://` URL asks for. Deliberately read-only: any web page

@@ -32,6 +32,7 @@ extension AppearanceMode {
 enum AppTab: Hashable {
     case main
     case history
+    case cost
     case settings
 }
 
@@ -82,7 +83,7 @@ struct MenuContent: View {
 
     // MARK: - Tab bar
 
-    /// Overview and History on the left, Settings (its own window) on the right.
+    /// Overview, History and Cost on the left, Settings (its own window) on the right.
     private var tabBar: some View {
         HStack(spacing: 4) {
             TabBarSlot(isSelected: appState.selectedTab == .main, help: "Overview", shortcut: "1") {
@@ -99,6 +100,14 @@ struct MenuContent: View {
                 Image(systemName: "chart.bar.xaxis")
                     .font(.system(size: 15, weight: .regular))
                     .foregroundStyle(appState.selectedTab == .history ? DS.C.ink : DS.C.textSub)
+            }
+
+            TabBarSlot(isSelected: appState.selectedTab == .cost, help: "Cost", shortcut: "3") {
+                appState.selectedTab = .cost
+            } icon: {
+                Image(systemName: appState.selectedTab == .cost ? "dollarsign.circle.fill" : "dollarsign.circle")
+                    .font(.system(size: 16, weight: .regular))
+                    .foregroundStyle(appState.selectedTab == .cost ? DS.C.ink : DS.C.textSub)
             }
 
             Spacer()
@@ -118,7 +127,7 @@ struct MenuContent: View {
         .background(DS.C.sidebar)
         // Opening the panel puts keyboard focus on the first slot (Home); the
         // selected slot already has its own highlight, so the system's blue
-        // focus ring is not drawn here. Tab, ⌘1, ⌘2 and ⌘, still work.
+        // focus ring is not drawn here. Tab, ⌘1–⌘3 and ⌘, still work.
         .focusEffectDisabled()
     }
 
@@ -140,6 +149,10 @@ struct MenuContent: View {
         switch appState.selectedTab {
         case .history:
             HistoryTabView()
+                .frame(width: DS.contentWidth)
+                .frame(maxHeight: .infinity)
+        case .cost:
+            CostTabView()
                 .frame(width: DS.contentWidth)
                 .frame(maxHeight: .infinity)
         case .main, .settings:
