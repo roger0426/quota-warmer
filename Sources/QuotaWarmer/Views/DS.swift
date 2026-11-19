@@ -164,7 +164,7 @@ enum DS {
     static let panelScale: CGFloat = 1.0
     static let contentWidth: CGFloat = 372
     static let totalWidth:   CGFloat = contentWidth
-    /// Tab bar along the bottom edge of the panel (Overview, History, Settings).
+    /// Tab bar along the top edge of the panel (Overview, History, Settings).
     static let tabBarHeight: CGFloat = 40
     // The panel height on every tab. History and Settings scroll inside it;
     // the overview and tool tabs do not scroll, so they report their content

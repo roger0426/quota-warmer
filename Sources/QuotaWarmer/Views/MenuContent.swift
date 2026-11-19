@@ -69,12 +69,12 @@ struct MenuContent: View {
 
     private var panel: some View {
         VStack(spacing: 0) {
-            mainContent
-                .frame(maxHeight: .infinity)
+            tabBar
             Rectangle()
                 .fill(DS.C.border)
                 .frame(height: 0.5)
-            tabBar
+            mainContent
+                .frame(maxHeight: .infinity)
         }
         // iStat Menus–style: the translucent menu material, lightly tinted.
         .background(DS.C.bg)
@@ -167,7 +167,7 @@ struct MenuContent: View {
 
 // MARK: - Tab bar items
 
-/// One icon slot in the bottom tab bar. Selected state is a soft filled
+/// One icon slot in the top tab bar. Selected state is a soft filled
 /// rounded highlight, like the selected pane in iStat Menus; hover gives a
 /// fainter one. Holds any icon (SF Symbol or template provider glyph).
 struct TabBarSlot<Icon: View>: View {
