@@ -237,7 +237,13 @@ struct ProviderDetailView: View {
 
     private var rings: some View {
         HStack(spacing: 0) {
-            ring(title: "Session", metric: state.primaryMetric, resetAt: state.resetAt)
+            // An idle 5h window's reset is only a sliding "if started now"
+            // projection; show it as not started (and the pre-warm it waits for).
+            ring(title: "Session", metric: state.primaryMetric,
+                 resetAt: state.primaryMetric?.isIdleFiveHourWindow == true ? nil : state.resetAt,
+                 notStartedText: ToolStatusCopy.reservedMorningWarm(for: state).map {
+                     String(localized: "Warms at \(ToolStatusCopy.shortClock($0))")
+                 })
             ring(title: "Weekly", metric: state.weeklyMetric, resetAt: state.weeklyMetric?.resetAt)
         }
         .padding(.vertical, 10)
@@ -245,7 +251,7 @@ struct ProviderDetailView: View {
         .background(DS.C.surface, in: RoundedRectangle(cornerRadius: DS.R.lg, style: .continuous))
     }
 
-    private func ring(title: LocalizedStringKey, metric: QuotaMetric?, resetAt: Date?) -> some View {
+    private func ring(title: LocalizedStringKey, metric: QuotaMetric?, resetAt: Date?, notStartedText: String? = nil) -> some View {
         let remaining = metric?.remainingFraction ?? 0
         let mode = state.displayMode
         let fraction = QuotaDisplay.barFraction(remainingFraction: remaining, hasMetric: metric != nil, mode: mode)
@@ -267,7 +273,7 @@ struct ProviderDetailView: View {
             Text(title)
                 .font(.system(size: 10.5, weight: .semibold))
                 .foregroundStyle(DS.C.text)
-            Text(resetAt.map { resetText($0) } ?? String(localized: "Not started"))
+            Text(resetAt.map { resetText($0) } ?? notStartedText ?? String(localized: "Not started"))
                 .font(.system(size: 9.5))
                 .foregroundStyle(DS.C.textMuted)
         }

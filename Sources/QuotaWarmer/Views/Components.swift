@@ -232,7 +232,11 @@ enum ToolStatusCopy {
         }
         if metric.isIdleFiveHourWindow {
             // The window hasn't opened yet — its quota is full and the only reset
-            // is a sliding projection. Say so plainly instead of faking a countdown.
+            // is a sliding projection. Say so plainly instead of faking a countdown,
+            // and name the pre-warm it is being held for, if any.
+            if let at = reservedMorningWarm(for: state) {
+                return String(localized: "Not started · warms at \(shortClock(at))")
+            }
             return String(localized: "Not started yet")
         }
         if authBlocked(state) {
@@ -311,7 +315,14 @@ enum ToolStatusCopy {
         }
     }
 
-    private static func shortClock(_ date: Date) -> String {
+    /// The morning pre-warm an idle window is being held for: auto-warm's last
+    /// skip was "reserved for morning" and that time is still ahead.
+    static func reservedMorningWarm(for state: ToolState, now: Date = Date()) -> Date? {
+        guard case .reservedForMorning(let at) = state.lastAutoWarmSkip, at > now else { return nil }
+        return at
+    }
+
+    static func shortClock(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .none
         formatter.timeStyle = .short

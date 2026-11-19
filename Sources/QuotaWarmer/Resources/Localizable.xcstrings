@@ -7635,6 +7635,28 @@
         }
       }
     },
+    "Not started · warms at %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not started · warms at %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Henüz başlamadı · %@ ısıtılacak"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未開始 · %@ 預熱"
+          }
+        }
+      }
+    },
     "Not updated yet": {
       "localizations": {
         "en": {
@@ -12779,6 +12801,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "正在預熱…"
+          }
+        }
+      }
+    },
+    "Warms at %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warms at %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ısıtılacak"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 預熱"
           }
         }
       }
