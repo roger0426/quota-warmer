@@ -15,6 +15,9 @@ struct HistoryTabView: View {
     @State private var samplesByKey: [String: [QuotaSample]] = [:]
     @State private var loaded = false
     @State private var showImpact = false
+    @State private var offset = 0
+    /// The oldest stored quota reading or local-log hour, for the navigator.
+    @State private var oldest: Date?
 
     private var range: HistoryRange { HistoryRange(rawValue: rangeRaw) ?? .week }
 
@@ -52,14 +55,16 @@ struct HistoryTabView: View {
             .map { appState.state(for: $0).lastSuccessfulFetch?.timeIntervalSince1970 ?? 0 }
             .map { String(Int($0)) }
             .joined(separator: ",")
-        return "\(providerKey)|\(range.rawValue)|\(fetches)"
+        return "\(providerKey)|\(range.rawValue)|\(offset)|\(fetches)"
     }
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: DS.Page.spacing) {
-                PanelHeader(title: showImpact ? "Impact" : "History") {
-                    if showImpact { EmptyView() } else { rangePicker }
+                if showImpact {
+                    PanelHeader(title: "Impact") { EmptyView() }
+                } else {
+                    rangeHeader
                 }
                 HistoryModeToggle(showImpact: $showImpact)
                 providerPicker
@@ -70,6 +75,7 @@ struct HistoryTabView: View {
                         series: series,
                         combined: selectedProvider == nil,
                         range: range,
+                        end: window.end,
                         loaded: loaded
                     )
                 }
@@ -82,35 +88,44 @@ struct HistoryTabView: View {
             .reportsPanelHeight()
         }
         .task(id: loadKey) {
-            let since = Date().addingTimeInterval(-range.interval)
+            let window = self.window
             var loadedSamples: [String: [QuotaSample]] = [:]
+            var first: Date?
             for tool in selectedProviders {
-                loadedSamples[tool.storageKey] = await UsageHistoryStore.shared.samples(for: tool, since: since)
+                let all = await UsageHistoryStore.shared.samples(for: tool, since: .distantPast)
+                if let t = all.first?.t { first = min(first ?? t, t) }
+                loadedSamples[tool.storageKey] = all.filter { $0.t >= window.start && $0.t <= window.end }
+            }
+            for entry in series {
+                if let hour = entry.tokens?.hourly.first?.hour { first = min(first ?? hour, hour) }
             }
             samplesByKey = loadedSamples
+            oldest = first
             loaded = true
         }
     }
 
-    private var rangePicker: some View {
-        HStack(spacing: 2) {
-            ForEach(HistoryRange.allCases) { option in
-                let selected = option == range
-                Button(action: { rangeRaw = option.rawValue }) {
-                    Text(option.label)
-                        .font(.system(size: 10, weight: .semibold))
-                        .padding(.horizontal, 8).padding(.vertical, 4)
-                        .background(selected ? DS.C.surface : .clear, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(selected ? DS.C.border : .clear, lineWidth: 1))
-                        .foregroundStyle(selected ? DS.C.text : DS.C.textMuted)
-                }
-                .buttonStyle(PressableButtonStyle())
-                .accessibilityLabel(Text("Show \(option.accessibilityLabel)"))
-                .accessibilityAddTraits(selected ? .isSelected : [])
+    /// Rolling: the current window ends now; each step back is one window length.
+    private var window: RangeWindow {
+        RangeWindow.rolling(hours: Int(range.interval / 3600), offset: offset)
+    }
+
+    private var rangeHeader: some View {
+        let window = self.window
+        return RangeHeader(
+            window: window,
+            canGoBack: window.canGoBack(oldest: oldest),
+            partialNote: window.isPartial(oldest: oldest)
+                ? oldest.map { String(localized: "History starts \($0.formatted(.dateTime.month(.abbreviated).day().hour().minute())).") }
+                : nil,
+            pillLabel: range.label,
+            pillHelp: String(localized: "Range: \(range.longLabel). Click to change."),
+            onStep: { offset = max($0, 0) },
+            onCycle: {
+                rangeRaw = range.next.rawValue
+                offset = 0
             }
-        }
-        .padding(2)
-        .background(DS.C.surfaceHigh, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        )
     }
 
     private var providerPicker: some View {
@@ -205,6 +220,11 @@ enum HistoryRange: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    var next: HistoryRange {
+        let all = Self.allCases
+        return all[(all.firstIndex(of: self)! + 1) % all.count]
+    }
+
     var label: String {
         switch self {
         case .day: return String(localized: "24h")
@@ -248,6 +268,8 @@ private struct HistoryContent: View {
     let series: [HistorySeries]
     let combined: Bool
     let range: HistoryRange
+    /// The window's end: now, or earlier when navigated back.
+    let end: Date
     let loaded: Bool
 
     var body: some View {
@@ -341,7 +363,6 @@ private struct HistoryContent: View {
     private var showsSessionLine: Bool { range != .month }
 
     private var usageCard: some View {
-        let end = Date()
         let start = end.addingTimeInterval(-range.interval)
         let trailing = HStack(spacing: 8) {
             legend
@@ -442,7 +463,7 @@ private struct HistoryContent: View {
 
     /// One-line spoken summary of the usage chart: the most-used window peak in range.
     private var usageSummary: String {
-        let peaks = series.flatMap(\.windows).filter { $0.resetAt >= Date().addingTimeInterval(-range.interval) }
+        let peaks = series.flatMap(\.windows).filter { $0.resetAt >= end.addingTimeInterval(-range.interval) }
         guard let peak = peaks.map(\.peakUsed).max() else { return String(localized: "No readings in this range") }
         return String(localized: "Highest window peak \(Int((peak * 100).rounded()))%")
     }
@@ -475,7 +496,6 @@ private struct HistoryContent: View {
     /// 5-hour span is ~2pt wide there, so each bar is a day instead — the
     /// fullest window that opened that day.
     private func windowCard(_ windowsByAccount: [(HistorySeries, [QuotaWindowSummary])]) -> some View {
-        let end = Date()
         let start = end.addingTimeInterval(-range.interval)
         let daily = range == .month
         var visible: [WindowBar] = []
@@ -620,7 +640,7 @@ private struct HistoryContent: View {
     /// Token bars built from local-time hours, like Busy hours: one bar per
     /// hour for 24h, per local day for 7d / 30d. Accounts stack.
     private var dailyTokensCard: some View {
-        let now = Date()
+        let now = end
         let calendar = Calendar.current
         let hourlyView = range == .day
         let bars: [(HistorySeries, [TokenUsageHour])] = series.map { entry in
@@ -693,9 +713,10 @@ private struct HistoryContent: View {
     private var heatmapCard: some View {
         // By tool, not account: two Claude accounts are both "Claude" here.
         var byKind: [ToolID: [[TokenUsageHour]]] = [:]
-        for entry in series { byKind[entry.tool.kind, default: []].append(entry.tokens?.hourly ?? []) }
+        // Hours after a past window's end stay out of its grid.
+        for entry in series { byKind[entry.tool.kind, default: []].append((entry.tokens?.hourly ?? []).filter { $0.hour < end }) }
         let hourlyByKind = byKind.mapValues { UsageHistory.mergeHourly($0) }
-        let grid = BusyHoursGrid.make(range: range, hourlyByKind: hourlyByKind, now: Date(), calendar: .current)
+        let grid = BusyHoursGrid.make(range: range, hourlyByKind: hourlyByKind, now: end, calendar: .current)
         let kinds = ToolID.allCases.filter { kind in grid.rows.contains { $0.cells.contains { ($0?.parts[kind] ?? 0) > 0 } } }
         let showsBoth = grid.rows.contains { $0.cells.contains { $0.map { BusyHoursGrid.tint(of: $0) == nil } ?? false } }
         let scope = combined

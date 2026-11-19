@@ -7,11 +7,6 @@ struct MainTabView: View {
     // starts with both provider sections expanded (empty = nothing collapsed).
     @State private var collapsedTools: Set<ProviderID> = []
 
-    private var claudeLogRoots: [URL] {
-        let roots = appState.providers.filter { $0.kind == .claude }.compactMap(\.resolvedLogDirectoryURL)
-        return Set(roots).sorted { $0.path < $1.path }
-    }
-
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
@@ -23,7 +18,6 @@ struct MainTabView: View {
                 VStack(alignment: .leading, spacing: DS.Page.spacing) {
                     PanelHeader(title: "QuotaWarmer") { automationControl }
                     if let warning = appState.watcherStatusText { watcherWarning(warning) }
-                    CacheMonitorView(panelVisible: appState.isPanelVisible, roots: claudeLogRoots)
                     providerList
                         .zIndex(2)   // a card's hover bubble draws over the header above it
                 }
@@ -281,104 +275,5 @@ struct HistoryRow: View {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
         return formatter.string(from: date)
-    }
-}
-
-private actor CacheMonitorScanner {
-    static let shared = CacheMonitorScanner()
-    let provider = LocalUsageProvider()
-    var files: [URL: LocalUsageProvider.CacheFile] = [:]
-
-    func snapshot(_ roots: [URL]) -> CacheMonitorSnapshot {
-        let now = Date()
-        let lines = provider.cacheRequests(roots: roots, files: &files, now: now)
-        let latest = lines.compactMap(\.last).filter { $0.prefix > 0 && $0.expiry > now.addingTimeInterval(-1800) }
-        return CacheMonitorSnapshot(rows: latest.sorted { $0.expiry < $1.expiry }.map { ($0, provider.rewriteCost($0)) },
-            statistics: [false, true].map { side in
-                provider.cacheStatistics(lines.filter { ($0.first?.agent != nil) == side }, target: side ? 3600 : 300)
-            })
-    }
-}
-
-private struct CacheMonitorSnapshot {
-    var rows: [(LocalUsageProvider.CacheRequest, Double?)] = []
-    var statistics: [LocalUsageProvider.CacheStatistics] = []
-}
-
-private struct CacheMonitorView: View {
-    let panelVisible: Bool
-    let roots: [URL]
-    @State private var snapshot = CacheMonitorSnapshot()
-    @State private var expanded = false
-
-    var body: some View {
-        DisclosureGroup(isExpanded: $expanded) {
-            VStack(alignment: .leading, spacing: 8) {
-                TimelineView(.periodic(from: .now, by: 1)) { tick in
-                    let visible = snapshot.rows.filter { $0.0.expiry.timeIntervalSince(tick.date) > -1800 }
-                    if visible.isEmpty { Text("No recent cached sessions") }
-                    ForEach(visible.indices, id: \.self) { i in
-                        let (request, price) = visible[i]
-                        let left = request.expiry.timeIntervalSince(tick.date)
-                        VStack(alignment: .leading) {
-                            Text(verbatim: "\(request.project) · \(request.slug)")
-                            Text(request.agent == nil ? "Main conversation" : "Subagent")
-                            HStack {
-                                Text(verbatim: (request.ttl == 300 ? "5m" : "1h") + (request.inferred ? " ≈" : ""))
-                                Text(left <= 0 ? "Expired" : left <= max(300, request.ttl * 0.2) ? "Expiring soon" : "Warm")
-                                if request.toolPending { Text("Tool running") }
-                                Text(verbatim: String(format: "%d:%02d", max(0, Int(left)) / 60, max(0, Int(left)) % 60))
-                            }
-                            if request.inferred { Text("Approximate TTL inferred from session type") }
-                            ProgressView(value: min(1, max(0, left / request.ttl)))
-                            Text("Estimated prefix rewrite cost (API equivalent)")
-                            let cost = price.map { String(format: "US$%.4f", $0) } ?? "—"
-                            Text("\(request.prefix) tokens · \(cost)")
-                        }
-                    }
-                }
-                ForEach(snapshot.statistics.indices, id: \.self) { index in
-                    statistics(snapshot.statistics[index], side: index == 1)
-                }
-                Text("API-equivalent estimates. Subscription quota impact is unknown.")
-            }.frame(maxWidth: .infinity, alignment: .leading)
-        } label: { Text("Prompt cache monitor") }
-        .font(.caption)
-        .task(id: expanded && panelVisible ? roots : []) {
-            guard expanded, panelVisible, !roots.isEmpty else { return }
-            let scanner = CacheMonitorScanner.shared
-            while !Task.isCancelled {
-                let updated = await scanner.snapshot(roots)
-                guard !Task.isCancelled else { return }
-                snapshot = updated
-                try? await Task.sleep(for: .seconds(25))
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func statistics(_ stats: LocalUsageProvider.CacheStatistics, side: Bool) -> some View {
-        Divider()
-        Text(side ? "Subagent" : "Main conversation").bold()
-        Text("Hit / expired / model change / prefix change / unknown")
-        Text(verbatim: [stats.hits, stats.expired, stats.modelChanges, stats.prefixChanges, stats.unknown].map(String.init).joined(separator: " / "))
-        Text("Intervals (<5m / 5–60m / >60m)")
-        let bins = zip(stats.gaps, stats.prefixes).map { count, prefix in
-            String(localized: "\(count) (\(prefix) tokens)")
-        }
-        Text(verbatim: bins.joined(separator: " / "))
-        Text("Token hit rate / write share of input cost")
-        let total = stats.inputs + stats.reads + stats.writes
-        Text(verbatim: (total > 0 ? String(format: "%.1f%%", 100 * Double(stats.reads) / Double(total)) : "—") + " / " +
-             (stats.priced && stats.inputSideCost > 0 ? String(format: "%.1f%%", 100 * stats.writeCost / stats.inputSideCost) : "—"))
-        if stats.eligible {
-            Text("Estimated weekly change")
-            Text(verbatim: (side ? "subagentPromptCacheTtl = 1h" : "promptCacheTtl = 5m") +
-                 String(format: " · US$%+.2f (%+.1f%%) · n=%d", stats.alternativeDelta * 7 / stats.days,
-                        100 * stats.alternativeDelta / stats.inputSideCost, stats.gaps[1]))
-        } else {
-            Text("Insufficient data for TTL estimate")
-            Text(verbatim: String(format: "%.0f / 14 d · %d / 30", max(0, stats.days), stats.gaps[1]))
-        }
     }
 }

@@ -31,6 +31,7 @@ extension AppearanceMode {
 
 enum AppTab: Hashable {
     case main
+    case cache
     case history
     case cost
     case settings
@@ -83,7 +84,7 @@ struct MenuContent: View {
 
     // MARK: - Tab bar
 
-    /// Overview, History and Cost on the left, Settings (its own window) on the right.
+    /// Overview, Cache, Cost and History on the left, Settings (its own window) on the right.
     private var tabBar: some View {
         HStack(spacing: 4) {
             TabBarSlot(isSelected: appState.selectedTab == .main, help: "Overview", shortcut: "1") {
@@ -94,12 +95,12 @@ struct MenuContent: View {
                     .foregroundStyle(appState.selectedTab == .main ? DS.C.ink : DS.C.textSub)
             }
 
-            TabBarSlot(isSelected: appState.selectedTab == .history, help: "History", shortcut: "2") {
-                appState.selectedTab = .history
+            TabBarSlot(isSelected: appState.selectedTab == .cache, help: "Prompt cache", shortcut: "2") {
+                appState.selectedTab = .cache
             } icon: {
-                Image(systemName: "chart.bar.xaxis")
-                    .font(.system(size: 15, weight: .regular))
-                    .foregroundStyle(appState.selectedTab == .history ? DS.C.ink : DS.C.textSub)
+                Image(systemName: appState.selectedTab == .cache ? "bolt.horizontal.circle.fill" : "bolt.horizontal.circle")
+                    .font(.system(size: 16, weight: .regular))
+                    .foregroundStyle(appState.selectedTab == .cache ? DS.C.ink : DS.C.textSub)
             }
 
             TabBarSlot(isSelected: appState.selectedTab == .cost, help: "Cost", shortcut: "3") {
@@ -108,6 +109,14 @@ struct MenuContent: View {
                 Image(systemName: appState.selectedTab == .cost ? "dollarsign.circle.fill" : "dollarsign.circle")
                     .font(.system(size: 16, weight: .regular))
                     .foregroundStyle(appState.selectedTab == .cost ? DS.C.ink : DS.C.textSub)
+            }
+
+            TabBarSlot(isSelected: appState.selectedTab == .history, help: "History", shortcut: "4") {
+                appState.selectedTab = .history
+            } icon: {
+                Image(systemName: "chart.bar.xaxis")
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundStyle(appState.selectedTab == .history ? DS.C.ink : DS.C.textSub)
             }
 
             Spacer()
@@ -127,7 +136,7 @@ struct MenuContent: View {
         .background(DS.C.sidebar)
         // Opening the panel puts keyboard focus on the first slot (Home); the
         // selected slot already has its own highlight, so the system's blue
-        // focus ring is not drawn here. Tab, ⌘1–⌘3 and ⌘, still work.
+        // focus ring is not drawn here. Tab, ⌘1–⌘4 and ⌘, still work.
         .focusEffectDisabled()
     }
 
@@ -149,6 +158,10 @@ struct MenuContent: View {
         switch appState.selectedTab {
         case .history:
             HistoryTabView()
+                .frame(width: DS.contentWidth)
+                .frame(maxHeight: .infinity)
+        case .cache:
+            CacheTabView(monitor: appState.cacheMonitor)
                 .frame(width: DS.contentWidth)
                 .frame(maxHeight: .infinity)
         case .cost:

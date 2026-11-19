@@ -52,6 +52,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         appState.onOpenSettings = { [weak self] in self?.showSettingsWindow() }
         appState.onShowPanel = { [weak self] in self?.showPanelIfHidden() }
 
+        appState.cacheMonitor.start { [weak appState] in appState?.claudeLogRoots ?? [] }
+
         GlobalHotKey.shared.onPress = { [weak self] in self?.togglePanelFromHotKey() }
         GlobalHotKey.shared.reload()
     }

@@ -58,6 +58,14 @@ final class AppState: ObservableObject, CoordinatorHost {
     private var quotaTimer: Timer?
 
     lazy var events = EventHistoryCoordinator(host: self)
+    /// Prompt-cache scanner for the Cache tab; runs in the background from launch.
+    let cacheMonitor = CacheMonitor()
+
+    /// Distinct Claude log folders across accounts.
+    var claudeLogRoots: [URL] {
+        let roots = providers.filter { $0.kind == .claude }.compactMap(\.resolvedLogDirectoryURL)
+        return Set(roots).sorted { $0.path < $1.path }
+    }
     lazy var quota = QuotaPollingCoordinator(
         host: self, quotaProvider: quotaProvider, runner: runner, scheduler: scheduler, notifications: notifications)
     lazy var warmup = WarmupCoordinator(host: self, runner: runner, notifications: notifications)

@@ -14,6 +14,7 @@ struct CostTabView: View {
     @AppStorage("costRange") private var rangeRaw = CostRange.week.rawValue
     @AppStorage("costTool") private var toolRaw = HistoryTabView.allKey
     @State private var weeklySamples: [QuotaSample] = []
+    @State private var offset = 0
 
     private var range: CostRange { CostRange(rawValue: rangeRaw) ?? .week }
 
@@ -76,7 +77,7 @@ struct CostTabView: View {
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: DS.Page.spacing) {
-                PanelHeader(title: "Cost") { rangePicker }
+                rangeHeader
                 toolPicker
                 Text("API-equivalent value of this Mac's CLI logs · not a bill")
                     .font(.system(size: 10))
@@ -86,7 +87,7 @@ struct CostTabView: View {
                         .font(.system(size: 10))
                         .foregroundStyle(DS.C.textMuted)
                 }
-                CostContent(rollup: rollup, range: range, isLoading: isLoading)
+                CostContent(rollup: rollup, range: range, window: window, isLoading: isLoading)
                 weeklySection
             }
             .padding(.horizontal, DS.Page.side)
@@ -144,25 +145,31 @@ struct CostTabView: View {
         }
     }
 
-    private var rangePicker: some View {
-        HStack(spacing: 2) {
-            ForEach(CostRange.allCases) { option in
-                let selected = option == range
-                Button(action: { rangeRaw = option.rawValue }) {
-                    Text(option.label)
-                        .font(.system(size: 10, weight: .semibold))
-                        .padding(.horizontal, 8).padding(.vertical, 4)
-                        .background(selected ? DS.C.surface : .clear, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).stroke(selected ? DS.C.border : .clear, lineWidth: 1))
-                        .foregroundStyle(selected ? DS.C.text : DS.C.textMuted)
-                }
-                .buttonStyle(PressableButtonStyle())
-                .accessibilityLabel(Text(option.longLabel))
-                .accessibilityAddTraits(selected ? .isSelected : [])
+    /// nil for All, which has no navigator.
+    private var window: RangeWindow? {
+        range.days.map { RangeWindow.calendar(days: $0, offset: offset) }
+    }
+
+    private var rangeHeader: some View {
+        let rollup = self.rollup
+        let oldest = rollup.sortedDayKeys.first.flatMap { CostRollup.date(fromDayKey: $0, calendar: .current) }
+        let window = self.window
+        return RangeHeader(
+            window: window,
+            fixedLabel: oldest.map { String(localized: "All time · since \($0.formatted(.dateTime.month(.abbreviated).day()))") }
+                ?? String(localized: "All time"),
+            canGoBack: window?.canGoBack(oldest: oldest) ?? false,
+            partialNote: (window?.isPartial(oldest: oldest) ?? false)
+                ? oldest.map { String(localized: "Stored data starts \($0.formatted(.dateTime.month(.abbreviated).day())).") }
+                : nil,
+            pillLabel: range.label,
+            pillHelp: String(localized: "Range: \(range.longLabel). Click to change."),
+            onStep: { offset = max($0, 0) },
+            onCycle: {
+                rangeRaw = range.next.rawValue
+                offset = 0
             }
-        }
-        .padding(2)
-        .background(DS.C.surfaceHigh, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        )
     }
 
     private var toolPicker: some View {
@@ -219,6 +226,21 @@ enum CostRange: String, CaseIterable, Identifiable {
     case today, week, month, all
 
     var id: String { rawValue }
+
+    /// Calendar days per window; nil for All.
+    var days: Int? {
+        switch self {
+        case .today: return 1
+        case .week: return 7
+        case .month: return 30
+        case .all: return nil
+        }
+    }
+
+    var next: CostRange {
+        let all = Self.allCases
+        return all[(all.firstIndex(of: self)! + 1) % all.count]
+    }
 
     var label: String {
         switch self {
@@ -297,18 +319,17 @@ private struct CostBar: Identifiable {
 private struct CostContent: View {
     let rollup: CostRollup
     let range: CostRange
+    /// nil for All.
+    let window: RangeWindow?
     let isLoading: Bool
 
     private var calendar: Calendar { .current }
 
     private var dayKeys: [String] {
-        switch range {
-        case .today: return CostRollup.dayKeys(endingAt: Date(), count: 1, calendar: calendar)
-        case .week: return CostRollup.dayKeys(endingAt: Date(), count: 7, calendar: calendar)
-        case .month: return CostRollup.dayKeys(endingAt: Date(), count: 30, calendar: calendar)
-        case .all: return rollup.sortedDayKeys
-        }
+        window?.dayKeys(calendar: calendar) ?? rollup.sortedDayKeys
     }
+
+    private var isCurrent: Bool { window?.isCurrent ?? true }
 
     private var summary: CostPeriodSummary { rollup.summary(dayKeys: dayKeys) }
 
@@ -336,15 +357,18 @@ private struct CostContent: View {
             }
             return range.longLabel
         default:
-            return range.longLabel
+            return isCurrent ? range.longLabel : String(localized: "this window")
         }
     }
 
     private func summaryCard(_ summary: CostPeriodSummary) -> some View {
-        let todayKey = CostRollup.dayKey(Date(), calendar: calendar)
-        let yesterdayKey = CostRollup.dayKey(calendar.date(byAdding: .day, value: -1, to: Date()) ?? Date(), calendar: calendar)
-        let sideKey = range == .today ? yesterdayKey : todayKey
-        let sideCost = rollup.summary(dayKeys: [sideKey]).cost.total
+        // Today: the day before the window. Longer ranges: the window's last day.
+        let lastDay = window.map { $0.end.addingTimeInterval(-1) } ?? Date()
+        let sideDay = range == .today ? calendar.date(byAdding: .day, value: -1, to: lastDay) ?? lastDay : lastDay
+        let sideCost = rollup.summary(dayKeys: [CostRollup.dayKey(sideDay, calendar: calendar)]).cost.total
+        let sideLabel: LocalizedStringKey = range == .today
+            ? (isCurrent ? "Yesterday" : "Day before")
+            : (isCurrent ? "Today" : "Last day")
         return HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 6) {
                 Text("API equivalent · \(title)")
@@ -358,7 +382,7 @@ private struct CostContent: View {
             VStack(alignment: .trailing, spacing: 3) {
                 statRow("Tokens", TokenFormat.compact(summary.totalTokens))
                 statRow("Cache hit", summary.cacheHitRate.map(CostFormat.percent) ?? "–")
-                statRow(range == .today ? "Yesterday" : "Today", CostFormat.usd(sideCost))
+                statRow(sideLabel, CostFormat.usd(sideCost))
             }
         }
         .padding(DS.Page.cardPadding)
@@ -430,11 +454,11 @@ private struct CostContent: View {
     }
 
     private var bars: [CostBar] {
-        let today = calendar.startOfDay(for: Date())
         switch range {
         case .today:
-            let end = calendar.date(byAdding: .day, value: 1, to: today) ?? Date()
-            return rollup.hourlyCosts(from: today, to: end).flatMap { Self.split($0.hour, $0.cost) }
+            let start = window?.start ?? calendar.startOfDay(for: Date())
+            let end = window?.end ?? calendar.date(byAdding: .day, value: 1, to: start) ?? Date()
+            return rollup.hourlyCosts(from: start, to: end).flatMap { Self.split($0.hour, $0.cost) }
         case .week, .month:
             return zip(dayKeys, rollup.dailyCosts(dayKeys: dayKeys)).flatMap { key, cost in
                 CostRollup.date(fromDayKey: key, calendar: calendar).map { Self.split($0, cost) } ?? []

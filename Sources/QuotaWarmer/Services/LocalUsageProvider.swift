@@ -741,7 +741,7 @@ final class LocalUsageProvider: @unchecked Sendable {
 }
 
 extension LocalUsageProvider {
-    struct CacheRequest {
+    struct CacheRequest: Codable {
         let session: String
         let agent: String?
         let project: String
@@ -755,15 +755,83 @@ extension LocalUsageProvider {
             usage.cacheReadTokens + usage.cacheCreationFiveMinuteTokens + usage.cacheCreationOneHourTokens
         }
         var expiry: Date { start.addingTimeInterval(ttl) }
+
+        init(session: String, agent: String?, project: String, slug: String, start: Date,
+             usage: UsageRecord, ttl: Double, inferred: Bool, toolPending: Bool) {
+            self.session = session
+            self.agent = agent
+            self.project = project
+            self.slug = slug
+            self.start = start
+            self.usage = usage
+            self.ttl = ttl
+            self.inferred = inferred
+            self.toolPending = toolPending
+        }
+
+        // Short keys keep the checkpoint small; usage is stored flat.
+        private enum CodingKeys: String, CodingKey {
+            case session = "s", agent = "a", project = "p", slug = "l", start = "t", ttl = "ttl"
+            case inferred = "inf", toolPending = "tp"
+            case date = "d", model = "m", input = "i", five = "w5", hour = "w1", read = "r", output = "o"
+        }
+
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            session = try c.decode(String.self, forKey: .session)
+            agent = try c.decodeIfPresent(String.self, forKey: .agent)
+            project = try c.decodeIfPresent(String.self, forKey: .project) ?? ""
+            slug = try c.decodeIfPresent(String.self, forKey: .slug) ?? ""
+            start = try c.decode(Date.self, forKey: .start)
+            ttl = try c.decode(Double.self, forKey: .ttl)
+            inferred = try c.decodeIfPresent(Bool.self, forKey: .inferred) ?? false
+            toolPending = try c.decodeIfPresent(Bool.self, forKey: .toolPending) ?? false
+            let input = try c.decodeIfPresent(Int.self, forKey: .input) ?? 0
+            let five = try c.decodeIfPresent(Int.self, forKey: .five) ?? 0
+            let hour = try c.decodeIfPresent(Int.self, forKey: .hour) ?? 0
+            let read = try c.decodeIfPresent(Int.self, forKey: .read) ?? 0
+            let output = try c.decodeIfPresent(Int.self, forKey: .output) ?? 0
+            usage = UsageRecord(date: try c.decode(Date.self, forKey: .date),
+                model: try c.decodeIfPresent(String.self, forKey: .model), inputTokens: input,
+                cacheCreationFiveMinuteTokens: five, cacheCreationOneHourTokens: hour,
+                cacheReadTokens: read, cachedInputTokens: 0, outputTokens: output,
+                totalTokens: input + five + hour + read + output, explicitCostUSD: nil)
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var c = encoder.container(keyedBy: CodingKeys.self)
+            try c.encode(session, forKey: .session)
+            try c.encodeIfPresent(agent, forKey: .agent)
+            try c.encode(project, forKey: .project)
+            try c.encode(slug, forKey: .slug)
+            try c.encode(start, forKey: .start)
+            try c.encode(ttl, forKey: .ttl)
+            if inferred { try c.encode(true, forKey: .inferred) }
+            if toolPending { try c.encode(true, forKey: .toolPending) }
+            try c.encode(usage.date, forKey: .date)
+            try c.encodeIfPresent(usage.model, forKey: .model)
+            try c.encode(usage.inputTokens, forKey: .input)
+            try c.encode(usage.cacheCreationFiveMinuteTokens, forKey: .five)
+            try c.encode(usage.cacheCreationOneHourTokens, forKey: .hour)
+            try c.encode(usage.cacheReadTokens, forKey: .read)
+            try c.encode(usage.outputTokens, forKey: .output)
+        }
     }
 
-    struct CacheFile {
+    struct CacheFile: Codable {
         var size = -1
         var modified = Date.distantPast
         var offset = 0
         var userTime: Date?
         var lastID: String?
         var requests: [String: CacheRequest] = [:]
+
+        /// Drops requests that started before `cutoff`; their days live in the rollup.
+        func pruned(before cutoff: Date) -> CacheFile {
+            var copy = self
+            copy.requests = requests.filter { $0.value.start >= cutoff }
+            return copy
+        }
     }
 
     // Decode block types only. User text and tool inputs/results never enter the model.
@@ -879,65 +947,60 @@ extension LocalUsageProvider {
         return sessions.values.map { $0.values.sorted { $0.start < $1.start } }
     }
 
-    struct CacheStatistics {
-        var gaps = [0, 0, 0]
-        var prefixes = [0, 0, 0]
-        var hits = 0, expired = 0, modelChanges = 0, prefixChanges = 0, unknown = 0
-        var reads = 0, writes = 0, inputs = 0
-        var writeCost = 0.0, inputSideCost = 0.0, alternativeDelta = 0.0
-        var priced = true
-        var first = Date.distantFuture, last = Date.distantPast
-        var days: Double { last.timeIntervalSince(first) / 86400 }
-        var eligible: Bool { priced && days >= 14 && gaps[1] >= 30 && inputSideCost > 0 }
-    }
-
-    func cacheStatistics(_ lines: [[CacheRequest]], target: Double) -> CacheStatistics {
+    /// Classifies each request after a gap and prices it, attributed to the
+    /// local day and hour the request started in. The main conversation is
+    /// priced against a 5m TTL and subagents against 1h (`CacheSide`).
+    func cacheRollup(_ lines: [[CacheRequest]], calendar: Calendar = .current) -> CacheRollup {
         entryCache.removeAll()
-        var stats = CacheStatistics()
+        var rollup = CacheRollup()
         for line in lines {
             var previous: CacheRequest?
             for request in line {
                 defer { previous = request }
+                let side: CacheSide = request.agent == nil ? .main : .subagent
+                let target = side.alternativeTTL
+                var cell = CacheCell()
+                cell.requests = 1
                 let u = request.usage
                 let write = u.cacheCreationFiveMinuteTokens + u.cacheCreationOneHourTokens
-                stats.first = min(request.start, stats.first)
-                stats.last = max(request.start, stats.last)
-                stats.reads += u.cacheReadTokens
-                stats.writes += write
-                stats.inputs += u.inputTokens
+                cell.reads = u.cacheReadTokens
+                cell.writes = write
+                cell.inputs = u.inputTokens
                 let gap = previous.map { request.start.timeIntervalSince($0.start) }
                 let rewrite = write > 0 && Double(u.cacheReadTokens) <= Double(request.prefix) * 0.1
                     && Double(write) >= 0.8 * Double(previous?.prefix ?? 0)
                 let hit = u.cacheReadTokens > 0 && Double(write) <= Double(request.prefix) * 0.1
                 if let gap, let prev = previous {
                     let bin = gap < 300 ? 0 : gap <= 3600 ? 1 : 2
-                    stats.gaps[bin] += 1
-                    stats.prefixes[bin] += prev.prefix
-                    if hit { stats.hits += 1 }
-                    else if !rewrite { stats.unknown += 1 }
-                    else if gap > prev.ttl { stats.expired += 1 }
-                    else if u.model == nil || prev.usage.model == nil { stats.unknown += 1 }
-                    else if u.model != prev.usage.model { stats.modelChanges += 1 }
-                    else { stats.prefixChanges += 1 }
+                    cell.gaps[bin] = 1
+                    cell.prefixes[bin] = prev.prefix
+                    if hit { cell.hits = 1 }
+                    else if !rewrite { cell.unknown = 1 }
+                    else if gap > prev.ttl { cell.expired = 1 }
+                    else if u.model == nil || prev.usage.model == nil { cell.unknown = 1 }
+                    else if u.model != prev.usage.model { cell.modelChanges = 1 }
+                    else { cell.prefixChanges = 1 }
                 }
-                guard let rates = claudeRates(for: u.model), let cost = claudeCostSplit(u) else {
-                    stats.priced = false
-                    continue
-                }
-                stats.writeCost += cost.cacheWrite
-                stats.inputSideCost += cost.input + cost.cacheRead + cost.cacheWrite
-                let price = target == 300 ? rates.cacheWriteFiveMinute : rates.cacheWriteOneHour
-                stats.alternativeDelta += Double(write) * price / 1e6 - cost.cacheWrite
-                if let gap, gap > 300, gap <= 3600, let prev = previous, prev.usage.model == u.model {
-                    if target == 300 && prev.ttl == 3600 && hit {
-                        stats.alternativeDelta += Double(u.cacheReadTokens) * (price - rates.cacheRead) / 1e6
-                    } else if target == 3600 && prev.ttl == 300 && rewrite {
-                        stats.alternativeDelta -= Double(min(prev.prefix, write)) * (price - rates.cacheRead) / 1e6
+                if let rates = claudeRates(for: u.model), let cost = claudeCostSplit(u) {
+                    cell.writeCost = cost.cacheWrite
+                    cell.inputSideCost = cost.input + cost.cacheRead + cost.cacheWrite
+                    if rewrite, previous != nil { cell.rewriteCost = cost.cacheWrite }
+                    let price = target == 300 ? rates.cacheWriteFiveMinute : rates.cacheWriteOneHour
+                    cell.alternativeDelta = Double(write) * price / 1e6 - cost.cacheWrite
+                    if let gap, gap > 300, gap <= 3600, let prev = previous, prev.usage.model == u.model {
+                        if target == 300 && prev.ttl == 3600 && hit {
+                            cell.alternativeDelta += Double(u.cacheReadTokens) * (price - rates.cacheRead) / 1e6
+                        } else if target == 3600 && prev.ttl == 300 && rewrite {
+                            cell.alternativeDelta -= Double(min(prev.prefix, write)) * (price - rates.cacheRead) / 1e6
+                        }
                     }
+                } else {
+                    cell.unpriced = 1
                 }
+                rollup.add(cell, side: side, at: request.start, calendar: calendar)
             }
         }
-        return stats
+        return rollup
     }
 
     func rewriteCost(_ request: CacheRequest) -> Double? {
