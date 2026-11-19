@@ -328,6 +328,7 @@ final class LocalUsageProvider: @unchecked Sendable {
     private func readLines(
         of url: URL,
         from offset: Int,
+        shouldStop: () -> Bool = { false },
         _ body: (UnsafeRawBufferPointer, _ terminated: Bool) -> Void
     ) -> Int? {
         guard let handle = try? FileHandle(forReadingFrom: url) else { return nil }
@@ -338,6 +339,7 @@ final class LocalUsageProvider: @unchecked Sendable {
         var consumed = offset
         var reachedEnd = false
         while !reachedEnd {
+            if shouldStop() { return consumed }
             // Drain JSONSerialization's autoreleased objects per chunk; without
             // this a large file's objects pile up until the whole scan returns.
             autoreleasepool {
@@ -695,7 +697,7 @@ final class LocalUsageProvider: @unchecked Sendable {
         return nil
     }
 
-    private func enumerateJSONL(in directory: URL, since: Date, handler: (URL, Int, Date) -> Void) {
+    private func enumerateJSONL(in directory: URL, since: Date, shouldStop: () -> Bool = { false }, handler: (URL, Int, Date) -> Void) {
         let keys: [URLResourceKey] = [.contentModificationDateKey, .fileSizeKey, .isDirectoryKey]
         guard let enumerator = fileManager.enumerator(
             at: directory,
@@ -706,7 +708,7 @@ final class LocalUsageProvider: @unchecked Sendable {
         var count = 0
         for case let url as URL in enumerator {
             count += 1
-            if count > 50_000 { break }
+            if count > 50_000 || shouldStop() { break }
             guard url.pathExtension == "jsonl",
                   let values = try? url.resourceValues(forKeys: Set(keys)),
                   let modified = values.contentModificationDate,
@@ -735,5 +737,211 @@ final class LocalUsageProvider: @unchecked Sendable {
         guard let value else { return nil }
         if let string = value as? String { return string.isEmpty ? nil : string }
         return String(describing: value)
+    }
+}
+
+extension LocalUsageProvider {
+    struct CacheRequest {
+        let session: String
+        let agent: String?
+        let project: String
+        let slug: String
+        let start: Date
+        var usage: UsageRecord
+        var ttl: Double
+        var inferred: Bool
+        var toolPending: Bool
+        var prefix: Int {
+            usage.cacheReadTokens + usage.cacheCreationFiveMinuteTokens + usage.cacheCreationOneHourTokens
+        }
+        var expiry: Date { start.addingTimeInterval(ttl) }
+    }
+
+    struct CacheFile {
+        var size = -1
+        var modified = Date.distantPast
+        var offset = 0
+        var userTime: Date?
+        var lastID: String?
+        var requests: [String: CacheRequest] = [:]
+    }
+
+    // Decode block types only. User text and tool inputs/results never enter the model.
+    private struct TranscriptMetadata: Decodable {
+        struct Block: Decodable { let type: String? }
+        struct Message: Decodable {
+            let id: String?
+            let model: String?
+            let usage: Usage?
+            let blocks: [Block]
+            enum CodingKeys: String, CodingKey { case id, model, usage, content }
+            init(from decoder: Decoder) throws {
+                let fields = try decoder.container(keyedBy: CodingKeys.self)
+                id = try fields.decodeIfPresent(String.self, forKey: .id)
+                model = try fields.decodeIfPresent(String.self, forKey: .model)
+                usage = try fields.decodeIfPresent(Usage.self, forKey: .usage)
+                blocks = (try? fields.decode([Block].self, forKey: .content)) ?? []
+            }
+        }
+        struct Usage: Decodable {
+            struct Writes: Decodable {
+                let ephemeral_1h_input_tokens, ephemeral_5m_input_tokens: Int?
+            }
+            let input_tokens, cache_read_input_tokens, cache_creation_input_tokens, output_tokens: Int?
+            let cache_creation: Writes?
+        }
+        let type, timestamp, sessionId, requestId, cwd, slug, agentId, promptCacheRequested: String?
+        let isSidechain: Bool?
+        let message: Message?
+    }
+
+    // One scanner per monitor task. Only newline-committed metadata survives a scan.
+    func cacheRequests(roots: [URL], files: inout [URL: CacheFile], now: Date) -> [[CacheRequest]] {
+        var seen = Set<URL>()
+        let since = now.addingTimeInterval(-30 * 86400)
+        let decoder = JSONDecoder()
+        for root in Set(roots) {
+            enumerateJSONL(in: root, since: since, shouldStop: { Task.isCancelled }) { url, size, modified in
+                seen.insert(url)
+                if files[url]?.size == size && files[url]?.modified == modified { return }
+                var file = files.removeValue(forKey: url) ?? CacheFile()
+                if size <= file.size { file = CacheFile() }
+                let offset = readLines(of: url, from: file.offset, shouldStop: { Task.isCancelled }) { line, terminated in
+                    guard terminated,
+                          let row = try? decoder.decode(TranscriptMetadata.self, from: Data(line)),
+                          let stamp = row.timestamp, let date = parseDate(stamp) else { return }
+                    let blocks = row.message?.blocks ?? []
+                    if row.type == "user" {
+                        file.userTime = date
+                        if let last = file.lastID, blocks.contains(where: { $0.type == "tool_result" }) {
+                            file.requests[last]?.toolPending = false
+                        }
+                        return
+                    }
+                    guard row.type == "assistant", let id = row.requestId ?? row.message?.id,
+                          let session = row.sessionId, let message = row.message, let usage = message.usage,
+                          message.model != "<synthetic>",
+                          let start = file.requests[id]?.start ?? file.userTime, start <= date else { return }
+                    let side = url.deletingLastPathComponent().lastPathComponent == "subagents" || row.isSidechain == true
+                    let agent = row.agentId ?? (side ? url.deletingPathExtension().lastPathComponent : nil)
+                    var five = usage.cache_creation?.ephemeral_5m_input_tokens ?? 0
+                    var hour = usage.cache_creation?.ephemeral_1h_input_tokens ?? 0
+                    let ttl: Double?
+                    switch row.promptCacheRequested {
+                    case "1h": ttl = 3600
+                    case "5m": ttl = 300
+                    default: ttl = hour > 0 ? 3600 : five > 0 ? 300 : nil
+                    }
+                    let effectiveTTL = ttl ?? file.requests[id]?.ttl ?? (agent == nil ? 3600 : 300)
+                    if five == 0 && hour == 0 {
+                        if effectiveTTL == 3600 { hour = usage.cache_creation_input_tokens ?? 0 }
+                        else { five = usage.cache_creation_input_tokens ?? 0 }
+                    }
+                    let reads = usage.cache_read_input_tokens ?? 0
+                    let inputs = usage.input_tokens ?? 0
+                    let outputs = usage.output_tokens ?? 0
+                    let record = UsageRecord(date: date, model: message.model, inputTokens: inputs,
+                        cacheCreationFiveMinuteTokens: five, cacheCreationOneHourTokens: hour,
+                        cacheReadTokens: reads, cachedInputTokens: 0, outputTokens: outputs,
+                        totalTokens: inputs + outputs + reads + five + hour, explicitCostUSD: nil)
+                    let existing = file.requests[id]
+                    file.requests[id] = CacheRequest(session: session, agent: agent,
+                        project: row.cwd.map { URL(fileURLWithPath: $0).lastPathComponent } ?? "",
+                        slug: row.slug ?? existing?.slug ?? String(session.prefix(8)),
+                        start: start, usage: record, ttl: effectiveTTL,
+                        inferred: ttl == nil && (existing?.inferred ?? true),
+                        toolPending: blocks.contains { $0.type == "tool_use" })
+                    file.lastID = id
+                }
+                if let offset {
+                    file.offset = offset
+                    if !Task.isCancelled {
+                        file.size = size
+                        file.modified = modified
+                    }
+                }
+                files[url] = file
+            }
+        }
+        guard !Task.isCancelled else { return [] }
+        files = files.filter { seen.contains($0.key) }
+        // Resumed sessions can appear in multiple transcript files.
+        var sessions: [[String]: [String: CacheRequest]] = [:]
+        for (url, file) in files {
+            // Separate independent log roots, even when request IDs match.
+            let root = roots.first { url.path.hasPrefix($0.path + "/") }?.path ?? ""
+            for (id, request) in file.requests where request.start >= since {
+                let key = [root, request.session, request.agent ?? ""]
+                if let old = sessions[key]?[id], old.usage.date > request.usage.date { continue }
+                sessions[key, default: [:]][id] = request
+            }
+        }
+        return sessions.values.map { $0.values.sorted { $0.start < $1.start } }
+    }
+
+    struct CacheStatistics {
+        var gaps = [0, 0, 0]
+        var prefixes = [0, 0, 0]
+        var hits = 0, expired = 0, modelChanges = 0, prefixChanges = 0, unknown = 0
+        var reads = 0, writes = 0, inputs = 0
+        var writeCost = 0.0, inputSideCost = 0.0, alternativeDelta = 0.0
+        var priced = true
+        var first = Date.distantFuture, last = Date.distantPast
+        var days: Double { last.timeIntervalSince(first) / 86400 }
+        var eligible: Bool { priced && days >= 14 && gaps[1] >= 30 && inputSideCost > 0 }
+    }
+
+    func cacheStatistics(_ lines: [[CacheRequest]], target: Double) -> CacheStatistics {
+        entryCache.removeAll()
+        var stats = CacheStatistics()
+        for line in lines {
+            var previous: CacheRequest?
+            for request in line {
+                defer { previous = request }
+                let u = request.usage
+                let write = u.cacheCreationFiveMinuteTokens + u.cacheCreationOneHourTokens
+                stats.first = min(request.start, stats.first)
+                stats.last = max(request.start, stats.last)
+                stats.reads += u.cacheReadTokens
+                stats.writes += write
+                stats.inputs += u.inputTokens
+                let gap = previous.map { request.start.timeIntervalSince($0.start) }
+                let rewrite = write > 0 && Double(u.cacheReadTokens) <= Double(request.prefix) * 0.1
+                    && Double(write) >= 0.8 * Double(previous?.prefix ?? 0)
+                let hit = u.cacheReadTokens > 0 && Double(write) <= Double(request.prefix) * 0.1
+                if let gap, let prev = previous {
+                    let bin = gap < 300 ? 0 : gap <= 3600 ? 1 : 2
+                    stats.gaps[bin] += 1
+                    stats.prefixes[bin] += prev.prefix
+                    if hit { stats.hits += 1 }
+                    else if !rewrite { stats.unknown += 1 }
+                    else if gap > prev.ttl { stats.expired += 1 }
+                    else if u.model == nil || prev.usage.model == nil { stats.unknown += 1 }
+                    else if u.model != prev.usage.model { stats.modelChanges += 1 }
+                    else { stats.prefixChanges += 1 }
+                }
+                guard let rates = claudeRates(for: u.model), let cost = claudeCostSplit(u) else {
+                    stats.priced = false
+                    continue
+                }
+                stats.writeCost += cost.cacheWrite
+                stats.inputSideCost += cost.input + cost.cacheRead + cost.cacheWrite
+                let price = target == 300 ? rates.cacheWriteFiveMinute : rates.cacheWriteOneHour
+                stats.alternativeDelta += Double(write) * price / 1e6 - cost.cacheWrite
+                if let gap, gap > 300, gap <= 3600, let prev = previous, prev.usage.model == u.model {
+                    if target == 300 && prev.ttl == 3600 && hit {
+                        stats.alternativeDelta += Double(u.cacheReadTokens) * (price - rates.cacheRead) / 1e6
+                    } else if target == 3600 && prev.ttl == 300 && rewrite {
+                        stats.alternativeDelta -= Double(min(prev.prefix, write)) * (price - rates.cacheRead) / 1e6
+                    }
+                }
+            }
+        }
+        return stats
+    }
+
+    func rewriteCost(_ request: CacheRequest) -> Double? {
+        guard let rates = claudeRates(for: request.usage.model) else { return nil }
+        return Double(request.prefix) * (request.ttl == 300 ? rates.cacheWriteFiveMinute : rates.cacheWriteOneHour) / 1e6
     }
 }

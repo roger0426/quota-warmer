@@ -9,7 +9,7 @@ QuotaWarmer is a macOS SwiftUI menu bar app generated with XcodeGen. Source live
 - `rtk xcodegen generate` regenerates `QuotaWarmer.xcodeproj` after source or project config changes.
 - `rtk xcodebuild -project QuotaWarmer.xcodeproj -scheme QuotaWarmer -configuration Debug -derivedDataPath /tmp/QuotaWarmerDerivedData -destination 'generic/platform=macOS' CODE_SIGNING_ALLOWED=NO build` builds the app locally without signing.
 - `rtk scripts/local-package.command` builds a local Release app, installs it to `/Applications`, clears quarantine, and launches it.
-- `rtk swift test` runs all three regression suites (`Package.swift` compiles the app's Models/Services in place; add new files to `QuotaWarmerCore.sources` there). `rtk swift test --filter quotaExtractor` runs one.
+- `rtk swift test` runs the serialized regression tests (`Package.swift` compiles the app's Models/Services in place; add new files to `QuotaWarmerCore.sources` there). `rtk swift test --filter quotaExtractor` runs one.
 
 ## Coding Style & Naming Conventions
 

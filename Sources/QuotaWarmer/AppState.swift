@@ -288,7 +288,7 @@ final class AppState: ObservableObject, CoordinatorHost {
 
     /// Set by AppDelegate while the panel is shown; gates the per-second
     /// SwiftUI invalidation above.
-    var isPanelVisible = false
+    @Published var isPanelVisible = false
     /// Natural height of the visible tab's content (0 when the tab doesn't report one).
     @Published var panelContentHeight: CGFloat = 0
 

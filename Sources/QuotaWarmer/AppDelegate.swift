@@ -192,8 +192,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         panel.setFrameOrigin(origin)
         appState.isPanelVisible = true
-        // Countdowns were not ticking while hidden; refresh before showing.
-        appState.objectWillChange.send()
         if NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
             panel.alphaValue = 1
             panel.makeKeyAndOrderFront(nil)

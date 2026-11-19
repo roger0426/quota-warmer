@@ -1583,7 +1583,7 @@ access_token=private-value
         "Sources/QuotaWarmer/Resources/\(ModelCatalogStore.resourceName(for: tool)).json"
     }
 
-    private static func repoCatalog(_ tool: ToolID) -> ModelCatalog {
+    static func repoCatalog(_ tool: ToolID) -> ModelCatalog {
         do {
             return try ModelCatalog.decode(Data(contentsOf: URL(fileURLWithPath: repoCatalogPath(tool))))
         } catch {
@@ -1619,7 +1619,7 @@ access_token=private-value
         do { return try ModelCatalog.decode(data) } catch { fatalError("Edited catalog must validate: \(error)") }
     }
 
-    private static func isolatedCatalogStore(_ tool: ToolID, _ catalog: ModelCatalog, cacheURL: URL? = nil) -> ModelCatalogStore {
+    static func isolatedCatalogStore(_ tool: ToolID, _ catalog: ModelCatalog, cacheURL: URL? = nil) -> ModelCatalogStore {
         let store = ModelCatalogStore(
             tool: tool,
             bundle: nil,

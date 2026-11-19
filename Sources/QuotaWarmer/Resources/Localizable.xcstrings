@@ -925,6 +925,28 @@
         }
       }
     },
+    "%lld (%lld tokens)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld (%lld tokens)"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld (%lld belirteç)"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld（%lld 個詞元）"
+          }
+        }
+      }
+    },
     "%lld auto": {
       "localizations": {
         "en": {
@@ -1075,6 +1097,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld 捷徑"
+          }
+        }
+      }
+    },
+    "%lld tokens · %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld tokens · %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld belirteç · %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 個詞元 · %@"
           }
         }
       }
@@ -2267,6 +2311,28 @@
         }
       }
     },
+    "API-equivalent estimates. Subscription quota impact is unknown.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API-equivalent estimates. Subscription quota impact is unknown."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tutarlar API eşdeğeri tahminlerdir. Abonelik kotasına etkisi bilinmiyor."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "金額為 API 等值估算，訂閱額度的折算方式未知。"
+          }
+        }
+      }
+    },
     "API-equivalent value of this Mac's CLI logs · not a bill": {
       "localizations": {
         "en": {
@@ -2747,6 +2813,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "另一個帳號已使用這個資料夾。"
+          }
+        }
+      }
+    },
+    "Approximate TTL inferred from session type": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approximate TTL inferred from session type"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oturum türünden tahmin edilen TTL"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依工作階段類型推定 TTL"
           }
         }
       }
@@ -4643,6 +4731,50 @@
         }
       }
     },
+    "Estimated prefix rewrite cost (API equivalent)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimated prefix rewrite cost (API equivalent)"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tahmini önek yeniden yazma maliyeti (API eşdeğeri)"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預估前綴重寫成本（API 等值）"
+          }
+        }
+      }
+    },
+    "Estimated weekly change": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimated weekly change"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tahmini haftalık maliyet farkı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預估每週成本差額"
+          }
+        }
+      }
+    },
     "Event History": {
       "localizations": {
         "en": {
@@ -4705,6 +4837,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "展開紀錄"
+          }
+        }
+      }
+    },
+    "Expired": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expired"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Süresi doldu"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已過期"
+          }
+        }
+      }
+    },
+    "Expiring soon": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expiring soon"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Süresi dolmak üzere"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即將過期"
           }
         }
       }
@@ -5193,6 +5369,28 @@
         }
       }
     },
+    "Hit / expired / model change / prefix change / unknown": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hit / expired / model change / prefix change / unknown"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İsabet / süre dolumu / model değişimi / önek değişimi / bilinmeyen"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "命中／過期／換模型／前綴變更／不明"
+          }
+        }
+      }
+    },
     "Hit limit": {
       "localizations": {
         "en": {
@@ -5519,6 +5717,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "安裝後按「重新檢查」："
+          }
+        }
+      }
+    },
+    "Insufficient data for TTL estimate": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insufficient data for TTL estimate"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TTL tahmini için yetersiz veri"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TTL 估算資料不足"
+          }
+        }
+      }
+    },
+    "Intervals (<5m / 5–60m / >60m)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intervals (<5m / 5–60m / >60m)"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aralıklar (<5 dk / 5–60 dk / >60 dk)"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "間隔（<5 分／5–60 分／>60 分）"
           }
         }
       }
@@ -6223,6 +6465,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mac 會在 %@ 喚醒並開始你的時段。"
+          }
+        }
+      }
+    },
+    "Main conversation": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Main conversation"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ana görüşme"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主對話"
           }
         }
       }
@@ -7103,6 +7367,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "這段範圍內尚無讀數。"
+          }
+        }
+      }
+    },
+    "No recent cached sessions": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No recent cached sessions"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yakın zamanda önbelleğe alınmış oturum yok"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "近期沒有快取工作階段"
           }
         }
       }
@@ -8225,6 +8511,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "問題"
+          }
+        }
+      }
+    },
+    "Prompt cache monitor": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prompt cache monitor"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İstem önbelleği izleyicisi"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提示快取監測"
           }
         }
       }
@@ -10517,6 +10825,28 @@
         }
       }
     },
+    "Subagent": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subagent"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alt ajan"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "子代理"
+          }
+        }
+      }
+    },
     "Success": {
       "localizations": {
         "en": {
@@ -11331,6 +11661,28 @@
         }
       }
     },
+    "Token hit rate / write share of input cost": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token hit rate / write share of input cost"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token isabet oranı / yazmanın girdi maliyetindeki payı"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token 命中率／寫入占輸入端成本比例"
+          }
+        }
+      }
+    },
     "Tokens": {
       "localizations": {
         "en": {
@@ -11415,6 +11767,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@每天的 tokens（當地時間），取自這台 Mac 上 CLI 的本機記錄（輸入、輸出與快取），並附估計的等值 API 費用。不含其他電腦或網頁上的用量。%@"
+          }
+        }
+      }
+    },
+    "Tool running": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tool running"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Araç çalışıyor"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "工具執行中"
           }
         }
       }

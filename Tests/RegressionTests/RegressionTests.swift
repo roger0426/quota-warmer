@@ -1,7 +1,7 @@
 import Testing
 @testable import QuotaWarmerCore
 
-/// Runs the three regression suites under `swift test`.
+/// Runs the regression tests under `swift test`.
 ///
 /// Each suite keeps its original assertion helpers: a failing check prints
 /// `FAIL: …` and stops the run (`exit(1)` / `fatalError`), so `swift test`
