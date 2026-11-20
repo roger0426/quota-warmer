@@ -165,7 +165,7 @@ struct MenuContent: View {
                 .frame(width: DS.contentWidth)
                 .frame(maxHeight: .infinity)
         case .cost:
-            CostTabView()
+            CostTabView(cacheMonitor: appState.cacheMonitor)
                 .frame(width: DS.contentWidth)
                 .frame(maxHeight: .infinity)
         case .main, .settings:

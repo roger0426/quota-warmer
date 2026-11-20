@@ -11,6 +11,7 @@ import SwiftUI
 /// visible. Not a bill.
 struct CostTabView: View {
     @EnvironmentObject var appState: AppState
+    @ObservedObject var cacheMonitor: CacheMonitor
     @AppStorage("costRange") private var rangeRaw = CostRange.week.rawValue
     @AppStorage("costTool") private var toolRaw = HistoryTabView.allKey
     @State private var weeklySamples: [QuotaSample] = []
@@ -42,6 +43,15 @@ struct CostTabView: View {
             rollups.append(stored)
         }
         return CostRollup.combined(rollups)
+    }
+
+    /// Where the rewrite share of cache writes comes from: the cache monitor
+    /// scans every Claude account's log folder, the same folders this tab sums
+    /// for Claude, with the same prices. nil when Claude is not selected
+    /// (Codex has no cache writes).
+    private var rewriteSource: CacheRollup? {
+        guard kinds.contains(.claude), selectedKind == nil || selectedKind == .claude else { return nil }
+        return cacheMonitor.rollup
     }
 
     private var isLoading: Bool {
@@ -87,7 +97,7 @@ struct CostTabView: View {
                         .font(.system(size: 10))
                         .foregroundStyle(DS.C.textMuted)
                 }
-                CostContent(rollup: rollup, range: range, window: window, isLoading: isLoading)
+                CostContent(rollup: rollup, rewrites: rewriteSource, range: range, window: window, isLoading: isLoading)
                 weeklySection
             }
             .padding(.horizontal, DS.Page.side)
@@ -290,6 +300,49 @@ extension CostComponent {
     }
 }
 
+/// What the composition bar and the chart split cost into: the token kinds,
+/// with cache writes that rebuilt a cached prefix (`CacheCell.rewriteCost`)
+/// split out of cache writes when the cache monitor covers the selection.
+private enum CostSegment: String, CaseIterable, Identifiable {
+    case cacheRead, cacheWrite, rewrite, output, input
+
+    var id: String { rawValue }
+
+    static func shown(splitRewrites: Bool) -> [CostSegment] {
+        splitRewrites ? allCases : allCases.filter { $0 != .rewrite }
+    }
+
+    /// `rewrite` must already be capped at `cost.cacheWrite`.
+    func value(_ cost: CostSplit, rewrite: Double) -> Double {
+        switch self {
+        case .cacheRead: return cost.cacheRead
+        case .cacheWrite: return cost.cacheWrite - rewrite
+        case .rewrite: return rewrite
+        case .output: return cost.output
+        case .input: return cost.input
+        }
+    }
+
+    private var component: CostComponent? {
+        switch self {
+        case .cacheRead: return .cacheRead
+        case .cacheWrite: return .cacheWrite
+        case .rewrite: return nil
+        case .output: return .output
+        case .input: return .input
+        }
+    }
+
+    var label: LocalizedStringKey { component?.label ?? "Rewrite" }
+    var plotName: String { component?.plotName ?? String(localized: "Rewrite") }
+    var color: Color { component?.color ?? DS.C.red }
+
+    var help: String? {
+        guard self == .rewrite else { return nil }
+        return String(localized: "Cache writes that rebuilt a prefix the previous request had cached: it expired, or the model or prefix changed. Claude only; the Cache tab breaks these down.")
+    }
+}
+
 enum CostFormat {
     static func usd(_ value: Double) -> String {
         let digits = value >= 1000 ? 0 : 2
@@ -310,14 +363,17 @@ enum CostFormat {
 
 private struct CostBar: Identifiable {
     let x: Date
-    let component: CostComponent
+    let segment: CostSegment
     let value: Double
 
-    var id: String { "\(x.timeIntervalSince1970)-\(component.rawValue)" }
+    var id: String { "\(x.timeIntervalSince1970)-\(segment.rawValue)" }
 }
 
 private struct CostContent: View {
     let rollup: CostRollup
+    /// Claude's cache rollup, for splitting rewrites out of cache writes; nil
+    /// when the selection has no Claude logs.
+    let rewrites: CacheRollup?
     let range: CostRange
     /// nil for All.
     let window: RangeWindow?
@@ -332,6 +388,24 @@ private struct CostContent: View {
     private var isCurrent: Bool { window?.isCurrent ?? true }
 
     private var summary: CostPeriodSummary { rollup.summary(dayKeys: dayKeys) }
+
+    private var segments: [CostSegment] { CostSegment.shown(splitRewrites: rewrites != nil) }
+
+    /// Rewrite cost of one day or hour, capped at that cell's cache-write
+    /// cost: the two scans read the logs separately and can disagree by a
+    /// request at a boundary.
+    private static func rewrite(_ cells: CacheSides?, cap: Double) -> Double {
+        guard let cells else { return 0 }
+        return min(cells.main.rewriteCost + cells.subagent.rewriteCost, cap)
+    }
+
+    private func dayRewrite(_ key: String, cost: CostSplit) -> Double {
+        Self.rewrite(rewrites?.days[key], cap: cost.cacheWrite)
+    }
+
+    private var rewriteTotal: Double {
+        zip(dayKeys, rollup.dailyCosts(dayKeys: dayKeys)).reduce(0) { $0 + dayRewrite($1.0, cost: $1.1) }
+    }
 
     var body: some View {
         let summary = self.summary
@@ -403,15 +477,16 @@ private struct CostContent: View {
 
     private func compositionCard(_ summary: CostPeriodSummary) -> some View {
         let total = summary.cost.total
+        let rewrite = min(rewriteTotal, summary.cost.cacheWrite)
         return VStack(alignment: .leading, spacing: 10) {
             Text("Cost by token type").dsSectionLabel()
             GeometryReader { geo in
                 HStack(spacing: 0) {
-                    ForEach(CostComponent.allCases) { component in
-                        let share = total > 0 ? summary.cost[component] / total : 0
+                    ForEach(segments) { segment in
+                        let share = total > 0 ? segment.value(summary.cost, rewrite: rewrite) / total : 0
                         if share > 0 {
                             Rectangle()
-                                .fill(component.color)
+                                .fill(segment.color)
                                 .frame(width: max(geo.size.width * share, 2))
                         }
                     }
@@ -423,13 +498,14 @@ private struct CostContent: View {
             .frame(height: 10)
             .accessibilityHidden(true)
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible())], alignment: .leading, spacing: 6) {
-                ForEach(CostComponent.allCases) { component in
-                    let value = summary.cost[component]
+                ForEach(segments) { segment in
+                    let value = segment.value(summary.cost, rewrite: rewrite)
                     HStack(spacing: 5) {
-                        RoundedRectangle(cornerRadius: 2).fill(component.color).frame(width: 8, height: 8)
-                        Text(component.label)
+                        RoundedRectangle(cornerRadius: 2).fill(segment.color).frame(width: 8, height: 8)
+                        Text(segment.label)
                             .font(.system(size: 10.5))
                             .foregroundStyle(DS.C.text)
+                        if let help = segment.help { HelpMark(text: help) }
                         Spacer(minLength: 4)
                         Text(verbatim: "\(CostFormat.usd(value))  \(CostFormat.percent(total > 0 ? value / total : 0))")
                             .font(DS.mono(10.5))
@@ -458,24 +534,30 @@ private struct CostContent: View {
         case .today:
             let start = window?.start ?? calendar.startOfDay(for: Date())
             let end = window?.end ?? calendar.date(byAdding: .day, value: 1, to: start) ?? Date()
-            return rollup.hourlyCosts(from: start, to: end).flatMap { Self.split($0.hour, $0.cost) }
+            return rollup.hourlyCosts(from: start, to: end).flatMap { hour, cost in
+                split(hour, cost, rewrite: Self.rewrite(rewrites?.hours[CostRollup.hourKey(hour)], cap: cost.cacheWrite))
+            }
         case .week, .month:
             return zip(dayKeys, rollup.dailyCosts(dayKeys: dayKeys)).flatMap { key, cost in
-                CostRollup.date(fromDayKey: key, calendar: calendar).map { Self.split($0, cost) } ?? []
+                CostRollup.date(fromDayKey: key, calendar: calendar)
+                    .map { split($0, cost, rewrite: dayRewrite(key, cost: cost)) } ?? []
             }
         case .all:
-            var weeks: [Date: CostSplit] = [:]
+            var weeks: [Date: (cost: CostSplit, rewrite: Double)] = [:]
             for (key, cost) in zip(dayKeys, rollup.dailyCosts(dayKeys: dayKeys)) {
                 guard let day = CostRollup.date(fromDayKey: key, calendar: calendar),
                       let week = calendar.dateInterval(of: .weekOfYear, for: day)?.start else { continue }
-                weeks[week, default: CostSplit()] += cost
+                weeks[week, default: (CostSplit(), 0)].cost += cost
+                weeks[week, default: (CostSplit(), 0)].rewrite += dayRewrite(key, cost: cost)
             }
-            return weeks.keys.sorted().flatMap { Self.split($0, weeks[$0] ?? CostSplit()) }
+            return weeks.keys.sorted().flatMap { week in
+                weeks[week].map { split(week, $0.cost, rewrite: $0.rewrite) } ?? []
+            }
         }
     }
 
-    private static func split(_ x: Date, _ cost: CostSplit) -> [CostBar] {
-        CostComponent.allCases.map { CostBar(x: x, component: $0, value: cost[$0]) }
+    private func split(_ x: Date, _ cost: CostSplit, rewrite: Double) -> [CostBar] {
+        segments.map { CostBar(x: x, segment: $0, value: $0.value(cost, rewrite: rewrite)) }
     }
 
     private var unit: Calendar.Component {
@@ -503,11 +585,11 @@ private struct CostContent: View {
                     y: .value("Cost", bar.value),
                     width: .ratio(0.7)
                 )
-                .foregroundStyle(by: .value("Kind", bar.component.plotName))
+                .foregroundStyle(by: .value("Kind", bar.segment.plotName))
             }
             .chartForegroundStyleScale(
-                domain: CostComponent.allCases.map(\.plotName),
-                range: CostComponent.allCases.map(\.color)
+                domain: segments.map(\.plotName),
+                range: segments.map(\.color)
             )
             .chartLegend(.hidden)
             .chartYAxis {

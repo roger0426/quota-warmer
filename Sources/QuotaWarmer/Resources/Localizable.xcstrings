@@ -3477,6 +3477,28 @@
         }
       }
     },
+    "Cache writes that rebuilt a prefix the previous request had cached: it expired, or the model or prefix changed. Claude only; the Cache tab breaks these down.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cache writes that rebuilt a prefix the previous request had cached: it expired, or the model or prefix changed. Claude only; the Cache tab breaks these down."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Önceki isteğin önbelleğe aldığı bir öneki yeniden oluşturan önbellek yazmaları: süresi doldu ya da model veya önek değişti. Yalnızca Claude; Önbellek sekmesi bunların dökümünü gösterir."
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重建上一個請求已快取之前綴的快取寫入：快取過期，或模型、前綴改變。僅限 Claude；快取分頁有細項。"
+          }
+        }
+      }
+    },
     "Calendar weeks where the weekly quota reached 95%.": {
       "localizations": {
         "en": {
@@ -9787,6 +9809,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "恢復所有帳號的自動預熱。"
+          }
+        }
+      }
+    },
+    "Rewrite": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rewrite"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yeniden yazma"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重寫"
           }
         }
       }
