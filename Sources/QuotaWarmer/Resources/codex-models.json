@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 2,
-  "updatedAt": "2026-10-30",
+  "revision": 3,
+  "updatedAt": "2026-11-21",
   "source": "https://developers.openai.com/api/docs/pricing",
   "upstream": {
     "url": "https://developers.openai.com/api/docs/pricing.md",
@@ -47,6 +47,8 @@
     { "id": "gpt-5-mini", "input": 0.25, "cacheWrite5m": 0.25, "cacheWrite1h": 0.25, "cacheRead": 0.025, "output": 2 },
     { "id": "gpt-5-nano", "input": 0.05, "cacheWrite5m": 0.05, "cacheWrite1h": 0.05, "cacheRead": 0.005, "output": 0.4 },
     { "id": "gpt-5-pro", "input": 15, "cacheWrite5m": 15, "cacheWrite1h": 15, "cacheRead": 15, "output": 120 },
-    { "id": "gpt-6.1-terra", "match": "prefix", "input": 1, "cacheWrite5m": 1.25, "cacheWrite1h": 1.25, "cacheRead": 0.05, "output": 5 }
+    { "id": "gpt-6.1-terra", "match": "prefix", "input": 1, "cacheWrite5m": 1.25, "cacheWrite1h": 1.25, "cacheRead": 0.05, "output": 5 },
+    { "id": "gpt-6.2-astra", "match": "prefix", "input": 8, "cacheWrite5m": 10, "cacheWrite1h": 10, "cacheRead": 0.4, "output": 40 },
+    { "id": "gpt-6.2-sol", "match": "prefix", "input": 2, "cacheWrite5m": 2.5, "cacheWrite1h": 2.5, "cacheRead": 0.1, "output": 10 }
   ]
 }
