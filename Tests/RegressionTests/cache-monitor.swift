@@ -45,8 +45,17 @@ extension RegressionTests {
         let long = rollup.total(from: from, to: to, side: .subagent)
         #expect(long.expired == 1)
         #expect(abs(long.alternativeDelta - (0.006 - 0.0078)) < 0.000001)
+        // Day and hour cells sum the same requests in a different order (the
+        // fixture straddles an hour boundary whenever the test runs just after
+        // the hour), so costs match only to rounding; counts must match exactly.
         let dayTotal = rollup.days.values.reduce(CacheCell()) { $0 + $1.main }
-        #expect(dayTotal == short)
+        var costless = dayTotal, shortCostless = short
+        for keyPath in [\CacheCell.writeCost, \.inputSideCost, \.rewriteCost, \.alternativeDelta] {
+            #expect(abs(dayTotal[keyPath: keyPath] - short[keyPath: keyPath]) < 0.000001)
+            costless[keyPath: keyPath] = 0
+            shortCostless[keyPath: keyPath] = 0
+        }
+        #expect(costless == shortCostless)
         // The checkpoint round-trips every request field.
         let encoded = try JSONEncoder().encode(files)
         let decoded = try JSONDecoder().decode([URL: LocalUsageProvider.CacheFile].self, from: encoded)
