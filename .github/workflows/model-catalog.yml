@@ -1,0 +1,101 @@
+name: Model catalog check
+
+# Daily comparison of the bundled model catalogs with the providers' published
+# pricing (scripts/check-model-catalog.py). Never merges anything:
+#   - price or model drift -> the fixed catalog goes to one PR for review
+#     (branch `catalog/auto-update`, force-pushed and refreshed each run), and
+#     CI is dispatched on that branch, since a PR opened by GITHUB_TOKEN does
+#     not trigger `pull_request` workflows;
+#   - drift the script cannot fix (e.g. a cheaper warm-up candidate; warm-up
+#     lists are human decisions) -> one open issue, updated in place;
+#   - a pricing page that cannot be read or parsed -> the job fails, and GitHub
+#     emails the failure.
+# The pricing pages are untrusted input: the script only extracts names and
+# numbers, the app re-validates the catalog, and a human reviews every PR.
+# Requires Settings -> Actions -> General -> "Allow GitHub Actions to create
+# and approve pull requests".
+
+on:
+  schedule:
+    - cron: "17 1 * * *"   # daily, 01:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: write
+
+concurrency:
+  group: model-catalog
+  cancel-in-progress: false
+
+env:
+  BRANCH: catalog/auto-update
+  ISSUE_TITLE: "Model catalog drift needs a decision"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check and fix catalogs
+        id: check
+        run: |
+          set +e
+          python3 scripts/check-model-catalog.py --fix > "$RUNNER_TEMP/report.md" 2>&1
+          status=$?
+          set -e
+          cat "$RUNNER_TEMP/report.md"
+          if [ "$status" -ge 2 ]; then
+            echo "::error::A pricing page could not be read or parsed"
+            exit 1
+          fi
+          if git diff --quiet -- Sources/QuotaWarmer/Resources; then changed=false; else changed=true; fi
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+
+      - name: Open or update the catalog PR
+        if: steps.check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C "$BRANCH"
+          git add Sources/QuotaWarmer/Resources/*-models.json
+          git commit -m "Update model catalogs from published pricing"
+          git push --force origin "$BRANCH"
+
+          {
+            echo "Automated by \`.github/workflows/model-catalog.yml\`. Review the prices against the source pages before merging; the app adopts the catalog only after a rebuild."
+            echo
+            cat "$RUNNER_TEMP/report.md"
+          } > "$RUNNER_TEMP/body.md"
+
+          pr=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$pr" ]; then
+            gh pr edit "$pr" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh pr create --base main --head "$BRANCH" \
+              --title "Update model catalogs from published pricing" \
+              --body-file "$RUNNER_TEMP/body.md"
+          fi
+          gh workflow run ci.yml --ref "$BRANCH"
+
+      - name: Open or update the drift issue
+        if: steps.check.outputs.status == '1' && steps.check.outputs.changed == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          issue=$(gh issue list --state open --search "\"$ISSUE_TITLE\" in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$issue" ]; then
+            gh issue edit "$issue" --body-file "$RUNNER_TEMP/report.md"
+          else
+            gh issue create --title "$ISSUE_TITLE" --body-file "$RUNNER_TEMP/report.md"
+          fi
