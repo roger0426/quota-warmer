@@ -17,6 +17,8 @@ protocol CoordinatorHost: AnyObject {
     var history: [HistoryEvent] { get set }
     var globalPassive: Bool { get }
     var lastSuccessfulPollAt: Date? { get set }
+    /// Last `didWakeNotification`; resets the Claude CLI token-refresh throttle.
+    var lastSystemWakeAt: Date? { get set }
     var morningPrewarmEnabled: Bool { get set }
     var morningStatus: String? { get set }
     var isRefreshing: Bool { get set }

@@ -36,6 +36,7 @@ final class AppState: ObservableObject, CoordinatorHost {
     /// Most recent successful quota poll across all tools. Drives the liveness
     /// watchdog so a silently-stalled app stops looking "all good."
     @Published var lastSuccessfulPollAt: Date?
+    var lastSystemWakeAt: Date?
     @Published var globalPassive: Bool {
         didSet {
             settings.globalPassive = globalPassive
@@ -101,6 +102,7 @@ final class AppState: ObservableObject, CoordinatorHost {
                 // mistaken for a stalled app; the per-tool fires that follow
                 // will refresh this on success.
                 self?.lastSuccessfulPollAt = Date()
+                self?.lastSystemWakeAt = Date()
                 self?.morning.handleSystemWake()
             }
         }

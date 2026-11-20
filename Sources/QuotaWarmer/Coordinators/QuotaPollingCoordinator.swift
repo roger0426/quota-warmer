@@ -241,21 +241,30 @@ final class QuotaPollingCoordinator {
             if CLITokenRefreshPolicy.shouldAttempt(
                 awaitingCLITokenRefresh: state.awaitingCLITokenRefresh,
                 lastAttemptAt: state.lastCLITokenRefreshAttemptAt,
+                lastWakeAt: host.lastSystemWakeAt,
+                force: force,
                 now: now
             ) {
                 state.lastCLITokenRefreshAttemptAt = now
-                let refreshed = await runner.refreshClaudeCLIToken(for: tool)
-                DiagnosticLogger.append("claude_cli_token_refresh tool=\(tool.rawValue) ok=\(refreshed)")
-                if refreshed {
+                // Exit 0 is not proof: `/usage` also exits 0 when it couldn't
+                // refresh (e.g. offline right after wake). The re-fetch decides.
+                let exitedCleanly = await runner.refreshClaudeCLIToken(for: tool)
+                if exitedCleanly {
                     state.isFetchingQuota = false
                     await refreshQuota(
                         for: tool,
                         allowAutomaticWarmup: allowAutomaticWarmup,
                         reconcileStuckOutcome: reconcileStuckOutcome
                     )
+                }
+                let renewed = !state.awaitingCLITokenRefresh
+                DiagnosticLogger.append("claude_cli_token_refresh tool=\(tool.rawValue) exit_ok=\(exitedCleanly) renewed=\(renewed)")
+                if exitedCleanly {
+                    if !renewed { scheduleWakeTokenRetry(for: tool, state: state, now: Date()) }
                     return
                 }
             }
+            scheduleWakeTokenRetry(for: tool, state: state, now: now)
             // Still expired: a warm-up also runs the CLI. AutoWarmDecision
             // allows that only when the last known window has already ended.
             if allowAutomaticWarmup, state.awaitingCLITokenRefresh {
@@ -379,6 +388,19 @@ final class QuotaPollingCoordinator {
     func scheduleQuotaRefresh(for tool: ProviderID, at date: Date) {
         guard host.state(for: tool).isMonitored, !host.globalPassive else { return }
         scheduler.schedule(tool: tool, at: date)
+    }
+
+    /// After a wake, a still-expired Claude token is retried every minute
+    /// instead of waiting for the next poll (see `CLITokenRefreshPolicy`).
+    private func scheduleWakeTokenRetry(for tool: ProviderID, state: ToolState, now: Date) {
+        guard state.awaitingCLITokenRefresh,
+              let retryAt = CLITokenRefreshPolicy.wakeRetryAt(
+                lastAttemptAt: state.lastCLITokenRefreshAttemptAt,
+                lastWakeAt: host.lastSystemWakeAt,
+                now: now
+              ) else { return }
+        scheduleQuotaRefresh(for: tool, at: retryAt)
+        state.nextRefreshAt = retryAt
     }
 
     private func rescheduleRefresh(for tool: ProviderID) {

@@ -1471,6 +1471,42 @@ access_token=private-value
             CLITokenRefreshPolicy.shouldAttempt(awaitingCLITokenRefresh: true, lastAttemptAt: now.addingTimeInterval(-refreshInterval), now: now),
             "CLI token refresh: retries once the interval passed"
         )
+        let throttled = now.addingTimeInterval(-30)
+        require(
+            CLITokenRefreshPolicy.shouldAttempt(awaitingCLITokenRefresh: true, lastAttemptAt: throttled, force: true, now: now),
+            "CLI token refresh: the Refresh button ignores the throttle"
+        )
+        require(
+            !CLITokenRefreshPolicy.shouldAttempt(awaitingCLITokenRefresh: false, lastAttemptAt: nil, force: true, now: now),
+            "CLI token refresh: the Refresh button still never spawns the CLI for a valid token"
+        )
+        require(
+            CLITokenRefreshPolicy.shouldAttempt(awaitingCLITokenRefresh: true, lastAttemptAt: now.addingTimeInterval(-60), lastWakeAt: now.addingTimeInterval(-5), now: now),
+            "CLI token refresh: an attempt from before the wake doesn't throttle"
+        )
+        let wake = now.addingTimeInterval(-90)
+        require(
+            CLITokenRefreshPolicy.shouldAttempt(awaitingCLITokenRefresh: true, lastAttemptAt: wake.addingTimeInterval(3), lastWakeAt: wake, now: now),
+            "CLI token refresh: retries every minute right after a wake"
+        )
+        require(
+            !CLITokenRefreshPolicy.shouldAttempt(awaitingCLITokenRefresh: true, lastAttemptAt: now.addingTimeInterval(-30), lastWakeAt: wake, now: now),
+            "CLI token refresh: still throttled inside the post-wake minute"
+        )
+        let oldWake = now.addingTimeInterval(-CLITokenRefreshPolicy.wakeRetryWindow - 60)
+        require(
+            !CLITokenRefreshPolicy.shouldAttempt(awaitingCLITokenRefresh: true, lastAttemptAt: now.addingTimeInterval(-120), lastWakeAt: oldWake, now: now),
+            "CLI token refresh: back to the regular interval once the wake window ends"
+        )
+        require(
+            CLITokenRefreshPolicy.wakeRetryAt(lastAttemptAt: wake.addingTimeInterval(3), lastWakeAt: wake, now: wake.addingTimeInterval(5))
+                == wake.addingTimeInterval(63),
+            "CLI token refresh: a failed post-wake attempt schedules a retry a minute later"
+        )
+        require(
+            CLITokenRefreshPolicy.wakeRetryAt(lastAttemptAt: now, lastWakeAt: oldWake, now: now) == nil,
+            "CLI token refresh: no early retry outside the wake window"
+        )
         let refreshCommand = ToolID.claudeTokenRefreshCommand
         require(refreshCommand.hasSuffix("-p /usage"), "CLI token refresh: runs the local /usage command")
         require(refreshCommand.contains("--safe-mode "), "CLI token refresh: keeps user hooks and plugins out of the background run")

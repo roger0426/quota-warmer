@@ -122,14 +122,46 @@ enum ScheduledWarmupDecision {
 /// When to run the Claude CLI's quota-free token refresh
 /// (`ToolID.claudeTokenRefreshCommand`) after a fetch found the token expired.
 /// Throttled so a CLI that can't refresh (signed out, offline) isn't spawned
-/// on every poll.
+/// on every poll. Two exceptions: the Refresh button (`force`) always runs it,
+/// and a system wake starts over — an attempt from before the sleep doesn't
+/// count, and for `wakeRetryWindow` after the wake retries come every
+/// `wakeRetryInterval`, because the first try usually runs before the network
+/// is back (and `/usage` still exits 0 when it couldn't refresh).
 enum CLITokenRefreshPolicy {
     static let minimumInterval: TimeInterval = 10 * 60
+    static let wakeRetryWindow: TimeInterval = 5 * 60
+    static let wakeRetryInterval: TimeInterval = 60
 
-    static func shouldAttempt(awaitingCLITokenRefresh: Bool, lastAttemptAt: Date?, now: Date) -> Bool {
+    static func shouldAttempt(
+        awaitingCLITokenRefresh: Bool,
+        lastAttemptAt: Date?,
+        lastWakeAt: Date? = nil,
+        force: Bool = false,
+        now: Date
+    ) -> Bool {
         guard awaitingCLITokenRefresh else { return false }
+        if force { return true }
         guard let lastAttemptAt else { return true }
-        return now.timeIntervalSince(lastAttemptAt) >= minimumInterval
+        if let lastWakeAt, lastAttemptAt < lastWakeAt { return true }
+        return now.timeIntervalSince(lastAttemptAt) >= interval(lastWakeAt: lastWakeAt, now: now)
+    }
+
+    /// When a still-expired token should be retried ahead of the regular poll:
+    /// only inside the post-wake window, otherwise nil (the poll covers it).
+    static func wakeRetryAt(lastAttemptAt: Date?, lastWakeAt: Date?, now: Date) -> Date? {
+        guard let lastAttemptAt, let lastWakeAt, inWakeWindow(lastWakeAt: lastWakeAt, now: now) else { return nil }
+        let next = lastAttemptAt.addingTimeInterval(wakeRetryInterval)
+        return next <= lastWakeAt.addingTimeInterval(wakeRetryWindow) ? max(next, now) : nil
+    }
+
+    private static func interval(lastWakeAt: Date?, now: Date) -> TimeInterval {
+        guard let lastWakeAt, inWakeWindow(lastWakeAt: lastWakeAt, now: now) else { return minimumInterval }
+        return wakeRetryInterval
+    }
+
+    private static func inWakeWindow(lastWakeAt: Date, now: Date) -> Bool {
+        let sinceWake = now.timeIntervalSince(lastWakeAt)
+        return sinceWake >= 0 && sinceWake < wakeRetryWindow
     }
 }
 
